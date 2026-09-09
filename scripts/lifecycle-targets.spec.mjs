@@ -260,10 +260,6 @@ describe('feature 3 nuxt workspace', () => {
     assert.match(webPackage.scripts.dev, /--port[ =]3000/);
   });
 
-  it('does not add a root test:e2e script', () => {
-    assert.equal(packageJson.scripts['test:e2e'], undefined);
-  });
-
   it('keeps the web stub free of API lists, cabinet data and api-client facade', () => {
     assert.equal(existsSync(webRoot), true, 'apps/web must exist');
 
@@ -317,7 +313,7 @@ describe('feature 4 tokens and document layout', () => {
     return vueSources().filter((file) => /\/layouts\/[^/]+\.vue$/.test(file.path));
   }
 
-  it('installs Tailwind v4 through the official Nuxt Vite plugin and keeps test:e2e out', () => {
+  it('installs Tailwind v4 through the official Nuxt Vite plugin', () => {
     const webPackage = webPackageJson();
 
     assert.equal(webPackage.dependencies?.tailwindcss, '4.3.3');
@@ -325,7 +321,6 @@ describe('feature 4 tokens and document layout', () => {
     assert.equal(webPackage.dependencies?.['@fontsource/ibm-plex-sans'], '5.3.0');
     assert.match(nuxtConfigSource(), /from ['"]@tailwindcss\/vite['"]/);
     assert.match(nuxtConfigSource(), /tailwindcss\(\s*\)/);
-    assert.equal(packageJson.scripts['test:e2e'], undefined);
 
     for (const { path, json } of workspaceManifests()) {
       for (const name of Object.keys(listedDependencies(json))) {
@@ -452,5 +447,81 @@ describe('feature 4 tokens and document layout', () => {
     ].find((file) => /useSeoMeta\s*\(/.test(file.source));
     assert.ok(seoHost, 'public document must call useSeoMeta');
     assert.match(seoHost.source, /title:\s*['"]ПК «Нордщит»['"]/);
+  });
+});
+
+function playwrightConfigSource() {
+  return readFileSync(resolve(rootDirectory, 'playwright.config.ts'), 'utf8');
+}
+
+function listE2eSpecs() {
+  const e2eRoot = resolve(rootDirectory, 'e2e');
+  assert.equal(existsSync(e2eRoot), true, 'root e2e/ must exist');
+
+  return readdirSync(e2eRoot, { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.spec.ts'))
+    .map((entry) => ({
+      path: `e2e/${entry.name}`,
+      source: readFileSync(resolve(e2eRoot, entry.name), 'utf8'),
+    }));
+}
+
+describe('feature 5 playwright harness', () => {
+  it('declares pnpm test:e2e as a root Playwright wrapper', () => {
+    assert.equal(typeof packageJson.scripts['test:e2e'], 'string');
+    assert.match(packageJson.scripts['test:e2e'], /\bplaywright test\b/);
+    assert.doesNotMatch(packageJson.scripts['test:e2e'], /\bnpx playwright\b/);
+    assert.equal(packageJson.devDependencies?.['@playwright/test'], '1.63.0');
+
+    const e2e = makefileTarget('e2e');
+    assert.match(e2e.recipe, /^\tpnpm test:e2e$/m);
+
+    for (const { path, json } of workspaceManifests()) {
+      if (path === 'package.json') {
+        continue;
+      }
+
+      assert.equal(
+        listedDependencies(json)['@playwright/test'],
+        undefined,
+        `${path} must not own Playwright; the harness is a root script`,
+      );
+    }
+  });
+
+  it('points Playwright at localhost:3000 and reuses an existing Nuxt process', () => {
+    const config = playwrightConfigSource();
+
+    assert.match(config, /baseURL:\s*['"]http:\/\/localhost:3000['"]/);
+    assert.match(config, /reuseExistingServer:\s*true/);
+    assert.doesNotMatch(config, /reuseExistingServer:\s*!process\.env\.CI/);
+    assert.match(config, /command:\s*['"][^'"]*@client-portal\/web[^'"]*['"]/);
+    assert.doesNotMatch(config, /@client-portal\/api/);
+    assert.doesNotMatch(config, /db:seed|db:migrate|mock-api|mock-core/);
+    assert.match(config, /name:\s*['"]chromium['"]/);
+    assert.doesNotMatch(config, /name:\s*['"](?:firefox|webkit)['"]/);
+  });
+
+  it('smokes the layout header on / without request screens or timeout polling', () => {
+    const specs = listE2eSpecs();
+    assert.ok(specs.length > 0, 'e2e/ must contain a layout smoke spec');
+
+    const headerSpec = specs.find((file) => file.path === 'e2e/layout-header.spec.ts');
+    assert.ok(headerSpec, 'e2e/layout-header.spec.ts must exist');
+
+    assert.match(headerSpec.source, /getByRole\(\s*['"]banner['"]/);
+    assert.match(headerSpec.source, /getByRole\(\s*['"]heading['"]/);
+    assert.match(headerSpec.source, /ПК «Нордщит»/);
+    assert.match(headerSpec.source, /content-type/);
+    assert.match(headerSpec.source, /text\\\/html/);
+    assert.doesNotMatch(headerSpec.source, /waitForTimeout/);
+    assert.doesNotMatch(headerSpec.source, /\/demo\/links/);
+    assert.doesNotMatch(headerSpec.source, /\/r\//);
+    assert.doesNotMatch(headerSpec.source, /З-1004\d/);
+    assert.doesNotMatch(headerSpec.source, /мессенджер|Ссылка недействительна|mock-api|mock-core/);
+
+    const ci = readFileSync(resolve(rootDirectory, '.github/workflows/ci.yml'), 'utf8');
+    assert.doesNotMatch(ci, /test:e2e/);
+    assert.doesNotMatch(ci, /playwright/i);
   });
 });

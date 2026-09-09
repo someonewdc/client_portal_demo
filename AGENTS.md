@@ -41,7 +41,7 @@ workspace нет и в production API не добавляй. Новый skill «
 
 ## Топология
 
-Сейчас (фича 4 в поставке):
+Сейчас (фича 5 в поставке):
 
 - pnpm workspace, Node 24.18 / pnpm 11;
 - reusable packages: `tsconfig`, `eslint-config`, `platform-core`, `nestjs-core`,
@@ -51,14 +51,15 @@ workspace нет и в production API не добавляй. Новый skill «
   `GET /api/v1/requests/{accessSecret}` (заявки в Postgres + seed);
 - `apps/web` — Nuxt 4.5.2, Tailwind v4 `@theme`, IBM Plex, документный layout; заглушка
   `/` без данных заявок; `make dev` = db+api+web `:3000`;
+- Playwright harness: `pnpm test:e2e` / `make e2e` (smoke шапки, D-021);
 - PostgreSQL в Docker (хост 5433), Prisma 7 в `apps/api`.
 
-Целевая (по `docs/implementation-plan.md`, появляется фичами 5–8):
+Целевая (по `docs/implementation-plan.md`, появляется фичами 6–8):
 
-- Playwright (фича 5), SSR через `useFetch`/`useAsyncData` (facade — фича 6);
+- SSR через `useFetch`/`useAsyncData` (facade — фича 6);
 - mock-api **нет и не появится**. «Система заявок» = Postgres + seed.
 
-Ещё нет, пока соответствующая фича не в `main`: e2e, экраны заявок.
+Ещё нет, пока соответствующая фича не в `main`: экраны заявок, CI e2e.
 
 Не добавляй Nx/Turborepo и не включай Nest monorepo mode. Не публикуй packages.
 
@@ -125,8 +126,7 @@ generate-only артефактов после того, как контракт�
 
 Не угадывай контракт. Версии сверяй с lockfile и официальной документацией. Lifecycle
 стенда — цели корневого `Makefile` по факту файла (`bootstrap` / `dev` / `up` / `down` /
-`verify`, когда они появятся). Не пиши агентам сырой `pnpm dev` / `docker compose`, кроме
-skill.
+`verify` / `e2e`). Не пиши агентам сырой `pnpm dev` / `docker compose`, кроме skill.
 
 ## Проверка и честность отчета
 
@@ -142,7 +142,7 @@ pnpm typecheck
 pnpm test
 pnpm test:packages
 pnpm build
+pnpm test:e2e
 ```
 
-`pnpm test:e2e` появится вместе с Playwright (фича 5). Не утверждай успех, если команда не
-запускалась. Не пиши «должно работать».
+Не утверждай успех, если команда не запускалась. Не пиши «должно работать».

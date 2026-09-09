@@ -20,9 +20,10 @@
 | Vue        |  3.5.42 | `apps/web`, официальный Nuxt 4.5 starter                      |
 | Tailwind   |   4.3.3 | `apps/web` (`tailwindcss`, `@tailwindcss/vite`; D-023)        |
 | IBM Plex   |   5.3.0 | `@fontsource/ibm-plex-sans` (D-015, D-023)                    |
+| Playwright |  1.63.0 | root `@playwright/test` (D-024)                               |
 
-Tailwind v4 `@theme` и документный layout — фича 4 (D-023). Playwright — фича 5. Порты стенда —
-`docs/decisions.md` (D-006, D-017).
+Tailwind v4 `@theme` и документный layout — фича 4 (D-023). Playwright harness — фича 5
+(D-024). Порты стенда — `docs/decisions.md` (D-006, D-017).
 
 CI (`.github/workflows/ci.yml`) пинит third-party actions на commit SHA. `pnpm/action-setup`
 идёт до `actions/setup-node` с `cache: pnpm`. Фича 1 добавила Postgres в CI; фича 8 — e2e,

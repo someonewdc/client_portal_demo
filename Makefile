@@ -1,4 +1,4 @@
-.PHONY: bootstrap doctor up down dev verify
+.PHONY: bootstrap doctor up down dev verify e2e
 
 COMPOSE ?= docker compose
 COMPOSE_FILE ?= compose.yaml
@@ -41,3 +41,7 @@ verify: up
 	pnpm test
 	pnpm test:packages
 	pnpm build
+
+# Layout smoke on :3000 (D-021). Reuses Nuxt when `make dev` already holds the port.
+e2e:
+	pnpm test:e2e
