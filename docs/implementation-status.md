@@ -2,8 +2,9 @@
 
 ## Текущее состояние
 
-Фича 1 (Docker Postgres + Prisma 7 + ready зависит от БД) реализована на ветке
-`feat/postgres-prisma-ready`. Домена заявки, Nuxt и `api-client` ещё нет.
+Фича 2 (домен заявки, идемпотентный seed, `GET /demo/links` и
+`GET /requests/{accessSecret}`, `pnpm generate:api`, `packages/api-client`) реализована
+на ветке `feat/request-domain-openapi`. Nuxt и e2e ещё нет.
 
 ## Правила обновления
 
@@ -20,7 +21,7 @@
 | Документы плана и промпты фич    | выполнен (main `cad60b4`, без PR) |
 | Правки контракта по ревью        | выполнен (main `95767dc`, PR #1)  |
 | Фича 1 Postgres/Prisma/ready     | проверен                          |
-| Фича 2 заявка + OpenAPI          | не начат                          |
+| Фича 2 заявка + OpenAPI          | проверен                          |
 | Фича 3 Nuxt + Playwright harness | не начат                          |
 | Фича 4 индекс ссылок             | не начат                          |
 | Фича 5 кабинет + 404             | не начат                          |
@@ -64,3 +65,17 @@
 | 2026-09-09 | Ревью F1 TDD green | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                       | exit 0: 4 tests                                                                                                     |
 | 2026-09-09 | Ревью F1           | `pnpm --filter @client-portal/api exec vitest run src/health/readiness.service.spec.ts src/health/health.http.spec.ts`                                 | exit 0: 2 files, 6 tests                                                                                            |
 | 2026-09-09 | Ревью F1           | `make verify`                                                                                                                                          | exit 0: `up` healthy, migrate applied, gates + api 9, scripts 28                                                    |
+| 2026-09-09 | Фича 2 TDD red     | `pnpm --filter @client-portal/api exec vitest run src/requests/requests.http.spec.ts`                                                                  | exit 1: `GET /demo/links` и fixture 404 (маршрутов нет); 404 `detail` содержит plaintext секрет (`Cannot GET …`)    |
+| 2026-09-09 | Фича 2 TDD red     | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                       | exit 1: нет корневого `generate:api`; `verify` не вызывает `pnpm generate:api`                                      |
+| 2026-09-09 | Фича 2 migrate     | `make up` затем `pnpm db:migrate` затем `pnpm db:seed`                                                                                                 | exit 0; migration `20260909180000_request_domain`; seed пяти заявок                                                 |
+| 2026-09-09 | Фича 2 TDD green   | `pnpm --filter @client-portal/api exec vitest run src/requests src/health/health.http.spec.ts src/health/readiness.service.spec.ts`                    | exit 0: 6 files, 13 tests                                                                                           |
+| 2026-09-09 | Фича 2 TDD green   | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                       | exit 0: 6 tests                                                                                                     |
+| 2026-09-09 | Фича 2 generate    | `pnpm generate:api`                                                                                                                                    | exit 0: `servers[0].url` `/api/v1`; path keys `/demo/links`, `/requests/{accessSecret}`; `schema.d.ts` сгенерирован |
+| 2026-09-09 | Фича 2 gates       | `pnpm db:generate`                                                                                                                                     | exit 0, Prisma Client 7.10.0 → `apps/api/src/generated/prisma`                                                      |
+| 2026-09-09 | Фича 2 gates       | `pnpm check:boundaries`                                                                                                                                | exit 0                                                                                                              |
+| 2026-09-09 | Фича 2 gates       | `pnpm lint`                                                                                                                                            | exit 0                                                                                                              |
+| 2026-09-09 | Фича 2 gates       | `pnpm typecheck`                                                                                                                                       | exit 0                                                                                                              |
+| 2026-09-09 | Фича 2 gates       | `pnpm test`                                                                                                                                            | exit 0: platform-core 29, nestjs-core 3, openapi-client-core 3, api 16, scripts 30                                  |
+| 2026-09-09 | Фича 2 gates       | `pnpm test:packages`                                                                                                                                   | exit 0: 5 tarballs, 17 ESM imports, 3 TypeScript consumers                                                          |
+| 2026-09-09 | Фича 2 gates       | `pnpm build`                                                                                                                                           | exit 0                                                                                                              |
+| 2026-09-09 | Фича 2 gates       | `pnpm format` затем `pnpm format:check`                                                                                                                | exit 0                                                                                                              |

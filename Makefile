@@ -32,6 +32,7 @@ dev: up
 verify: up
 	pnpm db:generate
 	pnpm db:migrate
+	pnpm generate:api
 	pnpm check:boundaries
 	pnpm lint
 	pnpm typecheck

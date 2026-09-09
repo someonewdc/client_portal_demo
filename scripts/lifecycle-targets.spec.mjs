@@ -43,3 +43,14 @@ describe('feature 1 lifecycle targets', () => {
     assert.doesNotMatch(compose, /^ {2}web:/m);
   });
 });
+
+describe('feature 2 generate:api', () => {
+  it('declares generate:api in the root package', () => {
+    assert.equal(typeof packageJson.scripts['generate:api'], 'string');
+  });
+
+  it('verify generates the OpenAPI client after migrate', () => {
+    const verify = makefileTarget('verify');
+    assert.match(verify.recipe, /^\tpnpm generate:api$/m);
+  });
+});

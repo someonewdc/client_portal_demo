@@ -7,9 +7,77 @@ datasource db {
   provider = "postgresql"
 }
 
-/// Technical non-product table so Prisma can generate a client before the request domain exists.
-model RuntimeProbe {
-  id        Int      @id @default(autoincrement())
+enum RequestStatus {
+  accepted
+  in_calculation
+  quote_ready
+  invoice_issued
+}
+
+enum RequestFileKind {
+  questionnaire
+  quote
+  invoice
+}
+
+model Request {
+  id               String                @id @default(cuid())
+  publicNumber     String                @unique
+  counterpartyName String
+  title            String
+  status           RequestStatus
+  accessSecretHash String                @unique
+  createdAt        DateTime              @default(now())
+  /// Fixture timestamps are part of the demo catalog; set explicitly instead of @updatedAt.
+  updatedAt        DateTime
+  specLines        RequestSpecLine[]
+  files            RequestFile[]
+  stageHistory     RequestStageHistory[]
+
+  @@index([status])
+}
+
+model RequestSpecLine {
+  id        String   @id @default(cuid())
+  requestId String
+  request   Request  @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  position  Int
+  name      String
+  quantity  Int
+  unit      String
+  comment   String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@unique([requestId, position])
+  @@index([requestId])
+}
+
+model RequestFile {
+  id         String          @id @default(cuid())
+  requestId  String
+  request    Request         @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  position   Int
+  fileName   String
+  kind       RequestFileKind
+  byteSize   Int
+  uploadedAt DateTime
+  createdAt  DateTime        @default(now())
+  updatedAt  DateTime        @updatedAt
+
+  @@unique([requestId, position])
+  @@index([requestId])
+}
+
+model RequestStageHistory {
+  id        String        @id @default(cuid())
+  requestId String
+  request   Request       @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  status    RequestStatus
+  reachedAt DateTime
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  @@unique([requestId, status])
+  @@index([requestId])
 }

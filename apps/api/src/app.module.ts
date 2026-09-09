@@ -5,6 +5,7 @@ import { ConfigModule } from '@nestjs/config';
 
 import { validateApiEnv } from './core/config/api-env.js';
 import { HealthModule } from './health/health.module.js';
+import { RequestsModule } from './requests/requests.module.js';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { HealthModule } from './health/health.module.js';
     }),
     PlatformLoggingModule.forRoot(),
     HealthModule,
+    RequestsModule,
   ],
   providers: [provideProblemDetailsFilter({ typeBaseUrl: 'https://demo.local/problems' })],
 })

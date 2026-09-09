@@ -1,0 +1,439 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/health/live": {
+      "get": {
+        "operationId": "HealthController_live",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Процесс жив"
+          }
+        },
+        "summary": "Проверить, что процесс API работает",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/health/ready": {
+      "get": {
+        "operationId": "HealthController_ready",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "API принимает трафик"
+          },
+          "503": {
+            "description": "API ещё не слушает, уже останавливается или база данных недоступна"
+          }
+        },
+        "summary": "Проверить готовность API принимать трафик",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/demo/links": {
+      "get": {
+        "operationId": "DemoLinksController_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DemoLinksResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Служебный список демо-ссылок на заявки",
+        "tags": [
+          "demo"
+        ]
+      }
+    },
+    "/requests/{accessSecret}": {
+      "get": {
+        "operationId": "RequestPortalController_show",
+        "parameters": [
+          {
+            "name": "accessSecret",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestPortalResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Кабинет одной заявки по секрету в URL",
+        "tags": [
+          "requests"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "ПК «Нордщит» — кабинет заявки",
+    "description": "",
+    "version": "0.0.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [
+    {
+      "url": "/api/v1"
+    }
+  ],
+  "components": {
+    "schemas": {
+      "DemoLinkItemDto": {
+        "type": "object",
+        "properties": {
+          "publicNumber": {
+            "type": "string",
+            "example": "З-10041"
+          },
+          "counterpartyName": {
+            "type": "string",
+            "example": "ООО «Северэнергомонтаж»"
+          },
+          "title": {
+            "type": "string",
+            "example": "Щит ЩО-70 800 А"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "in_calculation",
+              "quote_ready",
+              "invoice_issued"
+            ],
+            "example": "accepted"
+          },
+          "statusLabel": {
+            "type": "string",
+            "example": "Принят"
+          },
+          "portalPath": {
+            "type": "string",
+            "example": "/r/seed-z10041-accepted-severenergo"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2026-09-01T10:00:00.000Z",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "publicNumber",
+          "counterpartyName",
+          "title",
+          "status",
+          "statusLabel",
+          "portalPath",
+          "updatedAt"
+        ]
+      },
+      "DemoLinksDataDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DemoLinkItemDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "TraceMetaDto": {
+        "type": "object",
+        "properties": {
+          "traceId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "traceId"
+        ]
+      },
+      "DemoLinksResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/DemoLinksDataDto"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/TraceMetaDto"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "RequestStageDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "in_calculation",
+              "quote_ready",
+              "invoice_issued"
+            ]
+          },
+          "label": {
+            "type": "string",
+            "example": "Принят"
+          },
+          "reachedAt": {
+            "type": "string",
+            "example": "2026-09-01T09:00:00.000Z",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "status",
+          "label",
+          "reachedAt"
+        ]
+      },
+      "RequestSpecLineDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "quantity": {
+            "type": "number",
+            "example": 1
+          },
+          "unit": {
+            "type": "string",
+            "example": "шт"
+          },
+          "comment": {
+            "type": "string",
+            "example": "IP54, навесной"
+          }
+        },
+        "required": [
+          "name",
+          "quantity",
+          "unit"
+        ]
+      },
+      "RequestFileDto": {
+        "type": "object",
+        "properties": {
+          "fileName": {
+            "type": "string",
+            "example": "КП-З-10043.pdf"
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "questionnaire",
+              "quote",
+              "invoice"
+            ]
+          },
+          "byteSize": {
+            "type": "number",
+            "example": 240000
+          },
+          "uploadedAt": {
+            "type": "string",
+            "example": "2026-09-04T12:00:00.000Z",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "fileName",
+          "kind",
+          "byteSize",
+          "uploadedAt"
+        ]
+      },
+      "RequestPortalDataDto": {
+        "type": "object",
+        "properties": {
+          "publicNumber": {
+            "type": "string",
+            "example": "З-10043"
+          },
+          "counterpartyName": {
+            "type": "string",
+            "example": "ИП Кузнецов П.А."
+          },
+          "title": {
+            "type": "string",
+            "example": "ВРУ 400 А"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "in_calculation",
+              "quote_ready",
+              "invoice_issued"
+            ],
+            "example": "quote_ready"
+          },
+          "statusLabel": {
+            "type": "string",
+            "example": "КП готово"
+          },
+          "updatedAt": {
+            "type": "string",
+            "example": "2026-09-04T12:00:00.000Z",
+            "format": "date-time"
+          },
+          "plantName": {
+            "type": "string",
+            "example": "ПК «Нордщит»"
+          },
+          "stages": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RequestStageDto"
+            }
+          },
+          "specLines": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RequestSpecLineDto"
+            }
+          },
+          "files": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RequestFileDto"
+            }
+          }
+        },
+        "required": [
+          "publicNumber",
+          "counterpartyName",
+          "title",
+          "status",
+          "statusLabel",
+          "updatedAt",
+          "plantName",
+          "stages",
+          "specLines",
+          "files"
+        ]
+      },
+      "RequestPortalResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/RequestPortalDataDto"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/TraceMetaDto"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "ProblemDetailsDto": {
+        "type": "object",
+        "properties": {
+          "detail": {
+            "type": "string",
+            "example": "One or more fields are invalid"
+          },
+          "errors": {
+            "type": "array",
+            "example": [
+              {
+                "field": "pageSize",
+                "message": "pageSize must not be greater than 48"
+              }
+            ],
+            "items": {
+              "properties": {
+                "field": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "field",
+                "message"
+              ],
+              "type": "object"
+            }
+          },
+          "instance": {
+            "type": "string",
+            "example": "/api/v1/resources"
+          },
+          "status": {
+            "type": "number",
+            "example": 400
+          },
+          "title": {
+            "type": "string",
+            "example": "Validation failed"
+          },
+          "traceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "type": "string",
+            "example": "https://demo.local/problems/validation-error"
+          }
+        },
+        "required": [
+          "detail",
+          "instance",
+          "status",
+          "title",
+          "traceId",
+          "type"
+        ]
+      }
+    }
+  }
+}

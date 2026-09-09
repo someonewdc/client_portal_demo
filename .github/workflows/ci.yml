@@ -46,6 +46,8 @@ jobs:
         run: pnpm db:generate
       - name: Apply migrations
         run: pnpm db:migrate
+      - name: Generate API client
+        run: pnpm generate:api
       - name: Lint
         run: pnpm lint
       - name: Architecture boundaries

@@ -15,6 +15,7 @@
     "db:generate": "dotenv -e .env -- pnpm --filter @client-portal/api db:generate",
     "db:migrate": "dotenv -e .env -- pnpm --filter @client-portal/api db:migrate",
     "db:seed": "dotenv -e .env -- pnpm --filter @client-portal/api db:seed",
+    "generate:api": "pnpm build:core && pnpm db:generate && dotenv -e .env -- pnpm --filter @client-portal/api export:openapi && pnpm --filter @client-portal/api-client generate",
     "build": "pnpm -r --workspace-concurrency=1 --if-present build",
     "lint": "eslint . --max-warnings=0",
     "check:boundaries": "node scripts/check-boundaries.mjs",

@@ -8,6 +8,7 @@
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "db:seed": "prisma db seed",
+    "export:openapi": "tsx src/openapi/export-openapi.ts",
     "prebuild": "pnpm --workspace-root build:core",
     "build": "tsc -p tsconfig.build.json",
     "pretypecheck": "pnpm --workspace-root build:core && pnpm db:generate",
