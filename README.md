@@ -38,9 +38,11 @@ make dev
 client, затем корневые gates). Сырой `pnpm test` без живой БД падает на HTTP ready=200 —
 это не полный аналог CI.
 
-E2E layout smoke: один раз `pnpm exec playwright install chromium`, затем `make e2e`
-(обёртка над `pnpm test:e2e`). `baseURL` — `http://localhost:3000`. Если `make dev` уже
-держит порт, Playwright его переиспользует (`reuseExistingServer: true`, D-021); иначе
-поднимает только Nuxt, без API. Сценарий кабинета — фича 7; CI e2e — фича 8.
+E2E: один раз `pnpm exec playwright install chromium`, затем против живого стенда
+`make dev` (db+api+web) + seed — `make e2e` / `pnpm test:e2e`. `baseURL` —
+`http://localhost:3000`. Индексный spec ходит в `GET /demo/links`; Nuxt без API
+недостаточен. Если `:3000` уже занят `make dev`, Playwright его переиспользует
+(`reuseExistingServer: true`, D-021) и не стартует второй Nuxt. Сценарий кабинета —
+фича 7; CI e2e — фича 8.
 
 Пакеты private, `0.0.0`. Публикация в registry не входит.

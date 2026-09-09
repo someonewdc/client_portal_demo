@@ -7,6 +7,7 @@ const catalog = [
     title: 'Щит ЩО-70 800 А',
     statusLabel: 'Принят',
     portalPath: '/r/seed-z10041-accepted-severenergo',
+    updatedAt: '2026-09-01T10:00:00.000Z',
   },
   {
     publicNumber: 'З-10042',
@@ -14,6 +15,7 @@ const catalog = [
     title: 'НКУ освещения причала',
     statusLabel: 'В расчёте',
     portalPath: '/r/seed-z10042-calc-portline',
+    updatedAt: '2026-09-02T11:00:00.000Z',
   },
   {
     publicNumber: 'З-10043',
@@ -21,6 +23,7 @@ const catalog = [
     title: 'ВРУ 400 А',
     statusLabel: 'КП готово',
     portalPath: '/r/seed-z10043-quote-kuznetsov',
+    updatedAt: '2026-09-04T12:00:00.000Z',
   },
   {
     publicNumber: 'З-10044',
@@ -28,6 +31,7 @@ const catalog = [
     title: 'Щит управления теплицами',
     statusLabel: 'Счёт выставлен',
     portalPath: '/r/seed-z10044-invoice-teplitsy',
+    updatedAt: '2026-09-06T15:00:00.000Z',
   },
   {
     publicNumber: 'З-10045',
@@ -35,6 +39,7 @@ const catalog = [
     title: 'Шкафы наружного освещения',
     statusLabel: 'В расчёте',
     portalPath: '/r/seed-z10045-calc-gorsvet',
+    updatedAt: '2026-09-03T14:00:00.000Z',
   },
 ] as const;
 
@@ -56,6 +61,8 @@ test('demo links index lists seed requests and opens the quote cabinet URL', asy
     await expect(row).toContainText(item.title);
     await expect(row).toContainText(item.statusLabel);
     await expect(row).toHaveAttribute('href', item.portalPath);
+    await expect(row.locator('time')).toHaveAttribute('datetime', item.updatedAt);
+    await expect(row.locator('time')).toBeVisible();
   }
 
   await expect(page.locator('a[href="#"]')).toHaveCount(0);

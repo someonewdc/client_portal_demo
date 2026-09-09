@@ -1,45 +1,36 @@
 <script setup lang="ts">
-import { ApiProblemError } from '@client-portal/api-client';
-import { useAsyncData, useNuxtApp } from 'nuxt/app';
+import { createError, useAsyncData, useNuxtApp } from 'nuxt/app';
 import { computed } from 'vue';
+
+import {
+  asyncDataProblemPayload,
+  statusCodeFromThrown,
+  traceIdFromAsyncDataError,
+} from '~/utils/async-data-problem';
 
 const { $api } = useNuxtApp();
 
 const { data, error, status } = await useAsyncData('demo-links', async () => {
-  const response = await $api.GET('/demo/links');
-  const items = response.data?.data.items;
-  if (!items) {
-    throw new Error('Demo links response is missing data.items');
+  try {
+    const response = await $api.GET('/demo/links');
+    const items = response.data?.data.items;
+    if (!items) {
+      throw new Error('Demo links response is missing data.items');
+    }
+    return items;
+  } catch (caught) {
+    const payload = asyncDataProblemPayload(caught);
+    throw createError({
+      cause: caught,
+      message: 'Не удалось загрузить список заявок.',
+      statusCode: statusCodeFromThrown(caught),
+      ...(payload === undefined ? {} : { data: payload }),
+    });
   }
-  return items;
 });
 
 const items = computed(() => data.value ?? []);
-const errorTraceId = computed(() => traceIdFromUnknown(error.value));
-
-function traceIdFromUnknown(value: unknown): string | undefined {
-  if (value instanceof ApiProblemError) {
-    return value.problem.traceId;
-  }
-  if (typeof value !== 'object' || value === null) {
-    return undefined;
-  }
-  if ('problem' in value) {
-    const problem = value.problem;
-    if (
-      typeof problem === 'object' &&
-      problem !== null &&
-      'traceId' in problem &&
-      typeof problem.traceId === 'string'
-    ) {
-      return problem.traceId;
-    }
-  }
-  if ('cause' in value) {
-    return traceIdFromUnknown(value.cause);
-  }
-  return undefined;
-}
+const errorTraceId = computed(() => traceIdFromAsyncDataError(error.value));
 
 function formatUpdatedAt(iso: string): string {
   return new Intl.DateTimeFormat('ru-RU', {

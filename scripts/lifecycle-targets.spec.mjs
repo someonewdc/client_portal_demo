@@ -557,27 +557,37 @@ describe('feature 6 demo links index', () => {
 
   it('states loading, error with traceId and empty on the index page', () => {
     const indexPage = readFileSync(resolve(webRoot, 'app/pages/index.vue'), 'utf8');
+    const problemHelper = readFileSync(resolve(webRoot, 'app/utils/async-data-problem.ts'), 'utf8');
 
     assert.match(indexPage, /не показывается заказчику/);
     assert.match(indexPage, /мессенджер/);
     assert.match(indexPage, /pending/);
-    assert.match(indexPage, /traceId/);
+    assert.match(indexPage, /createError/);
+    assert.match(indexPage, /data:\s*payload/);
     assert.match(indexPage, /Заявок пока нет/);
     assert.match(indexPage, /portalPath/);
     assert.match(indexPage, /tabular-nums/);
+    assert.match(problemHelper, /data\.traceId/);
     assert.doesNotMatch(indexPage, /Принят|В расчёте|КП готово|Счёт выставлен/);
   });
 
   it('covers the index e2e against seed URLs without a cabinet page', () => {
     const spec = readFileSync(resolve(rootDirectory, 'e2e/demo-links.spec.ts'), 'utf8');
+    const readme = readFileSync(resolve(rootDirectory, 'README.md'), 'utf8');
 
     assert.match(spec, /не показывается заказчику/);
     assert.match(spec, /мессенджер/);
     assert.match(spec, /З-10041/);
     assert.match(spec, /З-10043/);
     assert.match(spec, /seed-z10043-quote-kuznetsov/);
+    assert.match(spec, /updatedAt/);
+    assert.match(spec, /datetime/);
     assert.doesNotMatch(spec, /waitForTimeout/);
     assert.doesNotMatch(spec, /mock-api|mock-core/);
+    assert.match(readme, /make dev/);
+    assert.match(readme, /seed/);
+    assert.doesNotMatch(readme, /поднимает только Nuxt, без API/);
+    assert.match(makefile, /make dev \+ seed/);
     assert.equal(existsSync(resolve(webRoot, 'app/pages/r')), false);
   });
 });

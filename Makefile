@@ -42,6 +42,8 @@ verify: up
 	pnpm test:packages
 	pnpm build
 
-# Layout smoke on :3000 (D-021). Reuses Nuxt when `make dev` already holds the port.
+# Index + layout e2e on :3000 against make dev + seed (D-021).
+# Playwright reuses Nuxt when that stand already holds the port; a Nuxt-only
+# webServer is not enough for the demo-links spec.
 e2e:
 	pnpm test:e2e
