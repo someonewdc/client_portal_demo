@@ -51,10 +51,9 @@ LLM часто пишет код, затем тесты «под него». Т�
 ## Корневые команды
 
 Сверяй имена с `package.json`. Сейчас есть: `pnpm check:boundaries`, `lint`, `typecheck`,
-`test`, `test:packages`, `build`.
+`test`, `test:packages`, `build`, `db:generate`, `db:migrate`, `db:seed`.
 
-Ещё нет (заводят фичи, AC это проверяет): `pnpm generate:api`, `pnpm db:generate`,
-`pnpm db:migrate`, `pnpm db:seed`, `pnpm test:e2e`.
+Ещё нет (заводят фичи, AC это проверяет): `pnpm generate:api`, `pnpm test:e2e`.
 
 Для docs-only поставки: Prettier / `git diff --check`. Не утверждать, что lint/test
 продукта прошли, если не запускались.

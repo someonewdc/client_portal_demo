@@ -11,6 +11,16 @@ export const apiEnvSchema = z.object({
   NODE_ENV: nodeEnvironmentSchema,
   LOG_LEVEL: logLevelSchema,
   API_PORT: environmentPortSchema(3001),
+  DATABASE_URL: z.url().check((context) => {
+    const protocol = new URL(context.value).protocol;
+    if (protocol !== 'postgresql:' && protocol !== 'postgres:') {
+      context.issues.push({
+        code: 'custom',
+        input: context.value,
+        message: 'DATABASE_URL protocol must be postgresql or postgres',
+      });
+    }
+  }),
   WEB_ORIGIN: exactHttpBaseUrlSchema('/'),
 });
 

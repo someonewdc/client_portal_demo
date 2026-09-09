@@ -1,0 +1,23 @@
+name: client-portal-demo
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: client-portal-postgres
+    environment:
+      POSTGRES_DB: client_portal
+      POSTGRES_PASSWORD: client_portal
+      POSTGRES_USER: client_portal
+    ports:
+      - '5433:5432'
+    volumes:
+      - client-portal-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U client_portal -d client_portal']
+      interval: 2s
+      timeout: 5s
+      retries: 20
+      start_period: 5s
+
+volumes:
+  client-portal-postgres-data:

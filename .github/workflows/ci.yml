@@ -16,6 +16,7 @@ permissions:
 
 env:
   API_PORT: 3001
+  DATABASE_URL: postgresql://client_portal:client_portal@localhost:5432/client_portal
   LOG_LEVEL: info
   NODE_ENV: test
   WEB_ORIGIN: http://localhost:3000
@@ -24,9 +25,27 @@ jobs:
   verify:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: client_portal
+          POSTGRES_PASSWORD: client_portal
+          POSTGRES_USER: client_portal
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U client_portal -d client_portal"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
       - uses: ./.github/actions/setup-workspace
+      - name: Generate Prisma client
+        run: pnpm db:generate
+      - name: Apply migrations
+        run: pnpm db:migrate
       - name: Lint
         run: pnpm lint
       - name: Architecture boundaries
