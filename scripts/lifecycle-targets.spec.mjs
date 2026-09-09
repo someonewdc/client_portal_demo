@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { dirname, resolve } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
 import { describe, it } from 'node:test';
 import { fileURLToPath } from 'node:url';
 
@@ -81,5 +81,138 @@ describe('feature 2 generate:api', () => {
     const apiRequire = createRequire(resolve(rootDirectory, 'apps/api/package.json'));
     const coreRequire = createRequire(resolve(rootDirectory, 'packages/nestjs-core/package.json'));
     assert.equal(apiRequire.resolve('@nestjs/config'), coreRequire.resolve('@nestjs/config'));
+  });
+});
+
+const forbiddenCssToolchain = /^(?:postcss|tailwindcss|@tailwindcss\/|@nuxtjs\/tailwindcss$)/;
+const webSourceExtensions = new Set(['.ts', '.mts', '.js', '.mjs', '.vue']);
+const skippedWebDirectories = new Set(['.nuxt', '.output', 'dist', 'node_modules']);
+
+function workspaceManifests() {
+  const manifests = [{ path: 'package.json', json: packageJson }];
+
+  for (const group of ['apps', 'packages']) {
+    const groupDirectory = resolve(rootDirectory, group);
+    if (!existsSync(groupDirectory)) {
+      continue;
+    }
+
+    for (const entry of readdirSync(groupDirectory, { withFileTypes: true })) {
+      if (!entry.isDirectory()) {
+        continue;
+      }
+
+      const path = `${group}/${entry.name}/package.json`;
+      const absolutePath = resolve(rootDirectory, path);
+      if (existsSync(absolutePath)) {
+        manifests.push({ path, json: JSON.parse(readFileSync(absolutePath, 'utf8')) });
+      }
+    }
+  }
+
+  return manifests;
+}
+
+function listedDependencies(manifest) {
+  return {
+    ...manifest.dependencies,
+    ...manifest.devDependencies,
+    ...manifest.optionalDependencies,
+    ...manifest.peerDependencies,
+  };
+}
+
+function listWebSourceFiles(directory) {
+  const files = [];
+
+  for (const entry of readdirSync(directory, { withFileTypes: true })) {
+    const absolutePath = join(directory, entry.name);
+    if (entry.isDirectory()) {
+      if (!skippedWebDirectories.has(entry.name)) {
+        files.push(...listWebSourceFiles(absolutePath));
+      }
+      continue;
+    }
+
+    const extension = entry.name.slice(entry.name.lastIndexOf('.'));
+    if (webSourceExtensions.has(extension)) {
+      files.push(absolutePath);
+    }
+  }
+
+  return files;
+}
+
+describe('feature 3 nuxt workspace', () => {
+  it('includes apps/web in recursive typecheck and build', () => {
+    const webPackagePath = resolve(rootDirectory, 'apps/web/package.json');
+    assert.equal(existsSync(webPackagePath), true, 'apps/web/package.json must exist');
+
+    const webPackage = JSON.parse(readFileSync(webPackagePath, 'utf8'));
+    assert.equal(webPackage.name, '@client-portal/web');
+    assert.match(packageJson.scripts.typecheck, /pnpm -r /);
+    assert.match(packageJson.scripts.build, /pnpm -r /);
+    assert.equal(typeof webPackage.scripts.typecheck, 'string');
+    assert.equal(typeof webPackage.scripts.build, 'string');
+    assert.match(webPackage.scripts.typecheck, /\bnuxt typecheck\b/);
+    assert.match(webPackage.scripts.build, /\bnuxt build\b/);
+    assert.equal(typeof webPackage.dependencies?.nuxt, 'string');
+    assert.match(webPackage.dependencies.nuxt, /^4\./);
+  });
+
+  it('make dev starts web on :3000 alongside db and api', () => {
+    const dev = makefileTarget('dev');
+    const webPackagePath = resolve(rootDirectory, 'apps/web/package.json');
+    assert.equal(existsSync(webPackagePath), true, 'apps/web/package.json must exist');
+    const webPackage = JSON.parse(readFileSync(webPackagePath, 'utf8'));
+
+    assert.equal(dev.prerequisites, 'up');
+    assert.match(dev.recipe, /^\tpnpm db:generate$/m);
+    assert.match(dev.recipe, /^\tpnpm db:migrate$/m);
+    assert.match(dev.recipe, /^\tpnpm db:seed$/m);
+    assert.match(dev.recipe, /^\tpnpm dev$/m);
+    assert.match(makefile, /@client-portal\/web/);
+    assert.match(`${dev.recipe}\n${packageJson.scripts.dev}`, /@client-portal\/web/);
+    assert.match(`${dev.recipe}\n${packageJson.scripts.dev}`, /@client-portal\/api/);
+    assert.match(webPackage.scripts.dev, /\bnuxt dev\b/);
+    assert.match(webPackage.scripts.dev, /--port[ =]3000/);
+  });
+
+  it('does not add Tailwind, PostCSS or a root test:e2e script', () => {
+    assert.equal(packageJson.scripts['test:e2e'], undefined);
+
+    for (const { path, json } of workspaceManifests()) {
+      for (const name of Object.keys(listedDependencies(json))) {
+        assert.equal(forbiddenCssToolchain.test(name), false, `${path} must not depend on ${name}`);
+      }
+    }
+  });
+
+  it('keeps the web stub free of API lists, cabinet data and api-client facade', () => {
+    const webRoot = resolve(rootDirectory, 'apps/web');
+    assert.equal(existsSync(webRoot), true, 'apps/web must exist');
+
+    const sourceFiles = listWebSourceFiles(webRoot);
+    assert.ok(sourceFiles.length > 0, 'apps/web must contain source files');
+
+    const sources = sourceFiles.map((absolutePath) => ({
+      path: relative(rootDirectory, absolutePath).replaceAll('\\', '/'),
+      source: readFileSync(absolutePath, 'utf8'),
+    }));
+    const combined = sources.map(({ source }) => source).join('\n');
+    const indexPage = sources.find((file) => file.path.endsWith('/pages/index.vue'));
+
+    assert.ok(indexPage, 'apps/web must have a / pages/index.vue stub');
+    assert.match(indexPage.source, /Нордщит/);
+    assert.doesNotMatch(indexPage.source, /Принят|В расчёте|КП готово|Счёт выставлен/);
+    assert.doesNotMatch(combined, /createApiClient|createProblemAwareClient/);
+    assert.doesNotMatch(combined, /@client-portal\/api-client/);
+    assert.doesNotMatch(combined, /@prisma\/client|@nestjs\/|apps\/api/);
+    assert.doesNotMatch(combined, /\/demo\/links/);
+    assert.equal(
+      sources.some((file) => /\/pages\/r\//.test(file.path)),
+      false,
+      'cabinet route /r/{secret} belongs to a later feature',
+    );
   });
 });

@@ -10,10 +10,11 @@
   `openapi-client-core`
 - `apps/api`: health live/ready; `GET /demo/links`; `GET /requests/{accessSecret}`;
   `API_PORT=3001`, `WEB_ORIGIN=http://localhost:3000`, `DATABASE_URL`
-- Root scripts (копировать буквально): `build:core`, `dev` (только API), `db:generate`,
+- `apps/web`: Nuxt 4.5.2, заглушка `/`, без Tailwind; `NUXT_PUBLIC_API_BASE_URL` с `/api/v1`
+- Root scripts (копировать буквально): `build:core`, `dev` (api+web), `db:generate`,
   `db:migrate`, `db:seed`, `generate:api`, `build`, `lint`, `check:boundaries`, `typecheck`,
   `test`, `test:packages`, `format`, `format:check`
-- Makefile: `bootstrap`, `doctor`, `up` (только Postgres :5433), `down`, `dev` (db+api),
+- Makefile: `bootstrap`, `doctor`, `up` (только Postgres :5433), `down`, `dev` (db+api+web),
   `verify` (`up` + migrate + `generate:api` + diff generated client + корневые gates, D-018)
 - CI: Postgres service + `DATABASE_URL` на 5432, затем generate/migrate, `generate:api`,
   `git diff --exit-code` на `openapi.json` / `schema.d.ts`, затем корневые gates
@@ -24,14 +25,13 @@
 
 ## Чего ещё нет (фича должна завести; AC проверяет имя script)
 
-| Имя                                  | Где появится          |
-| ------------------------------------ | --------------------- |
-| `apps/web`, Nuxt, `make dev` + web   | фича 3 (без Tailwind) |
-| Tailwind, `@theme`, IBM Plex, layout | фича 4                |
-| `pnpm test:e2e`, Playwright harness  | фича 5                |
-| экран `/` (индекс ссылок)            | фича 6                |
-| экран `/r/{secret}` + 404            | фича 7                |
-| compose-smoke приложений, CI e2e     | фича 8                |
+| Имя                                  | Где появится |
+| ------------------------------------ | ------------ |
+| Tailwind, `@theme`, IBM Plex, layout | фича 4       |
+| `pnpm test:e2e`, Playwright harness  | фича 5       |
+| экран `/` (индекс ссылок)            | фича 6       |
+| экран `/r/{secret}` + 404            | фича 7       |
+| compose-smoke приложений, CI e2e     | фича 8       |
 
 Не выдумывай другие имена. Если нужен новый script — заведи его в той фиче, чей AC это
 требует, и запиши в `package.json`.
@@ -49,7 +49,7 @@ docs → 1 Postgres/Prisma/ready
      → 8 compose-smoke + CI e2e
 ```
 
-Фичи 1–2 уже в `main`. Нарезка 3–8 — D-020: не возвращаться к старому комку
+Фичи 1–3 уже в поставке. Нарезка 4–8 — D-020: не возвращаться к старому комку
 «Nuxt+токены+Playwright» в одном PR.
 
 Зависимость: фича N в `main` до старта N+1.

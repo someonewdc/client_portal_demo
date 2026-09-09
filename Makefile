@@ -23,6 +23,7 @@ up:
 down:
 	$(compose) down
 
+# db + api + @client-portal/web on :3000 (root `pnpm dev`). `up` stays Postgres-only.
 dev: up
 	pnpm db:generate
 	pnpm db:migrate

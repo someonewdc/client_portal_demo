@@ -40,7 +40,7 @@ workspace нет и в production API не добавляй. Новый skill «
 
 ## Топология
 
-Сейчас (фича 2 в поставке):
+Сейчас (фича 3 в поставке):
 
 - pnpm workspace, Node 24.18 / pnpm 11;
 - reusable packages: `tsconfig`, `eslint-config`, `platform-core`, `nestjs-core`,
@@ -48,15 +48,16 @@ workspace нет и в production API не добавляй. Новый skill «
 - generated `packages/api-client` (`openapi.json` / `schema.d.ts` руками не править);
 - `apps/api` — NestJS/Fastify, health, `GET /api/v1/demo/links` и
   `GET /api/v1/requests/{accessSecret}` (заявки в Postgres + seed);
+- `apps/web` — Nuxt 4.5.2 без Tailwind; заглушка `/`; `make dev` = db+api+web `:3000`;
 - PostgreSQL в Docker (хост 5433), Prisma 7 в `apps/api`.
 
-Целевая (по `docs/implementation-plan.md`, появляется фичами 3–8):
+Целевая (по `docs/implementation-plan.md`, появляется фичами 4–8):
 
-- `apps/web` — Nuxt 4 (фича 3 без Tailwind), Tailwind v4 `@theme` (фича 4), SSR через
-  `useFetch`/`useAsyncData` (facade — фича 6);
+- Tailwind v4 `@theme` (фича 4), Playwright (фича 5), SSR через `useFetch`/`useAsyncData`
+  (facade — фича 6);
 - mock-api **нет и не появится**. «Система заявок» = Postgres + seed.
 
-Ещё нет, пока соответствующая фича не в `main`: Nuxt, e2e.
+Ещё нет, пока соответствующая фича не в `main`: токены layout, e2e, экраны заявок.
 
 Не добавляй Nx/Turborepo и не включай Nest monorepo mode. Не публикуй packages.
 

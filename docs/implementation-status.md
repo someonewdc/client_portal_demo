@@ -2,9 +2,8 @@
 
 ## Текущее состояние
 
-Фича 2 (домен заявки, идемпотентный seed, `GET /demo/links` и
-`GET /requests/{accessSecret}`, `pnpm generate:api`, `packages/api-client`) реализована
-в `main` (PR #3). Нарезка оставшегося web — D-020 / D-021 (фичи 3–8). Nuxt и e2e ещё нет.
+Фича 3 (`apps/web` Nuxt 4.5.2 без Tailwind, заглушка `/`, `make dev` = db+api+web `:3000`)
+реализована. Tailwind, Playwright и экраны заявок ещё нет.
 
 ## Правила обновления
 
@@ -22,7 +21,7 @@
 | Правки контракта по ревью     | выполнен (main `95767dc`, PR #1)  |
 | Фича 1 Postgres/Prisma/ready  | проверен                          |
 | Фича 2 заявка + OpenAPI       | проверен                          |
-| Фича 3 Nuxt + make dev        | не начат                          |
+| Фича 3 Nuxt + make dev        | проверен                          |
 | Фича 4 токены + layout        | не начат                          |
 | Фича 5 Playwright harness     | не начат                          |
 | Фича 6 индекс ссылок          | не начат                          |
@@ -112,3 +111,12 @@
 | 2026-09-09 | Ревью нарезки 3–8    | `pnpm format` затем `pnpm format:check`                                                                                                                                                                                                                                                   | exit 0                                                                                                                                      |
 | 2026-09-09 | Ревью нарезки 3–8    | `git diff --check`                                                                                                                                                                                                                                                                        | exit 0                                                                                                                                      |
 | 2026-09-09 | Ревью нарезки 3–8    | `pnpm lint` / `pnpm test`                                                                                                                                                                                                                                                                 | не запускались: docs-only (`change-impact-gates`)                                                                                           |
+| 2026-09-09 | Фича 3 TDD red       | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                                                                                                                                                          | exit 1: нет `apps/web/package.json`; нет заглушки `/`; `make dev` / `pnpm dev` не стартуют `@client-portal/web`                             |
+| 2026-09-09 | Фича 3 TDD green     | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                                                                                                                                                          | exit 0: 13 tests                                                                                                                            |
+| 2026-09-09 | Фича 3 gates         | `pnpm check:boundaries`                                                                                                                                                                                                                                                                   | exit 0                                                                                                                                      |
+| 2026-09-09 | Фича 3 gates         | `pnpm lint`                                                                                                                                                                                                                                                                               | exit 0                                                                                                                                      |
+| 2026-09-09 | Фича 3 gates         | `pnpm typecheck`                                                                                                                                                                                                                                                                          | exit 0, включая `nuxt typecheck`                                                                                                            |
+| 2026-09-09 | Фича 3 gates         | `pnpm test`                                                                                                                                                                                                                                                                               | exit 0: platform-core 29, nestjs-core 4, openapi-client-core 3, api 22, scripts 38                                                          |
+| 2026-09-09 | Фича 3 gates         | `pnpm test:packages`                                                                                                                                                                                                                                                                      | exit 0: 5 tarballs, 17 ESM imports, 3 TypeScript consumers                                                                                  |
+| 2026-09-09 | Фича 3 gates         | `pnpm build`                                                                                                                                                                                                                                                                              | exit 0, включая Nuxt 4.5.2 production build                                                                                                 |
+| 2026-09-09 | Фича 3 gates         | `pnpm format` затем `pnpm format:check`                                                                                                                                                                                                                                                   | exit 0                                                                                                                                      |
