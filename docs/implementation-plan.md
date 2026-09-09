@@ -10,10 +10,11 @@
   `openapi-client-core`
 - `apps/api`: health live/ready; `GET /demo/links`; `GET /requests/{accessSecret}`;
   `API_PORT=3001`, `WEB_ORIGIN=http://localhost:3000`, `DATABASE_URL`
-- Root scripts (копировать буквально): `build:core`, `dev` (только API), `db:generate`,
+- `apps/web`: Nuxt 4.5.2, заглушка `/`, без Tailwind; `NUXT_PUBLIC_API_BASE_URL` с `/api/v1`
+- Root scripts (копировать буквально): `build:core`, `dev` (api+web), `db:generate`,
   `db:migrate`, `db:seed`, `generate:api`, `build`, `lint`, `check:boundaries`, `typecheck`,
   `test`, `test:packages`, `format`, `format:check`
-- Makefile: `bootstrap`, `doctor`, `up` (только Postgres :5433), `down`, `dev` (db+api),
+- Makefile: `bootstrap`, `doctor`, `up` (только Postgres :5433), `down`, `dev` (db+api+web),
   `verify` (`up` + migrate + `generate:api` + diff generated client + корневые gates, D-018)
 - CI: Postgres service + `DATABASE_URL` на 5432, затем generate/migrate, `generate:api`,
   `git diff --exit-code` на `openapi.json` / `schema.d.ts`, затем корневые gates

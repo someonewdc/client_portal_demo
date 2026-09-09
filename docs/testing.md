@@ -62,7 +62,8 @@ LLM часто пишет код, затем тесты «под него». Т�
 Сверяй имена с `package.json`. Сейчас есть: `pnpm check:boundaries`, `lint`, `typecheck`,
 `test`, `test:packages`, `build`, `db:generate`, `db:migrate`, `db:seed`, `generate:api`.
 
-Ещё нет (заводит фича 5, AC это проверяет): `pnpm test:e2e`.
+Ещё нет (заводит фича 5, AC это проверяет): `pnpm test:e2e`. `apps/web` в `typecheck`/`build`
+и `make dev` — фича 3; HTML на `:3000` — smoke фичи 5.
 
 Для docs-only поставки: Prettier / `git diff --check`. Не утверждать, что lint/test
 продукта прошли, если не запускались.

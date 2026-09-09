@@ -16,10 +16,11 @@
 | ESLint     |  9.39.5 | `packages/eslint-config` peers                                |
 | Prisma     |  7.10.0 | `apps/api` (`prisma`, `@prisma/client`, `@prisma/adapter-pg`) |
 | PostgreSQL |      17 | `compose.yaml`, CI service; хост 5433 (D-006, D-017)          |
+| Nuxt       |   4.5.2 | `apps/web` (D-022); без Tailwind/PostCSS (D-011, D-020)       |
+| Vue        |  3.5.42 | `apps/web`, официальный Nuxt 4.5 starter                      |
 
-Nuxt 4 заводит фича 3 **без** Tailwind/PostCSS. Tailwind, CSS-pipeline и `@theme` — фича 4,
-Playwright — фича 5. Патч-версии сверяют с официальными docs и lockfile в том чате. Порты
-стенда — `docs/decisions.md` (D-006, D-017).
+Tailwind, CSS-pipeline и `@theme` — фича 4, Playwright — фича 5. Порты стенда —
+`docs/decisions.md` (D-006, D-017).
 
 CI (`.github/workflows/ci.yml`) пинит third-party actions на commit SHA. `pnpm/action-setup`
 идёт до `actions/setup-node` с `cache: pnpm`. Фича 1 добавила Postgres в CI; фича 8 — e2e,
