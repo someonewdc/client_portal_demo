@@ -9,3 +9,5 @@ coverage
 playwright-report
 test-results
 apps/api/src/generated
+packages/api-client/openapi.json
+packages/api-client/src/schema.d.ts

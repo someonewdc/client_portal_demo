@@ -44,14 +44,15 @@ Skill `nestjs-hexagonal-boundaries`:
 
 ## OpenAPI и клиент
 
-Когда появится фича 2: `pnpm generate:api` пишет `packages/api-client`. Web — один facade
-над `createProblemAwareClient<Paths>`. Prefix `/api/v1` на base URL.
+`pnpm generate:api` пишет `packages/api-client` (types-only `Paths`; facade `createApiClient`
+— фича 3). Web — один facade над `createProblemAwareClient<Paths>`. Prefix `/api/v1` на
+base URL.
 
 ## Стенд
 
 Lifecycle — корневой Makefile (цели заводит фича 1 и расширяют 3/6): `bootstrap`, `dev`,
 `up`, `down`, `verify` по факту файла. Смысл `up`/`dev` — D-016: сначала только Postgres,
 потом `dev`+web, потом тот же `up` = полный стенд. `verify` — D-018: `up` + migrate +
-gates.
+`generate:api` + diff generated client + gates.
 
 Порты — `docs/decisions.md`. Один стенд на машине для `:3000`/`:3001`.

@@ -377,7 +377,7 @@ function checkApiDomain(file, specifier, statement, resolvedPath) {
   if (
     specifier.startsWith('@nestjs/') ||
     isGeneratedPrismaImport(specifier, resolvedPath) ||
-    /(?:^|\/)(?:dto|infrastructure)(?:\/|$)/.test(specifier) ||
+    /(?:^|\/)(?:dto|infrastructure|http)(?:\/|$)/.test(specifier) ||
     importsNestHttpException(specifier, statement) ||
     (targetContext && targetContext !== sourceContext && /\/domain\//.test(resolvedPath))
   ) {
@@ -402,7 +402,8 @@ function checkApiCrossContext(file, specifier, resolvedPath) {
   const sourceContext = apiContext(file);
   const targetContext = resolvedPath ? apiContext(resolvedPath) : null;
   const importsContextInternalLayer =
-    Boolean(resolvedPath) && /\/(?:application|domain|infrastructure|dto)\//.test(resolvedPath);
+    Boolean(resolvedPath) &&
+    /\/(?:application|domain|infrastructure|dto|http)\//.test(resolvedPath);
   if (
     sourceContext &&
     targetContext &&

@@ -1,5 +1,5 @@
-async function seed(): Promise<void> {
-  // Request fixtures are added in feature 2. This command stays idempotent.
-}
+import { applyRequestSeed } from '../src/requests/infrastructure/apply-request-seed.js';
 
-await seed();
+export { applyRequestSeed };
+
+await applyRequestSeed();

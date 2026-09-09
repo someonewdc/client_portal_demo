@@ -6,15 +6,16 @@
 ## Сейчас
 
 - packages: `tsconfig`, `eslint-config`, `platform-core`, `nestjs-core`,
-  `openapi-client-core`
+  `openapi-client-core`, generated `api-client` (`pnpm generate:api`; `openapi.json` /
+  `schema.d.ts` руками не править)
 - `apps/api`: `GET /api/v1/health/live`, `GET /api/v1/health/ready` (ready зависит от
-  Postgres)
+  Postgres), `GET /api/v1/demo/links`, `GET /api/v1/requests/{accessSecret}`
 - PostgreSQL в Docker на хосте `5433`, Prisma 7 в `apps/api`
 - план и промпты: `docs/README.md`, `docs/implementation-plan.md`
 
-## Ещё нет (заводят фичи 2–6)
+## Ещё нет (заводят фичи 3–6)
 
-Nuxt, generated `api-client`, Playwright. mock-api нет и не появится.
+Nuxt, Playwright. mock-api нет и не появится.
 
 ## Запуск
 
@@ -31,7 +32,8 @@ API на `:3001`. Агентам — только цели Makefile, не сыр
 (D-013). Web origin `http://localhost:3000` — один стенд на машине для `:3000`/`:3001`
 (`docs/decisions.md` D-006).
 
-Проверки: `make verify` (D-018: сначала Postgres + migrate, затем корневые gates). Сырой
-`pnpm test` без живой БД падает на HTTP ready=200 — это не полный аналог CI.
+Проверки: `make verify` (D-018: Postgres + migrate + `generate:api` + diff generated
+client, затем корневые gates). Сырой `pnpm test` без живой БД падает на HTTP ready=200 —
+это не полный аналог CI.
 
 Пакеты private, `0.0.0`. Публикация в registry не входит.

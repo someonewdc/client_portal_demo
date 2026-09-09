@@ -34,9 +34,12 @@ LLM часто пишет код, затем тесты «под него». Т�
 - F1: `GET /api/v1/health/live` 200 при недоступной БД; `GET /health/ready` 503 Problem
   Details после `markReady`, если БД недоступна; 200 `{ data.status: "ok" }` когда
   Postgres отвечает (`make verify` / CI-сервис, не сырой `pnpm test` без БД).
-- F2: `GET /demo/links` — 5 items, поля сидов 1:1 из `docs/domain-model.md`;
-  `GET /requests/{secret}` 200 для fixture; 404 Problem Details: `detail` без SQL/stack и
-  без секрета; `instance`/path могут содержать секрет (D-014).
+- F2: `GET /demo/links` — envelope 1:1 (`data.items` + `meta.traceId`), поля сидов из
+  `docs/domain-model.md` (включая `status`/`statusLabel`/`counterpartyName`/`updatedAt`);
+  лишняя строка в БД → 500; повторный seed удаляет её (D-019); `GET /requests/{secret}` 200
+  для fixture с датами, подписями шагов и полным `files`; 404 Problem Details: `detail` без
+  SQL/stack и без секрета; `instance`/path могут содержать секрет (D-014). HTTP-тесты
+  фиксируют UTC ISO при `TZ=Europe/Moscow`; колонки дат — `timestamptz`.
 
 **E2E (Playwright, скрипт `test:e2e` заводит F3):**
 
@@ -54,9 +57,9 @@ LLM часто пишет код, затем тесты «под него». Т�
 ## Корневые команды
 
 Сверяй имена с `package.json`. Сейчас есть: `pnpm check:boundaries`, `lint`, `typecheck`,
-`test`, `test:packages`, `build`, `db:generate`, `db:migrate`, `db:seed`.
+`test`, `test:packages`, `build`, `db:generate`, `db:migrate`, `db:seed`, `generate:api`.
 
-Ещё нет (заводят фичи, AC это проверяет): `pnpm generate:api`, `pnpm test:e2e`.
+Ещё нет (заводят фичи, AC это проверяет): `pnpm test:e2e`.
 
 Для docs-only поставки: Prettier / `git diff --check`. Не утверждать, что lint/test
 продукта прошли, если не запускались.

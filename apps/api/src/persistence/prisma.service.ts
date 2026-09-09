@@ -19,6 +19,10 @@ export class PrismaService implements DatabaseHealthPort, OnModuleDestroy {
     this.client = new PrismaClient({ adapter });
   }
 
+  asClient(): PrismaClient {
+    return this.client;
+  }
+
   async ping(): Promise<void> {
     await this.client.$queryRaw`SELECT 1`;
   }

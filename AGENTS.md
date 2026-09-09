@@ -40,22 +40,22 @@ workspace нет и в production API не добавляй. Новый skill «
 
 ## Топология
 
-Сейчас (фича 1 в поставке):
+Сейчас (фича 2 в поставке):
 
 - pnpm workspace, Node 24.18 / pnpm 11;
 - reusable packages: `tsconfig`, `eslint-config`, `platform-core`, `nestjs-core`,
   `openapi-client-core`;
-- `apps/api` — NestJS/Fastify, `GET /api/v1/health/live` и `/health/ready` (ready зависит от
-  Postgres через Prisma);
+- generated `packages/api-client` (`openapi.json` / `schema.d.ts` руками не править);
+- `apps/api` — NestJS/Fastify, health, `GET /api/v1/demo/links` и
+  `GET /api/v1/requests/{accessSecret}` (заявки в Postgres + seed);
 - PostgreSQL в Docker (хост 5433), Prisma 7 в `apps/api`.
 
-Целевая (по `docs/implementation-plan.md`, появляется фичами 2–6):
+Целевая (по `docs/implementation-plan.md`, появляется фичами 3–6):
 
 - `apps/web` — Nuxt 4, Tailwind v4 `@theme`, SSR через `useFetch`/`useAsyncData`;
-- generated `packages/api-client` (`openapi.json` / `schema.d.ts` руками не править);
 - mock-api **нет и не появится**. «Система заявок» = Postgres + seed.
 
-Ещё нет, пока соответствующая фича не в `main`: Nuxt, `api-client`, e2e.
+Ещё нет, пока соответствующая фича не в `main`: Nuxt, e2e.
 
 Не добавляй Nx/Turborepo и не включай Nest monorepo mode. Не публикуй packages.
 
@@ -130,6 +130,7 @@ skill.
 
 ```bash
 pnpm db:generate
+pnpm generate:api
 pnpm check:boundaries
 pnpm lint
 pnpm typecheck
@@ -138,5 +139,5 @@ pnpm test:packages
 pnpm build
 ```
 
-`pnpm generate:api` и `pnpm test:e2e` появятся вместе с контрактом заявки и Playwright
-(фичи 2–3). Не утверждай успех, если команда не запускалась. Не пиши «должно работать».
+`pnpm test:e2e` появится вместе с Playwright (фича 3). Не утверждай успех, если команда не
+запускалась. Не пиши «должно работать».

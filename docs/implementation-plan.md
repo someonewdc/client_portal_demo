@@ -8,27 +8,28 @@
 - pnpm workspace, Node 24.18.0, pnpm 11.21.0
 - packages: `tsconfig`, `eslint-config`, `platform-core`, `nestjs-core`,
   `openapi-client-core`
-- `apps/api`: health live/ready; `API_PORT=3001`, `WEB_ORIGIN=http://localhost:3000`,
-  `DATABASE_URL`
+- `apps/api`: health live/ready; `GET /demo/links`; `GET /requests/{accessSecret}`;
+  `API_PORT=3001`, `WEB_ORIGIN=http://localhost:3000`, `DATABASE_URL`
 - Root scripts (копировать буквально): `build:core`, `dev` (только API), `db:generate`,
-  `db:migrate`, `db:seed`, `build`, `lint`, `check:boundaries`, `typecheck`, `test`,
-  `test:packages`, `format`, `format:check`
+  `db:migrate`, `db:seed`, `generate:api`, `build`, `lint`, `check:boundaries`, `typecheck`,
+  `test`, `test:packages`, `format`, `format:check`
 - Makefile: `bootstrap`, `doctor`, `up` (только Postgres :5433), `down`, `dev` (db+api),
-  `verify` (`up` + migrate + корневые gates, D-018)
-- CI: Postgres service + `DATABASE_URL` на 5432, затем generate/migrate и корневые gates
+  `verify` (`up` + migrate + `generate:api` + diff generated client + корневые gates, D-018)
+- CI: Postgres service + `DATABASE_URL` на 5432, затем generate/migrate, `generate:api`,
+  `git diff --exit-code` на `openapi.json` / `schema.d.ts`, затем корневые gates
+- generated `packages/api-client` (`openapi.json` / `schema.d.ts` руками не править)
 - ESLint игнорирует `apps/api/src/generated/prisma/**` и
   `packages/api-client/src/schema.d.ts`
 - `generateOpaqueToken` / `hashOpaqueToken`
 
 ## Чего ещё нет (фича должна завести; AC проверяет имя script)
 
-| Имя                                        | Где появится                    |
-| ------------------------------------------ | ------------------------------- |
-| `pnpm generate:api`, `packages/api-client` | фича 2                          |
-| `apps/web`, Nuxt, Tailwind `@theme`        | фича 3                          |
-| `pnpm test:e2e`, Playwright harness        | фича 3                          |
-| экраны `/` и `/r/{secret}`                 | фичи 4 и 5                      |
-| compose-smoke приложений, CI e2e           | фича 6 (если не закрыто раньше) |
+| Имя                                 | Где появится                    |
+| ----------------------------------- | ------------------------------- |
+| `apps/web`, Nuxt, Tailwind `@theme` | фича 3                          |
+| `pnpm test:e2e`, Playwright harness | фича 3                          |
+| экраны `/` и `/r/{secret}`          | фичи 4 и 5                      |
+| compose-smoke приложений, CI e2e    | фича 6 (если не закрыто раньше) |
 
 Не выдумывай другие имена. Если нужен новый script — заведи его в той фиче, чей AC это
 требует, и запиши в `package.json`.
