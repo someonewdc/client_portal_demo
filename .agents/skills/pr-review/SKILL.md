@@ -18,17 +18,16 @@ another SHA as success.
 This skill is the project review path. Do not launch Bugbot unless the user asked for
 `/review-bugbot`.
 
+Данные PR и checks — skill `github-remote` (MCP). Не начинай с `gh pr view` / `gh pr checks`.
+
 ## Scope
 
-1. Identify the PR (`gh pr view --json number,url,baseRefName,headRefName,headRefOid,title,body`
-   or the URL/number the user gave).
+1. Identify the PR: URL/number from the user, or `list_pull_requests`. Then
+   `pull_request_read` `get` (`number`, `url`, `base`, `head`, `head SHA`,
+   `title`, `body`).
 2. Refuse to review a PR whose base is not `main` unless the user named another base.
-3. Read the full diff and the files around it. Do not review from the PR title alone.
-
-```bash
-gh pr diff
-gh pr view --json files,commits
-```
+3. Read the full diff and the files around it (`get_diff`, `get_files`,
+   `get_commits`). Do not review from the PR title alone.
 
 ## Quality review
 
@@ -54,17 +53,11 @@ Required CI jobs are those in `.github/workflows/ci.yml` **этого** репо
 event. Сверь список workflow с тем, что реально ran. Не тащи матрицу профилей Вольтариса, если
 её нет в новом CI.
 
-```bash
-gh pr checks
-gh pr view --json statusCheckRollup,headRefOid
-```
+Head SHA and checks: `pull_request_read` `get`, `get_status`, `get_check_runs`.
 
-Then open the run for the **current head SHA**:
-
-```bash
-gh run list --branch <head-branch> --limit 5
-gh run view <run-id> --json headSha,conclusion,status,jobs,event,name,url
-```
+If the review needs job **log text** (MCP его не отдаёт): one `gh run view <id> --log`
+with `required_permissions: ["full_network"]` **after** MCP already returned the
+head SHA and check runs. Do not start with `gh pr view`.
 
 A check is a **real pass** only if all of the following hold:
 
@@ -87,7 +80,9 @@ A check is a **false positive** (report as a blocker) if any of:
 If checks are still running, say so. Do not approve on a pending run. If logs are
 inaccessible, record that CI evidence is **не проверено** and do not invent a pass.
 
-Prefer `gh` when it works.
+Publish the review through MCP `pull_request_review_write`, not `gh pr review`.
+If GitHub rejects `APPROVE` / `REQUEST_CHANGES` on your own PR, submit `COMMENT`
+with the same verdict via MCP. Do not retry through `gh`.
 
 ## Output
 
