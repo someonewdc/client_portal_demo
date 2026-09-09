@@ -62,9 +62,10 @@ git push -u origin HEAD
 ```
 
 Open or update a PR into `main` through skill `github-remote` (`base=main`):
-есть ли PR — **read**; создать/обновить — **write** (отдельный канал, 403 не
-убивает MCP reads). If a PR for this branch already exists, push commits to
-that branch. Do not open a second PR.
+есть ли PR — **read** `list_pull_requests` с `head={owner}:{branch}` (не голое
+имя ветки); создать/обновить — **write** (отдельный канал, 403 не убивает MCP
+reads). If a PR for this branch already exists, push commits to that branch.
+Do not open a second PR.
 
 PR body:
 

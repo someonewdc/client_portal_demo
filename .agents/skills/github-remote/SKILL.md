@@ -81,14 +81,24 @@ GitHub app. После skip/fail не предлагай снова.
 | --- | --- | --- |
 | Метаданные PR | read | `pull_request_read` `get` |
 | Diff / files / commits | read | `get_diff` / `get_files` / `get_commits` |
-| CI на head | read | `get_check_runs` + `get_status` |
-| Есть ли PR у ветки | read | `list_pull_requests` (`head` / `base`) |
+| CI на head | read | `get_check_runs` |
+| Есть ли PR у ветки | read | `list_pull_requests` `head={owner}:{branch}` |
 | Открыть PR | write | `create_pull_request` `base=main` |
 | Обновить PR | write | `update_pull_request` |
 | Ревью | write | `pull_request_review_write` |
 
+`list_pull_requests.head` — `owner:branch` с origin, например
+`someonewdc:docs/github-remote-mcp`. Голое имя ветки даёт пустой список → второй
+PR. Перед `create_pull_request` ищи существующий PR в этом формате.
+
+Обязательное доказательство CI — check run job из `.github/workflows/ci.yml`
+этого репозитория на текущем head SHA (сейчас `verify`). `get_status` — classic
+commit statuses; в этом репозитории их нет. Пустой / `pending` `get_status` ≠
+«CI ещё идёт» и не блокирует approve. `mergeable_state: clean` — не evidence.
+
 ## Actions logs
 
-Лог job в MCP нет — это не отказ read. После успешных check runs, если нужен
-текст шагов: один `gh run view <id> --log` с `all`. Не начинай ревью с
-`gh pr view`.
+Лог job в MCP нет. `get_check_runs.id` — id **job**, не workflow run.
+Run id — число в `html_url` после `/actions/runs/`. Если нужен текст шагов:
+`gh run view <run-id> --log` с `all`. Не `gh run view` с check run id. Не
+начинай ревью с `gh pr view`.

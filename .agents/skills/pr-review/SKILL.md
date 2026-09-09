@@ -24,9 +24,9 @@ reads на `gh` из-за 403 на write.
 
 ## Scope
 
-1. Identify the PR: URL/number from the user, or `list_pull_requests`. Then
-   `pull_request_read` `get` (`number`, `url`, `base`, `head`, `head SHA`,
-   `title`, `body`).
+1. Identify the PR: URL/number from the user, or `list_pull_requests` with
+   `head={owner}:{branch}`. Then `pull_request_read` `get` (`number`, `url`,
+   `base`, `head`, `head SHA`, `title`, `body`).
 2. Refuse to review a PR whose base is not `main` unless the user named another base.
 3. Read the full diff and the files around it (`get_diff`, `get_files`,
    `get_commits`). Do not review from the PR title alone.
@@ -52,14 +52,19 @@ linter already owns.
 ## CI is evidence, not decoration
 
 Required CI jobs are those in `.github/workflows/ci.yml` **этого** репозитория для данного
-event. Сверь список workflow с тем, что реально ran. Не тащи матрицу профилей Вольтариса, если
-её нет в новом CI.
+event (сейчас один job `verify`). Сверь список workflow с `get_check_runs`. Не тащи
+матрицу профилей Вольтариса, если её нет в новом CI.
 
-Head SHA and checks: `pull_request_read` `get`, `get_status`, `get_check_runs`.
+Обязательное доказательство — check run `verify` на текущем head SHA
+(`pull_request_read` `get` + `get_check_runs`). `get_status` — classic commit
+statuses; в этом репозитории их нет. Пустой / `pending` `get_status` ≠ «CI ещё
+идёт» и не запрещает approve. `mergeable_state: clean` и старый
+`statusCheckRollup` не заменяют check run.
 
-If the review needs job **log text** (MCP его не отдаёт): one `gh run view <id> --log`
-with `required_permissions: ["all"]` **after** check runs already returned the
-head SHA. Do not start with `gh pr view`.
+If the review needs job **log text** (MCP его не отдаёт): take the workflow
+**run** id from the check run `html_url` (`/actions/runs/<run-id>/`), then
+`gh run view <run-id> --log` with `required_permissions: ["all"]`. Do not pass
+`get_check_runs.id` (that is the job id). Do not start with `gh pr view`.
 
 A check is a **real pass** only if all of the following hold:
 
@@ -72,15 +77,18 @@ A check is a **real pass** only if all of the following hold:
 
 A check is a **false positive** (report as a blocker) if any of:
 
-- Combined status is green while a required job is skipped/missing.
-- Checks are pending, cancelled, or from a different SHA than `headRefOid`.
+- Required check run is green while another required job is skipped/missing.
+- Required check run is queued/cancelled/from a different SHA than `headRefOid`.
+  Empty `get_status` is not this case.
 - Duration is implausibly short for the job's expected steps, and the log does not show them.
 - The PR removed, skipped, or weakened tests that previously covered the change.
 - `if:` / path filters / matrix exclusions dropped a required job.
 - Author claimed CI passed without a run URL and SHA.
 
-If checks are still running, say so. Do not approve on a pending run. If logs are
-inaccessible, record that CI evidence is **не проверено** and do not invent a pass.
+If the required check run (`verify`) is still `queued` / `in_progress` /
+`pending`, say so. Do not approve on a pending **check run**. Empty `get_status`
+is not pending CI. If logs are inaccessible, record that CI evidence is
+**не проверено** and do not invent a pass.
 
 Publish the review through `github-remote` **write** (`pull_request_review_write`,
 или `gh pr review` если `mcp_writes=dead`). Reads (diff, checks) оставь на MCP.
