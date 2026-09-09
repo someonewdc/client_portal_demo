@@ -105,10 +105,20 @@ export class RequestPortalDataDto {
   @ApiProperty({ example: 'ПК «Нордщит»', type: String })
   plantName!: string;
 
-  @ApiProperty({ type: () => RequestStageDto, isArray: true })
+  @ApiProperty({
+    type: () => RequestStageDto,
+    isArray: true,
+    maxItems: 4,
+    minItems: 4,
+  })
   stages!: RequestStageDto[];
 
-  @ApiProperty({ type: () => RequestSpecLineDto, isArray: true })
+  @ApiProperty({
+    type: () => RequestSpecLineDto,
+    isArray: true,
+    maxItems: 5,
+    minItems: 2,
+  })
   specLines!: RequestSpecLineDto[];
 
   @ApiProperty({ type: () => RequestFileDto, isArray: true })

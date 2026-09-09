@@ -124,6 +124,23 @@ async function startSeededApp(): Promise<NestFastifyApplication> {
   return app;
 }
 
+async function insertOrphanRequest(app: NestFastifyApplication): Promise<void> {
+  const { PrismaService } = await import('../persistence/prisma.service.js');
+  await app
+    .get(PrismaService)
+    .asClient()
+    .request.create({
+      data: {
+        accessSecretHash: hashOpaqueToken('orphan-not-in-catalog'),
+        counterpartyName: 'ООО «Лишнее»',
+        publicNumber: 'З-19999',
+        status: 'accepted',
+        title: 'Лишняя заявка',
+        updatedAt: new Date('2026-09-09T00:00:00.000Z'),
+      },
+    });
+}
+
 describe('request HTTP', () => {
   let app: NestFastifyApplication | undefined;
 
@@ -140,20 +157,38 @@ describe('request HTTP', () => {
 
   it('returns five catalog demo links 1:1 including status, counterparty and UTC updatedAt', async () => {
     const response = await app!.inject({ method: 'GET', url: '/api/v1/demo/links' });
-    const body: unknown = response.json();
-    const items =
-      typeof body === 'object' &&
-      body !== null &&
-      'data' in body &&
-      typeof body.data === 'object' &&
-      body.data !== null &&
-      'items' in body.data &&
-      Array.isArray(body.data.items)
-        ? body.data.items
-        : [];
 
     expect(response.statusCode).toBe(200);
-    expect(items).toEqual([...EXPECTED_DEMO_LINKS]);
+    expect(response.json()).toEqual({
+      data: { items: [...EXPECTED_DEMO_LINKS] },
+      meta: { traceId: expect.any(String) },
+    });
+  });
+
+  it('fails closed on an extra stored request, then seed restores the catalog envelope', async () => {
+    await insertOrphanRequest(app!);
+
+    const dirty = await app!.inject({ method: 'GET', url: '/api/v1/demo/links' });
+    const dirtyBody: unknown = dirty.json();
+
+    expect(dirty.statusCode).toBe(500);
+    expect(dirty.headers['content-type']).toContain('application/problem+json');
+    expect(isProblemDetails(dirtyBody)).toBe(true);
+    expect(dirtyBody).toMatchObject({
+      status: 500,
+      title: 'Internal server error',
+      detail: 'The server could not complete the request',
+    });
+
+    const { applyRequestSeed } = await import('./infrastructure/apply-request-seed.js');
+    await applyRequestSeed();
+
+    const healed = await app!.inject({ method: 'GET', url: '/api/v1/demo/links' });
+    expect(healed.statusCode).toBe(200);
+    expect(healed.json()).toEqual({
+      data: { items: [...EXPECTED_DEMO_LINKS] },
+      meta: { traceId: expect.any(String) },
+    });
   });
 
   it('returns the quote fixture by access secret with catalog dates, stages and files 1:1', async () => {

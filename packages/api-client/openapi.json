@@ -380,12 +380,16 @@
             "example": "ПК «Нордщит»"
           },
           "stages": {
+            "maxItems": 4,
+            "minItems": 4,
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RequestStageDto"
             }
           },
           "specLines": {
+            "maxItems": 5,
+            "minItems": 2,
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/RequestSpecLineDto"

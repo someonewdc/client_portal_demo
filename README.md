@@ -32,7 +32,8 @@ API на `:3001`. Агентам — только цели Makefile, не сыр
 (D-013). Web origin `http://localhost:3000` — один стенд на машине для `:3000`/`:3001`
 (`docs/decisions.md` D-006).
 
-Проверки: `make verify` (D-018: сначала Postgres + migrate, затем корневые gates). Сырой
-`pnpm test` без живой БД падает на HTTP ready=200 — это не полный аналог CI.
+Проверки: `make verify` (D-018: Postgres + migrate + `generate:api` + diff generated
+client, затем корневые gates). Сырой `pnpm test` без живой БД падает на HTTP ready=200 —
+это не полный аналог CI.
 
 Пакеты private, `0.0.0`. Публикация в registry не входит.

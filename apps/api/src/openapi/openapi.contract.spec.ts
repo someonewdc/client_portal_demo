@@ -17,17 +17,25 @@ function asRecord(value: unknown): Record<string, unknown> {
   return value as Record<string, unknown>;
 }
 
-function schemaPropertyType(
+function schemaProperty(
   document: Record<string, unknown>,
   schemaName: string,
   property: string,
-): unknown {
+): Record<string, unknown> {
   const components = asRecord(document.components);
   const schemas = asRecord(components.schemas);
   const schema = asRecord(schemas[schemaName]);
   const properties = asRecord(schema.properties);
 
-  return asRecord(properties[property]).type;
+  return asRecord(properties[property]);
+}
+
+function schemaPropertyType(
+  document: Record<string, unknown>,
+  schemaName: string,
+  property: string,
+): unknown {
+  return schemaProperty(document, schemaName, property).type;
 }
 
 function responseContentTypes(
@@ -64,5 +72,18 @@ describe('OpenAPI contract for generated client', () => {
   it('declares spec quantity and file byteSize as integers', () => {
     expect(schemaPropertyType(document, 'RequestSpecLineDto', 'quantity')).toBe('integer');
     expect(schemaPropertyType(document, 'RequestFileDto', 'byteSize')).toBe('integer');
+  });
+
+  it('fixes portal stages to four items and specLines to 2–5', () => {
+    expect(schemaProperty(document, 'RequestPortalDataDto', 'stages')).toMatchObject({
+      maxItems: 4,
+      minItems: 4,
+      type: 'array',
+    });
+    expect(schemaProperty(document, 'RequestPortalDataDto', 'specLines')).toMatchObject({
+      maxItems: 5,
+      minItems: 2,
+      type: 'array',
+    });
   });
 });

@@ -22,6 +22,14 @@ export async function applyRequestSeed(): Promise<void> {
   const prisma = createPrisma();
   try {
     await prisma.$transaction(async (tx) => {
+      await tx.request.deleteMany({
+        where: {
+          publicNumber: {
+            notIn: REQUEST_CATALOG.map((fixture) => fixture.publicNumber),
+          },
+        },
+      });
+
       for (const fixture of REQUEST_CATALOG) {
         const accessSecretHash = hashOpaqueToken(fixture.accessSecret);
         const request = await tx.request.upsert({
