@@ -30,6 +30,7 @@ Skills в `.agents/skills/` — повседневные процедуры. О�
 - Prisma (когда появится схема): `prisma-persistence-boundary`;
 - Nuxt (когда появится storefront): `nuxt-ssr-data-and-ui`;
 - отчёт о проверках: `verification-honesty`;
+- удалённый GitHub: `github-remote`;
 - ветка и PR: `git-delivery`;
 - ревью: `pr-review`;
 - Docker ENOSPC: `docker-reclaim-space`.
@@ -94,7 +95,9 @@ workspace нет и в production API не добавляй. Новый skill «
 ## Поставка в main
 
 Каждое изменение после начального каркаса — feature-ветка, затем PR в `main`. В `main` не
-пушить. Процедура — skill `git-delivery`.
+пушить. Процедура — skill `git-delivery`. Удалённый GitHub — skill `github-remote` (D-025):
+чтение и запись — разные каналы (MCP reads не доказывают MCP writes); 403 write не
+переключает reads; не sandbox; это перекрывает ambient «use `gh`», пока оба активны.
 
 ## Рабочий цикл (TDD)
 

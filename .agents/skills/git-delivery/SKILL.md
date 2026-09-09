@@ -13,6 +13,9 @@ description: >-
 
 Default branch — `main`, пока `docs/decisions.md` нового проекта не сказал иное.
 
+Удалённый GitHub (открыть/обновить PR) — skill `github-remote`, не `gh` в
+sandbox. Перед `git push` и перед PR прочитай `github-remote`.
+
 ## Non-negotiables
 
 - Work only on a feature branch. If `HEAD` is `main`, create and switch to a feature branch
@@ -34,7 +37,8 @@ git status --short
 ```
 
 2. If on `main` (or detached / dirty on `main`), create a feature branch from up-to-date
-   `main` before editing further:
+   `main` before editing further. `git fetch` / `pull` — сразу с
+   `required_permissions: ["all"]` (skill `github-remote`):
 
 ```bash
 git fetch origin
@@ -50,27 +54,28 @@ Branch name: lowercase, hyphens, prefix `feat/`, `fix/`, `docs/`, `chore/`, or `
 
 ## After the change
 
-Commit only when the user asked. Then push the **feature branch**, not `main`:
+Commit only when the user asked. Then push the **feature branch**, not `main`.
+Первый `git push` — с `required_permissions: ["all"]`:
 
 ```bash
 git push -u origin HEAD
 ```
 
-Open or update a PR into `main` with `gh`. Do not use the GitHub MCP as the primary path when
-`gh` works.
+Open or update a PR into `main` through skill `github-remote` (`base=main`):
+есть ли PR — **read** `list_pull_requests` с `head={owner}:{branch}` (не голое
+имя ветки); создать/обновить — **write** (отдельный канал, 403 не убивает MCP
+reads). If a PR for this branch already exists, push commits to that branch.
+Do not open a second PR.
 
-```bash
-gh pr create --base main --title "…" --body "$(cat <<'EOF'
+PR body:
+
+```markdown
 ## Summary
 - …
 
 ## Test plan
 - …
-EOF
-)"
 ```
-
-If a PR for this branch already exists, push commits to that branch. Do not open a second PR.
 
 ## After push
 
@@ -83,3 +88,4 @@ inspected the run for this SHA (`pr-review`).
 - Use `main` as a working branch.
 - Fast-forward `main` locally and push.
 - Bypass CI by merging from the local checkout.
+- Probe `gh` in the sandbox to open or update a PR.
