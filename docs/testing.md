@@ -41,7 +41,7 @@ LLM часто пишет код, затем тесты «под него». Т�
   SQL/stack и без секрета; `instance`/path могут содержать секрет (D-014). HTTP-тесты
   фиксируют UTC ISO при `TZ=Europe/Moscow`; колонки дат — `timestamptz`.
 
-**E2E (Playwright, скрипт `test:e2e` заводит F5):**
+**E2E (Playwright, скрипт `pnpm test:e2e` / `make e2e`, D-024):**
 
 - `baseURL` `http://localhost:3000`. Сценарии индекса и кабинета гоняют против `make dev`
   (db+api+web) + seed, не против mock-api и не против фиктивного server (D-021).
@@ -60,10 +60,9 @@ LLM часто пишет код, затем тесты «под него». Т�
 ## Корневые команды
 
 Сверяй имена с `package.json`. Сейчас есть: `pnpm check:boundaries`, `lint`, `typecheck`,
-`test`, `test:packages`, `build`, `db:generate`, `db:migrate`, `db:seed`, `generate:api`.
-
-Ещё нет (заводит фича 5, AC это проверяет): `pnpm test:e2e`. `apps/web` в `typecheck`/`build`
-и `make dev` — фича 3; HTML на `:3000` — smoke фичи 5.
+`test`, `test:e2e`, `test:packages`, `build`, `db:generate`, `db:migrate`, `db:seed`,
+`generate:api`. `apps/web` в `typecheck`/`build` и `make dev` — фича 3; HTML на `:3000` —
+smoke фичи 5 (`make e2e`).
 
 Для docs-only поставки: Prettier / `git diff --check`. Не утверждать, что lint/test
 продукта прошли, если не запускались.

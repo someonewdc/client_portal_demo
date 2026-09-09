@@ -12,12 +12,13 @@
   Postgres), `GET /api/v1/demo/links`, `GET /api/v1/requests/{accessSecret}`
 - `apps/web`: Nuxt 4.5.2 на `:3000`, Tailwind v4 `@theme`, IBM Plex, документный layout;
   заглушка `/` без данных заявок
+- Playwright harness: `pnpm test:e2e` / `make e2e` (smoke шапки на `:3000`)
 - PostgreSQL в Docker на хосте `5433`, Prisma 7 в `apps/api`
 - план и промпты: `docs/README.md`, `docs/implementation-plan.md`
 
-## Ещё нет (заводят фичи 5–8)
+## Ещё нет (заводят фичи 6–8)
 
-Playwright, экраны заявок, compose-smoke. mock-api нет и не появится.
+Экраны заявок, compose-smoke, CI e2e. mock-api нет и не появится.
 
 ## Запуск
 
@@ -36,5 +37,10 @@ make dev
 Проверки: `make verify` (D-018: Postgres + migrate + `generate:api` + diff generated
 client, затем корневые gates). Сырой `pnpm test` без живой БД падает на HTTP ready=200 —
 это не полный аналог CI.
+
+E2E layout smoke: один раз `pnpm exec playwright install chromium`, затем `make e2e`
+(обёртка над `pnpm test:e2e`). `baseURL` — `http://localhost:3000`. Если `make dev` уже
+держит порт, Playwright его переиспользует (`reuseExistingServer: true`, D-021); иначе
+поднимает только Nuxt, без API. Сценарии индекса и кабинета — фичи 6–7; CI e2e — фича 8.
 
 Пакеты private, `0.0.0`. Публикация в registry не входит.
