@@ -24,4 +24,6 @@
 | Копируемый промпт фичи N      | [`llm/feature-01.md`](llm/feature-01.md) … [`feature-06.md`](llm/feature-06.md) |
 
 Предметный код пишут отдельные чаты по `docs/llm/feature-NN.md`. В этом наборе документов
-кода продукта нет.
+кода продукта нет. Стенд — цели корневого Makefile (`bootstrap`, `up`, `down`, `dev`,
+`verify`), не сырой `docker compose` (D-013). `verify` поднимает Postgres и мигрирует
+до gates (D-018).

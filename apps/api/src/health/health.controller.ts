@@ -33,7 +33,9 @@ export class HealthController {
   @Get('ready')
   @ApiOperation({ summary: 'Проверить готовность API принимать трафик' })
   @ApiOkResponse({ description: 'API принимает трафик' })
-  @ApiServiceUnavailableResponse({ description: 'API ещё не слушает или уже останавливается' })
+  @ApiServiceUnavailableResponse({
+    description: 'API ещё не слушает, уже останавливается или база данных недоступна',
+  })
   async ready(@Req() request: FastifyRequest): Promise<HealthResponse> {
     if (!(await this.readiness.isReady())) {
       throw new ServiceUnavailableException('API is not ready');

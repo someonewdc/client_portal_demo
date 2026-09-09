@@ -12,6 +12,9 @@
     "build:core": "pnpm --filter @client-portal/platform-core build && pnpm --filter @client-portal/nestjs-core build && pnpm --filter @client-portal/openapi-client-core build",
     "predev": "pnpm build:core",
     "dev": "dotenv -e .env -- pnpm --filter @client-portal/api dev",
+    "db:generate": "dotenv -e .env -- pnpm --filter @client-portal/api db:generate",
+    "db:migrate": "dotenv -e .env -- pnpm --filter @client-portal/api db:migrate",
+    "db:seed": "dotenv -e .env -- pnpm --filter @client-portal/api db:seed",
     "build": "pnpm -r --workspace-concurrency=1 --if-present build",
     "lint": "eslint . --max-warnings=0",
     "check:boundaries": "node scripts/check-boundaries.mjs",
@@ -19,7 +22,7 @@
     "pretypecheck": "pnpm build:core",
     "typecheck": "pnpm -r --workspace-concurrency=1 --if-present typecheck",
     "pretest": "pnpm build:core",
-    "test": "pnpm -r --workspace-concurrency=1 --if-present test && node --test scripts/check-boundaries.spec.mjs scripts/test-packages.spec.mjs",
+    "test": "pnpm -r --workspace-concurrency=1 --if-present test && node --test scripts/check-boundaries.spec.mjs scripts/test-packages.spec.mjs scripts/lifecycle-targets.spec.mjs",
     "test:packages": "node --test scripts/test-packages.spec.mjs && node scripts/test-packages.mjs",
     "format": "prettier . --write",
     "format:check": "prettier . --check"

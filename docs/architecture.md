@@ -40,7 +40,7 @@ Skill `nestjs-hexagonal-boundaries`:
 - Application кидает typed errors без `HttpException`.
 - HTTP map на границе → Nest exception → Problem Details.
 - Prisma только в infrastructure repository + mapper. Generated client:
-  `apps/api/src/generated/prisma`.
+  `apps/api/src/generated/prisma`. Ready проверяет БД через Prisma `$queryRaw` `SELECT 1`.
 
 ## OpenAPI и клиент
 
@@ -51,6 +51,7 @@ Skill `nestjs-hexagonal-boundaries`:
 
 Lifecycle — корневой Makefile (цели заводит фича 1 и расширяют 3/6): `bootstrap`, `dev`,
 `up`, `down`, `verify` по факту файла. Смысл `up`/`dev` — D-016: сначала только Postgres,
-потом `dev`+web, потом тот же `up` = полный стенд.
+потом `dev`+web, потом тот же `up` = полный стенд. `verify` — D-018: `up` + migrate +
+gates.
 
 Порты — `docs/decisions.md`. Один стенд на машине для `:3000`/`:3001`.

@@ -1,4 +1,10 @@
-.PHONY: bootstrap doctor
+.PHONY: bootstrap doctor up down dev verify
+
+COMPOSE ?= docker compose
+COMPOSE_FILE ?= compose.yaml
+COMPOSE_PROJECT ?= client-portal-demo
+
+compose = $(COMPOSE) -p $(COMPOSE_PROJECT) -f $(COMPOSE_FILE)
 
 bootstrap:
 	corepack enable
@@ -10,3 +16,25 @@ doctor:
 	@node --version
 	@pnpm --version
 	@test -f pnpm-lock.yaml
+
+up:
+	$(compose) up -d --wait
+
+down:
+	$(compose) down
+
+dev: up
+	pnpm db:generate
+	pnpm db:migrate
+	pnpm db:seed
+	pnpm dev
+
+verify: up
+	pnpm db:generate
+	pnpm db:migrate
+	pnpm check:boundaries
+	pnpm lint
+	pnpm typecheck
+	pnpm test
+	pnpm test:packages
+	pnpm build
