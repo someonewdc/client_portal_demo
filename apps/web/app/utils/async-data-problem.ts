@@ -54,3 +54,11 @@ export function statusCodeFromThrown(error: unknown, fallback = 502): number {
 
   return fallback;
 }
+
+export function statusCodeFromAsyncDataError(error: unknown, fallback = 502): number {
+  if (isRecord(error) && typeof error.statusCode === 'number') {
+    return error.statusCode;
+  }
+
+  return statusCodeFromThrown(error, fallback);
+}

@@ -260,7 +260,7 @@ describe('feature 3 nuxt workspace', () => {
     assert.match(webPackage.scripts.dev, /--port[ =]3000/);
   });
 
-  it('keeps web free of backend source and of the cabinet route', () => {
+  it('keeps web free of backend source', () => {
     assert.equal(existsSync(webRoot), true, 'apps/web must exist');
 
     const sourceFiles = listWebSourceFiles(webRoot);
@@ -273,11 +273,6 @@ describe('feature 3 nuxt workspace', () => {
     const combined = sources.map(({ source }) => source).join('\n');
 
     assert.doesNotMatch(combined, /@prisma\/client|@nestjs\/|apps\/api/);
-    assert.equal(
-      sources.some((file) => /\/pages\/r\//.test(file.path)),
-      false,
-      'cabinet route /r/{secret} belongs to a later feature',
-    );
   });
 });
 
@@ -571,7 +566,7 @@ describe('feature 6 demo links index', () => {
     assert.doesNotMatch(indexPage, /Принят|В расчёте|КП готово|Счёт выставлен/);
   });
 
-  it('covers the index e2e against seed URLs without a cabinet page', () => {
+  it('covers the index e2e against seed URLs without asserting cabinet payload', () => {
     const spec = readFileSync(resolve(rootDirectory, 'e2e/demo-links.spec.ts'), 'utf8');
     const readme = readFileSync(resolve(rootDirectory, 'README.md'), 'utf8');
 
@@ -584,10 +579,58 @@ describe('feature 6 demo links index', () => {
     assert.match(spec, /datetime/);
     assert.doesNotMatch(spec, /waitForTimeout/);
     assert.doesNotMatch(spec, /mock-api|mock-core/);
+    assert.doesNotMatch(spec, /Вводно-распределительное|Ссылка недействительна|КП-З-10043\.pdf/);
     assert.match(readme, /make dev/);
     assert.match(readme, /seed/);
     assert.doesNotMatch(readme, /поднимает только Nuxt, без API/);
     assert.match(makefile, /make dev \+ seed/);
-    assert.equal(existsSync(resolve(webRoot, 'app/pages/r')), false);
+  });
+});
+
+describe('feature 7 request cabinet', () => {
+  it('loads GET /requests/{accessSecret} through useAsyncData without session cookies', () => {
+    const cabinetPage = readFileSync(resolve(webRoot, 'app/pages/r/[accessSecret].vue'), 'utf8');
+    const sources = listWebSourceFiles(webRoot).map((absolutePath) =>
+      readFileSync(absolutePath, 'utf8'),
+    );
+    const combined = sources.join('\n');
+
+    assert.match(cabinetPage, /useAsyncData/);
+    assert.match(cabinetPage, /\/requests\/\{accessSecret\}/);
+    assert.match(cabinetPage, /createError/);
+    assert.match(cabinetPage, /data:\s*payload/);
+    assert.match(cabinetPage, /Ссылка недействительна/);
+    assert.match(cabinetPage, /заявки по этой ссылке нет/i);
+    assert.match(cabinetPage, /Код ошибки:/);
+    assert.match(cabinetPage, /setResponseStatus/);
+    assert.match(cabinetPage, /tabular-nums/);
+    assert.match(cabinetPage, /specLines/);
+    assert.match(cabinetPage, /fileName/);
+    assert.doesNotMatch(combined, /credentials:\s*['"]include['"]/);
+    assert.doesNotMatch(combined, /useRequestHeaders\s*\(|getRequestHeader\s*\(/);
+    assert.doesNotMatch(combined, /defineStore|from ['"]pinia['"]/);
+    assert.doesNotMatch(cabinetPage, /скачать/);
+    assert.doesNotMatch(cabinetPage, /href=["']#["']/);
+    assert.doesNotMatch(cabinetPage, /Принят|В расчёте|КП готово|Счёт выставлен/);
+    assert.doesNotMatch(cabinetPage, /OTP|логин|телефон|парол/);
+  });
+
+  it('covers cabinet and unknown-secret e2e against seed without mock-api', () => {
+    const spec = readFileSync(resolve(rootDirectory, 'e2e/request-cabinet.spec.ts'), 'utf8');
+
+    assert.match(spec, /З-10043/);
+    assert.match(spec, /seed-z10043-quote-kuznetsov/);
+    assert.match(spec, /КП готово/);
+    assert.match(spec, /Принят/);
+    assert.match(spec, /Счёт выставлен/);
+    assert.match(spec, /Вводно-распределительное устройство 400 А/);
+    assert.match(spec, /КП-З-10043\.pdf/);
+    assert.match(spec, /this-secret-does-not-exist/);
+    assert.match(spec, /Ссылка недействительна/);
+    assert.match(spec, /application\/problem\+json/);
+    assert.match(spec, /localhost:3001\/api\/v1\/requests/);
+    assert.doesNotMatch(spec, /waitForTimeout/);
+    assert.doesNotMatch(spec, /mock-api|mock-core/);
+    assert.match(makefile, /make dev \+ seed/);
   });
 });

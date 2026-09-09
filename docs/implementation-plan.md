@@ -11,7 +11,7 @@
 - `apps/api`: health live/ready; `GET /demo/links`; `GET /requests/{accessSecret}`;
   `API_PORT=3001`, `WEB_ORIGIN=http://localhost:3000`, `DATABASE_URL`
 - `apps/web`: Nuxt 4.5.2, Tailwind v4 `@theme`, IBM Plex, layout; индекс `/` из
-  `GET /demo/links` (`createApiClient`, `useAsyncData`);
+  `GET /demo/links` (`createApiClient`, `useAsyncData`); кабинет `/r/{secret}` и тупик 404;
   `NUXT_PUBLIC_API_BASE_URL` с `/api/v1`
 - Root scripts (копировать буквально): `build:core`, `dev` (api+web), `db:generate`,
   `db:migrate`, `db:seed`, `generate:api`, `build`, `lint`, `check:boundaries`, `typecheck`,
@@ -30,7 +30,6 @@
 
 | Имя                              | Где появится |
 | -------------------------------- | ------------ |
-| экран `/r/{secret}` + 404        | фича 7       |
 | compose-smoke приложений, CI e2e | фича 8       |
 
 Не выдумывай другие имена. Если нужен новый script — заведи его в той фиче, чей AC это
@@ -49,8 +48,7 @@ docs → 1 Postgres/Prisma/ready
      → 8 compose-smoke + CI e2e
 ```
 
-Фичи 1–6 уже в поставке. Нарезка 7–8 — D-020: не возвращаться к старому комку
-«Nuxt+токены+Playwright» в одном PR.
+Фичи 1–7 уже в поставке. Нарезка 8 — D-020: не смешивать кабинет с compose-smoke/CI e2e.
 
 Зависимость: фича N в `main` до старта N+1.
 

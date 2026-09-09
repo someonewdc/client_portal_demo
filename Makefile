@@ -42,8 +42,8 @@ verify: up
 	pnpm test:packages
 	pnpm build
 
-# Index + layout e2e on :3000 against make dev + seed (D-021).
+# Index + cabinet e2e on :3000 against make dev + seed (D-021).
 # Playwright reuses Nuxt when that stand already holds the port; a Nuxt-only
-# webServer is not enough for the demo-links spec.
+# webServer is not enough for the demo-links and request-cabinet specs.
 e2e:
 	pnpm test:e2e
