@@ -1,9 +1,7 @@
 # Правила apps/api
 
 Сначала корневой `AGENTS.md`, `docs/implementation-status.md` и `docs/product-scope.md`.
-
-Сейчас в приложении только health. Не добавляй каталог, кабинет, Prisma или внешние adapters
-без явного prompt.
+Предметные поставки — только `docs/llm/feature-NN.md` (Prisma — фича 1–2, не каталог).
 
 - Controller — тонкий HTTP adapter.
 - Prisma (когда появится) только через repository.

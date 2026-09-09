@@ -22,8 +22,14 @@ description: >-
 Пиши команду целиком, не «прогнал тесты». Targeted test изменённого поведения обязателен.
 Root gates — по `change-impact-gates`, не по памяти.
 
+TDD этого репозитория (`AGENTS.md`, `docs/testing.md`): targeted-тесты по AC пишут **до**
+кода. В status обязателен red-прогон (команда, exit ≠ 0, причина). Тест, который был
+зелёным до реализации поведения, — false positive: перепиши, не подгоняй код под слабый
+assert. Не `skip`/`xit` и не меняй ожидаемые значения «чтобы прошло».
+
 Playwright: без `waitForTimeout` как синхронизации; role / label / test-id. Scenario-mutating
-E2E — serial. Skip, `xit`, flake-retry без фикса ≠ покрытие.
+E2E — serial. Skip, `xit`, flake-retry без фикса ≠ покрытие. E2E экранов пишут в фичах 4–5
+до страниц, не после вёрстки.
 
 CI зелёный — skill `pr-review`: jobs реально бежали на **этом** head SHA.
 

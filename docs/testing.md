@@ -1,0 +1,56 @@
+# Тестирование и TDD
+
+## Зачем TDD здесь
+
+LLM часто пишет код, затем тесты «под него». Такие тесты зелёные всегда и не ловят регресс.
+Поэтому тесты по приёмке пишут **до** кода. Протокол обязателен в `AGENTS.md`.
+
+## Протокол (каждая предметная фича)
+
+1. Сформулировать AC (Given/When/Then) из `docs/llm/feature-NN.md`.
+2. Написать targeted-тесты по AC, не по будущим именам классов.
+3. Запустить. Зафиксировать **red**: полная команда, exit ≠ 0, причина (нет маршрута, 503,
+   нет текста на странице).
+4. Если прогон уже green — это провал TDD. Переписать assert так, чтобы отсутствие поведения
+   валило тест.
+5. Минимальный код до green. Запрещено: ослабить assert, `skip`/`xit`, поменять ожидаемое
+   значение «чтобы прошло», snapshot без смысловой проверки, e2e который зелёный на пустой
+   странице.
+6. В `docs/implementation-status.md` — строка red и строка green.
+
+Не требовать отдельный red: чисто docs/Prettier; generate-only файлы после того, как
+контрактный тест уже red.
+
+## Минимум по слоям
+
+**Unit / application (Vitest в `apps/api`, packages как сейчас):**
+
+- F1: ready 503 без БД, 200 когда `SELECT 1` проходит; live не зависит от БД.
+- F2: lookup по хешу секрета; неизвестный секрет → typed not-found; маппинг статусов и
+  `stages` из четырёх шагов; seed fixture-секреты стабильны.
+
+**HTTP integration (`apps/api`):**
+
+- F2: `GET /demo/links` — 5 items, есть `portalPath`; `GET /requests/{secret}` 200 для
+  fixture; 404 Problem Details без утечки SQL/секрета.
+
+**E2E (Playwright, скрипт `test:e2e` заводит F3):**
+
+- F4 пишет сценарий индекса **до** страницы: дисклеймер, список из API, клик → `/r/…`.
+- F5 пишет сценарий кабинета и тупика **до** страницы.
+- Селекторы: role / label / осмысленный `data-testid`, не CSS-хрупкость. Без
+  `waitForTimeout` как синхронизации (`verification-honesty`).
+- Scenario-mutating e2e — serial. Этот демо read-only, мутаций нет.
+
+**Compose-smoke (F6):** полный стенд через Makefile/`up` отвечает health и отдаёт индекс.
+
+## Корневые команды
+
+Сверяй имена с `package.json`. Сейчас есть: `pnpm check:boundaries`, `lint`, `typecheck`,
+`test`, `test:packages`, `build`.
+
+Ещё нет (заводят фичи, AC это проверяет): `pnpm generate:api`, `pnpm db:generate`,
+`pnpm db:migrate`, `pnpm db:seed`, `pnpm test:e2e`.
+
+Для docs-only поставки: Prettier / `git diff --check`. Не утверждать, что lint/test
+продукта прошли, если не запускались.

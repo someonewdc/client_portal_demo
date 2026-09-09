@@ -1,4 +1,4 @@
-# Toolchain заготовки
+# Toolchain
 
 Версии совпадают с исходным ядром `demo_b2b` и фиксируются `package.json`, `.nvmrc` и
 `pnpm-lock.yaml`. Перед установкой: `nvm use`, затем `node --version` = `v24.18.0` и
@@ -15,7 +15,10 @@
 | Vitest     |  4.1.10 | compiled packages и `apps/api`             |
 | ESLint     |  9.39.5 | `packages/eslint-config` peers             |
 
-Nuxt, Prisma, Playwright и PostgreSQL в эту заготовку не входят.
+Nuxt 4, Prisma 7, Playwright и PostgreSQL **в заготовке ещё нет**. Их заводят фичи 1 и 3;
+патч-версии сверяют с официальными docs и lockfile в том чате. Не угадывать версии в
+документах заранее. Порты стенда — `docs/decisions.md` (D-006).
 
 CI (`.github/workflows/ci.yml`) пинит third-party actions на commit SHA. `pnpm/action-setup`
-идёт до `actions/setup-node` с `cache: pnpm`.
+идёт до `actions/setup-node` с `cache: pnpm`. Фича 1 добавит Postgres в CI; фича 6 — e2e,
+если harness уже есть.
