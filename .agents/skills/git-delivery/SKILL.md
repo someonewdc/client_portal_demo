@@ -61,10 +61,10 @@ Commit only when the user asked. Then push the **feature branch**, not `main`.
 git push -u origin HEAD
 ```
 
-Open or update a PR into `main` through GitHub MCP (`create_pull_request` /
-`update_pull_request`, `base=main`). Do not open a PR with `gh` while MCP is
-available. If a PR for this branch already exists (`list_pull_requests`), push
-commits to that branch. Do not open a second PR.
+Open or update a PR into `main` through skill `github-remote` (`base=main`):
+есть ли PR — **read**; создать/обновить — **write** (отдельный канал, 403 не
+убивает MCP reads). If a PR for this branch already exists, push commits to
+that branch. Do not open a second PR.
 
 PR body:
 

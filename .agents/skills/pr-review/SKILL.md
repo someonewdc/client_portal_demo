@@ -18,7 +18,9 @@ another SHA as success.
 This skill is the project review path. Do not launch Bugbot unless the user asked for
 `/review-bugbot`.
 
-Данные PR и checks — skill `github-remote` (MCP). Не начинай с `gh pr view` / `gh pr checks`.
+Сбор данных PR и checks — **read** skill `github-remote` (MCP). Публикация
+ревью — **write** (отдельный канал). Не начинай с `gh pr view`. Не переключай
+reads на `gh` из-за 403 на write.
 
 ## Scope
 
@@ -56,8 +58,8 @@ event. Сверь список workflow с тем, что реально ran. Н
 Head SHA and checks: `pull_request_read` `get`, `get_status`, `get_check_runs`.
 
 If the review needs job **log text** (MCP его не отдаёт): one `gh run view <id> --log`
-with `required_permissions: ["full_network"]` **after** MCP already returned the
-head SHA and check runs. Do not start with `gh pr view`.
+with `required_permissions: ["all"]` **after** check runs already returned the
+head SHA. Do not start with `gh pr view`.
 
 A check is a **real pass** only if all of the following hold:
 
@@ -80,9 +82,10 @@ A check is a **false positive** (report as a blocker) if any of:
 If checks are still running, say so. Do not approve on a pending run. If logs are
 inaccessible, record that CI evidence is **не проверено** and do not invent a pass.
 
-Publish the review through MCP `pull_request_review_write`, not `gh pr review`.
+Publish the review through `github-remote` **write** (`pull_request_review_write`,
+или `gh pr review` если `mcp_writes=dead`). Reads (diff, checks) оставь на MCP.
 If GitHub rejects `APPROVE` / `REQUEST_CHANGES` on your own PR, submit `COMMENT`
-with the same verdict via MCP. Do not retry through `gh`.
+**тем же write-каналом** — это business rule, не смена транспорта.
 
 ## Output
 

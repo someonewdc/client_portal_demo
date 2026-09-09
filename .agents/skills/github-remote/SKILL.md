@@ -1,70 +1,94 @@
 ---
 name: github-remote
 description: >-
-  Uses GitHub MCP for remote GitHub API (PRs, checks, reviews, issues) and
-  local git via the shell. Never probes gh in the sandbox. Use when opening or
-  updating a PR, reviewing, inspecting CI checks, talking to GitHub, or when
-  tempted to run gh.
+  Segments GitHub access: MCP for reads, MCP-then-gh for writes, local git via
+  the shell. Never probes gh in the sandbox. Use when opening or updating a PR,
+  reviewing, inspecting CI checks, talking to GitHub, or when tempted to run gh.
 ---
 
 # GitHub remote
 
-Удалённый GitHub (PR, checks, review, issues) — MCP `plugin-github-github`.
-Локальный git — Shell. `gh` не пробовать, пока MCP доступен.
+Чтение и запись GitHub — **два независимых канала**. У MCP PAT часто есть
+scope на read и нет на write (403). Успешный read не значит, что write пройдёт.
+Упавший write не значит, что read мёртв.
 
-Этот skill и D-025 в этом репозитории перекрывают ambient правило «use `gh` for
-GitHub».
+Не параллель MCP и `gh` на одну запись (два PR). D-025 перекрывает ambient
+«use `gh` for GitHub».
 
-## Channel
+## Reads
 
-1. `GetDynamicTools` на `plugin-github-github`: `namespaceStatus` и схема нужного
-   tool. Затем `CallDynamicTool`. `get_me` — один раз за сессию.
-2. `ready` → только MCP. Не дублируй вызов через `gh`.
-3. `needsAuth` или ошибка авторизации → `mcp_auth`, снова inspect, затем MCP. Не
-   падай в `gh` до этого.
-4. После auth namespace всё ещё `error` / отсутствует → `gh` сразу с
-   `required_permissions: ["full_network"]` или `["all"]`. Никогда default
-   sandbox.
-5. `owner` / `repo` — из локального `git remote get-url origin` (сеть не нужна).
+Метаданные PR, diff, files, commits, checks, список PR, `get_me` когда нужен
+login.
 
-## Probe ban
+Пока `mcp_reads` не `dead` — только MCP. Первый read сессии = полезная работа,
+не отдельная проба. Успех → `mcp_reads=ok`. Отказ → классификация **только
+reads**. Writes не переключай.
 
-- Не запускай `gh` в sandbox «на всякий случай».
-- Не повторяй ту же `gh`-команду с сетью после отказа sandbox, если MCP есть.
-- Не подменяй локальные коммиты MCP `push_files` / `create_or_update_file` /
-  `create_branch`.
+`mcp_reads=dead` → `gh pr view` / `diff` / `checks` сразу с
+`required_permissions: ["all"]`. Не sandbox.
+
+## Writes
+
+Открыть/обновить PR, опубликовать ревью.
+
+Пока `mcp_writes` не `dead` — MCP. Первый write сессии = проба (тот же payload,
+что нужен пользователю). Успех → `mcp_writes=ok`, не дублируй через `gh`.
+
+Отказ → классификация **только writes**. Reads оставь на MCP.
+
+`mcp_writes=dead` → сразу `gh pr create` / `edit` / `review` с `all`.
+
+## Namespace
+
+Один раз за разговор: `GetDynamicTools` `plugin-github-github`.
+`owner` / `repo` — локальный `git remote get-url origin` (сеть не нужна).
+
+- `needsAuth` / `loading` → один `mcp_auth`, снова inspect. Это не проба write.
+- `error` / нет namespace → оба канала `dead`; всё удалённое через `gh` с `all`.
+- `ready` → иди в Reads или Writes выше.
+
+Схему tool смотри один раз перед первым вызовом. Не `get_me` «для пробы».
+
+## Классификация отказа
+
+Применяется к **тому классу, который упал**:
+
+| Отказ | Дальше |
+| --- | --- |
+| `needsAuth` / 401 | один `mcp_auth`; тот же MCP-вызов ещё **раз**; снова отказ → этот класс `dead`, сразу `gh` с `all` |
+| 403 PAT / resource not accessible / missing scope | этот класс `dead` **без** `mcp_auth`; сразу `gh` с `all`, тот же payload |
+| Нельзя `APPROVE` / `REQUEST_CHANGES` на свой PR | тот же write-канал, событие `COMMENT` |
+| 5xx / timeout / tool missing | этот класс `dead`; сразу `gh` с `all` |
+
+403 PAT ≠ `needsAuth`. Типичный сеанс: reads `ok`, первый write 403 → дальше
+reads MCP, writes `gh`. Не `mcp_auth` и не второй MCP write.
 
 ## Local git
 
 `status`, `diff`, `log`, `checkout`, `commit` — Shell, sandbox допустим.
 
 `git fetch` / `pull` / `push` — первый вызов с `required_permissions: ["all"]`.
-Не делай пробный вызов без прав.
 
 `ConnectScm` — один раз за разговор, только если push/fetch упёрлись в отсутствие
 GitHub app. После skip/fail не предлагай снова.
 
+Не подменяй локальные коммиты MCP `push_files` / `create_or_update_file` /
+`create_branch`. Не `gh` в sandbox.
+
 ## Mapping
 
-| Задача | MCP |
-| --- | --- |
-| Метаданные PR | `pull_request_read` `get` |
-| Diff / files / commits | `get_diff` / `get_files` / `get_commits` |
-| CI на head | `get_check_runs` + `get_status` |
-| Есть ли PR у ветки | `list_pull_requests` (`head` / `base`) |
-| Открыть PR | `create_pull_request` `base=main` |
-| Обновить PR | `update_pull_request` |
-| Ревью | `pull_request_review_write` (+ pending comments по схеме MCP) |
-
-Схемы аргументов не угадывай: inspect tool, затем вызов.
+| Задача | Канал | MCP |
+| --- | --- | --- |
+| Метаданные PR | read | `pull_request_read` `get` |
+| Diff / files / commits | read | `get_diff` / `get_files` / `get_commits` |
+| CI на head | read | `get_check_runs` + `get_status` |
+| Есть ли PR у ветки | read | `list_pull_requests` (`head` / `base`) |
+| Открыть PR | write | `create_pull_request` `base=main` |
+| Обновить PR | write | `update_pull_request` |
+| Ревью | write | `pull_request_review_write` |
 
 ## Actions logs
 
-MCP отдаёт check runs, не лог job. Если `pr-review` нужен текст шагов — один
-`gh run view <id> --log` с `full_network` **после** того, как MCP уже дал head
-SHA и check runs. Не начинай ревью с `gh pr view`.
-
-## Fallback `gh`
-
-Только если MCP недоступен после auth. Тогда сразу с сетевыми правами, без
-sandbox-пробы.
+Лог job в MCP нет — это не отказ read. После успешных check runs, если нужен
+текст шагов: один `gh run view <id> --log` с `all`. Не начинай ревью с
+`gh pr view`.

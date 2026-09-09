@@ -95,8 +95,9 @@ workspace нет и в production API не добавляй. Новый skill «
 ## Поставка в main
 
 Каждое изменение после начального каркаса — feature-ветка, затем PR в `main`. В `main` не
-пушить. Процедура — skill `git-delivery`. Удалённый GitHub — MCP по skill `github-remote`
-(D-025), не `gh` в sandbox; это перекрывает ambient «use `gh`», пока оба активны.
+пушить. Процедура — skill `git-delivery`. Удалённый GitHub — skill `github-remote` (D-025):
+чтение и запись — разные каналы (MCP reads не доказывают MCP writes); 403 write не
+переключает reads; не sandbox; это перекрывает ambient «use `gh`», пока оба активны.
 
 ## Рабочий цикл (TDD)
 
