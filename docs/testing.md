@@ -41,17 +41,18 @@ LLM часто пишет код, затем тесты «под него». Т�
   SQL/stack и без секрета; `instance`/path могут содержать секрет (D-014). HTTP-тесты
   фиксируют UTC ISO при `TZ=Europe/Moscow`; колонки дат — `timestamptz`.
 
-**E2E (Playwright, скрипт `test:e2e` заводит F3):**
+**E2E (Playwright, скрипт `test:e2e` заводит F5):**
 
 - `baseURL` `http://localhost:3000`. Сценарии индекса и кабинета гоняют против `make dev`
   (db+api+web) + seed, не против mock-api и не против фиктивного server.
-- F4 пишет сценарий индекса **до** страницы: дисклеймер, список из API, клик → `/r/…`.
-- F5 пишет сценарий кабинета и тупика **до** страницы.
+- F5 — только harness и smoke layout («Нордщит»).
+- F6 пишет сценарий индекса **до** страницы: дисклеймер, список из API, клик → `/r/…`.
+- F7 пишет сценарий кабинета и тупика **до** страницы.
 - Селекторы: role / label / осмысленный `data-testid`, не CSS-хрупкость. Без
   `waitForTimeout` как синхронизации (`verification-honesty`).
 - Scenario-mutating e2e — serial. Этот демо read-only, мутаций нет.
 
-**Compose-smoke (F6):** тот же `make up` после расширения (D-016) отвечает health и отдаёт
+**Compose-smoke (F8):** тот же `make up` после расширения (D-016) отвечает health и отдаёт
 индекс.
 
 ## Корневые команды
@@ -59,7 +60,7 @@ LLM часто пишет код, затем тесты «под него». Т�
 Сверяй имена с `package.json`. Сейчас есть: `pnpm check:boundaries`, `lint`, `typecheck`,
 `test`, `test:packages`, `build`, `db:generate`, `db:migrate`, `db:seed`, `generate:api`.
 
-Ещё нет (заводят фичи, AC это проверяет): `pnpm test:e2e`.
+Ещё нет (заводит фича 5, AC это проверяет): `pnpm test:e2e`.
 
 Для docs-only поставки: Prettier / `git diff --check`. Не утверждать, что lint/test
 продукта прошли, если не запускались.

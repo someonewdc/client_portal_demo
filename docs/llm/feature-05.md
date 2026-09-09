@@ -1,75 +1,64 @@
-# Реализуй фичу 5: кабинет по секрету + тупик 404
+# Реализуй фичу 5: Playwright harness (`pnpm test:e2e`)
 
 ## Цель
 
-Заказчик (и зритель) открывает ссылку и видит одну заявку: жива, какой шаг, что в
-спецификации, какие файлы. Несуществующий секрет — тупик, не логин.
+Фичи 6–7 должны писать e2e **до** страниц. Этот шаг только ставит Playwright и корневой
+script `test:e2e`. Сценариев индекса и кабинета здесь нет.
 
 ## Зависимости
 
-Фичи 1–4 в `main` (индекс уже кликает на `/r/{secret}`). Фича 6 не обязательна.
+Фичи 1–4 в `main` (web на :3000, layout с «Нордщит»). Фич 6–8 нет.
 
 ## Read set
 
 - `AGENTS.md`
-- `docs/README.md`, `docs/implementation-status.md`
-- `docs/frontend.md`, `docs/demo-scenarios.md`, `docs/api-contracts.md`
-- `docs/domain-model.md`, `docs/acceptance-checklist.md`
-- `docs/decisions.md` (D-007, D-008, D-009, D-012, D-014, D-016)
-- `docs/testing.md`
+- `docs/README.md`, `docs/implementation-status.md`, `docs/implementation-plan.md`
+- `docs/testing.md`, `docs/decisions.md` (D-006, D-012, D-016, D-020)
 - `.agents/skills/git-delivery/SKILL.md`
 - `.agents/skills/change-impact-gates/SKILL.md`
-- `.agents/skills/nuxt-ssr-data-and-ui/SKILL.md`
-- `.agents/skills/nestjs-hexagonal-boundaries/SKILL.md` (если трогаешь API)
 - `.agents/skills/verification-honesty/SKILL.md`
-- `apps/web` индекс, `packages/api-client`
+- корневой `package.json`, `Makefile`
+- `apps/web`
 
 ## Контекст продукта
 
-ПК «Нордщит». Кабинет снаружи по секрету. Этапы: принят → в расчёте → КП → счёт. Спека не
-SKU. Файлы — список имён без «скачать». Запрещено: чат, OTP, логин, телефон, каталог,
-мертвые CTA, админка статусов, mock-api.
+ПК «Нордщит». Запрещено: mock-api, фиктивный server вместо стенда, `waitForTimeout`, e2e
+списка ссылок и кабинета (это фичи 6 и 7).
 
 ## Стек и границы
 
-- Маршрут `/r/[accessSecret]`. Данные: `GET /requests/{accessSecret}` через generated
-  client + `useAsyncData`/`useFetch`.
-- 404 API → тупик UI, не форма. Problem Details: безопасное сообщение + `traceId`.
-- Web не импортирует Prisma / Nest DTO.
+- Заведи корневой script **`pnpm test:e2e`** (имени ещё нет).
+- `baseURL` = `http://localhost:3000`.
+- Минимальный smoke: document/layout содержит «Нордщит». Smoke может стартовать только
+  Nuxt (`webServer`); API не мокать. Сценарии с API (индекс/кабинет) будут против
+  `make dev` + seed в фичах 6–7.
+- Селекторы: role / label / осмысленный `data-testid`.
 
-## TDD (обязательно e2e до страницы)
+## TDD
 
-1. Playwright: З-10043 — номер, «КП готово», четыре штампа, строки спецификации из
-   каталога (в т.ч. «Вводно-распределительное устройство 400 А»), имя `КП-З-10043.pdf`,
-   дата обновления, «ПК «Нордщит»». Второй тест: `/r/this-secret-does-not-exist` —
-   тупик, нет полей входа/телефона/OTP. `baseURL` `http://localhost:3000`.
-2. `pnpm test:e2e` против `make dev` + seed — **red**. Не мокать API.
-3. Потом страница.
-4. Не помечай кабинет «готовым», если e2e написан после вёрстки под уже видимый DOM.
+1. Добавь spec «на `/` виден текст ПК «Нордщит»» и script `test:e2e`.
+2. Запусти `pnpm test:e2e` до зелёного harness: сначала **red**, если script/spec нет.
+3. Не пиши дисклеймер мессенджера, 5 номеров, клик на `/r/…`, тупик 404.
 
 ## Что сделать
 
-- Кабинет по `docs/frontend.md` и payload `docs/api-contracts.md`.
-- Лента четырёх штампов, не канбан.
-- Файлы: текст списка, без кнопки скачивания.
-- Понятный 404.
+- Playwright в workspace, `pnpm test:e2e`.
+- Один smoke по layout фичи 4.
+- Зафиксируй в README/Makefile, как гонять e2e локально (через существующие цели, не сырой
+  `npx playwright`, если можно обернуть).
 
 ## Что не делать
 
-- Upload, оплата, чат, OTP, редактирование, кнопка скачать, `#`.
+- Экраны индекса и кабинета.
+- CI e2e job полного стенда (фича 8).
 - Пушить в `main`.
 
 ## Критерии приёмки
 
-- Given fixture З-10043 и стенд `make dev` + seed, When открыть
-  `/r/seed-z10043-quote-kuznetsov`, Then видны номер, контрагент, текущий штамп «КП готово»,
-  пройденные шаги, spec lines из каталога, файл `КП-З-10043.pdf`, `updatedAt`.
-- Given неизвестный секрет, When открыть `/r/this-secret-does-not-exist`, Then тупик на
-  русском без login form.
-- Given тот же секрет, When API GET, Then 404 Problem Details (`detail` без секрета; path в
-  `instance` допустим, D-014).
-- Клик с индекса (фича 4) открывает заполненный кабинет, не пустышку.
-- Нет мёртвых кнопок.
+- `pnpm test:e2e` существует и гоняет smoke «Нордщит» на `:3000`.
+- Нет сценария `GET /demo/links` / кабинета / битой ссылки.
+- Нет `waitForTimeout` как синхронизации.
+- Нет mock-api.
 
 ## Проверки
 
@@ -83,8 +72,7 @@ pnpm build
 pnpm test:e2e
 ```
 
-Если менял контракт — `pnpm generate:api`. Обнови `docs/implementation-status.md` (red и
-green).
+Обнови `docs/implementation-status.md` (red и green).
 
 ## Git
 
@@ -100,4 +88,4 @@ Feature-ветка, PR в `main`, не пушить в `main`. Skill `git-delive
 
 ## Стоп
 
-Неоднозначность контракта → `docs/decisions.md`, не угадывать.
+Неоднозначность harness → `docs/decisions.md`, не угадывать.

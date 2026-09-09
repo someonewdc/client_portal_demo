@@ -4,10 +4,7 @@
 
 Фича 2 (домен заявки, идемпотентный seed, `GET /demo/links` и
 `GET /requests/{accessSecret}`, `pnpm generate:api`, `packages/api-client`) реализована
-на ветке `feat/request-domain-openapi`. Правки по ревью PR #3: каталог HTTP 1:1,
-`timestamptz`, явный mismatch хеша, pinned `openapi-typescript`; seed reconcile (D-019),
-envelope `/demo/links`, `stages`/`specLines` bounds, D-018 = generate+diff. Nuxt и e2e ещё
-нет.
+в `main` (PR #3). Нарезка оставшегося web — D-020 (фичи 3–8). Nuxt и e2e ещё нет.
 
 ## Правила обновления
 
@@ -18,17 +15,19 @@ envelope `/demo/links`, `stages`/`specLines` bounds, D-018 = generate+diff. Nuxt
 
 ## Этапы
 
-| Этап                             | Состояние                         |
-| -------------------------------- | --------------------------------- |
-| Boilerplate workspace            | проверен                          |
-| Документы плана и промпты фич    | выполнен (main `cad60b4`, без PR) |
-| Правки контракта по ревью        | выполнен (main `95767dc`, PR #1)  |
-| Фича 1 Postgres/Prisma/ready     | проверен                          |
-| Фича 2 заявка + OpenAPI          | проверен                          |
-| Фича 3 Nuxt + Playwright harness | не начат                          |
-| Фича 4 индекс ссылок             | не начат                          |
-| Фича 5 кабинет + 404             | не начат                          |
-| Фича 6 compose-smoke / CI e2e    | не начат                          |
+| Этап                          | Состояние                         |
+| ----------------------------- | --------------------------------- |
+| Boilerplate workspace         | проверен                          |
+| Документы плана и промпты фич | выполнен (main `cad60b4`, без PR) |
+| Правки контракта по ревью     | выполнен (main `95767dc`, PR #1)  |
+| Фича 1 Postgres/Prisma/ready  | проверен                          |
+| Фича 2 заявка + OpenAPI       | проверен                          |
+| Фича 3 Nuxt + make dev        | не начат                          |
+| Фича 4 токены + layout        | не начат                          |
+| Фича 5 Playwright harness     | не начат                          |
+| Фича 6 индекс ссылок          | не начат                          |
+| Фича 7 кабинет + 404          | не начат                          |
+| Фича 8 compose-smoke / CI e2e | не начат                          |
 
 ## Журнал проверки
 
@@ -107,3 +106,6 @@ envelope `/demo/links`, `stages`/`specLines` bounds, D-018 = generate+diff. Nuxt
 | 2026-09-09 | Ревью F2.2 gates     | `pnpm test:packages`                                                                                                                                                                                                                                                                      | exit 0: 5 tarballs, 17 ESM imports, 3 TypeScript consumers                                                                                  |
 | 2026-09-09 | Ревью F2.2 gates     | `pnpm build`                                                                                                                                                                                                                                                                              | exit 0                                                                                                                                      |
 | 2026-09-09 | Ревью F2.2 gates     | `pnpm format` затем `pnpm format:check`                                                                                                                                                                                                                                                   | exit 0                                                                                                                                      |
+| 2026-09-09 | Нарезка 3–8 (D-020)  | `pnpm format` затем `pnpm format:check`                                                                                                                                                                                                                                                   | exit 0                                                                                                                                      |
+| 2026-09-09 | Нарезка 3–8 (D-020)  | `git diff --check`                                                                                                                                                                                                                                                                        | exit 0                                                                                                                                      |
+| 2026-09-09 | Нарезка 3–8 (D-020)  | `pnpm lint` / `pnpm test`                                                                                                                                                                                                                                                                 | не запускались: docs-only (`change-impact-gates`)                                                                                           |

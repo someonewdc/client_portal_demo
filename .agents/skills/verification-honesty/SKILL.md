@@ -28,8 +28,8 @@ TDD этого репозитория (`AGENTS.md`, `docs/testing.md`): targeted
 assert. Не `skip`/`xit` и не меняй ожидаемые значения «чтобы прошло».
 
 Playwright: без `waitForTimeout` как синхронизации; role / label / test-id. Scenario-mutating
-E2E — serial. Skip, `xit`, flake-retry без фикса ≠ покрытие. E2E экранов пишут в фичах 4–5
-до страниц, не после вёрстки.
+E2E — serial. Skip, `xit`, flake-retry без фикса ≠ покрытие. E2E экранов пишут в фичах 6–7
+до страниц, не после вёрстки. Harness — фича 5.
 
 CI зелёный — skill `pr-review`: jobs реально бежали на **этом** head SHA.
 

@@ -50,7 +50,7 @@ workspace нет и в production API не добавляй. Новый skill «
   `GET /api/v1/requests/{accessSecret}` (заявки в Postgres + seed);
 - PostgreSQL в Docker (хост 5433), Prisma 7 в `apps/api`.
 
-Целевая (по `docs/implementation-plan.md`, появляется фичами 3–6):
+Целевая (по `docs/implementation-plan.md`, появляется фичами 3–8):
 
 - `apps/web` — Nuxt 4, Tailwind v4 `@theme`, SSR через `useFetch`/`useAsyncData`;
 - mock-api **нет и не появится**. «Система заявок» = Postgres + seed.
@@ -139,5 +139,5 @@ pnpm test:packages
 pnpm build
 ```
 
-`pnpm test:e2e` появится вместе с Playwright (фича 3). Не утверждай успех, если команда не
+`pnpm test:e2e` появится вместе с Playwright (фича 5). Не утверждай успех, если команда не
 запускалась. Не пиши «должно работать».

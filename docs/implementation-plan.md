@@ -24,12 +24,14 @@
 
 ## Чего ещё нет (фича должна завести; AC проверяет имя script)
 
-| Имя                                 | Где появится                    |
-| ----------------------------------- | ------------------------------- |
-| `apps/web`, Nuxt, Tailwind `@theme` | фича 3                          |
-| `pnpm test:e2e`, Playwright harness | фича 3                          |
-| экраны `/` и `/r/{secret}`          | фичи 4 и 5                      |
-| compose-smoke приложений, CI e2e    | фича 6 (если не закрыто раньше) |
+| Имя                                 | Где появится |
+| ----------------------------------- | ------------ |
+| `apps/web`, Nuxt, `make dev` + web  | фича 3       |
+| Tailwind `@theme`, IBM Plex, layout | фича 4       |
+| `pnpm test:e2e`, Playwright harness | фича 5       |
+| экран `/` (индекс ссылок)           | фича 6       |
+| экран `/r/{secret}` + 404           | фича 7       |
+| compose-smoke приложений, CI e2e    | фича 8       |
 
 Не выдумывай другие имена. Если нужен новый script — заведи его в той фиче, чей AC это
 требует, и запиши в `package.json`.
@@ -37,13 +39,18 @@
 ## Порядок
 
 ```text
-docs (этот набор) → 1 Postgres/Prisma/ready
-                  → 2 заявка + OpenAPI + api-client
-                  → 3 Nuxt + токены + Playwright harness
-                  → 4 индекс (e2e red, затем страница)
-                  → 5 кабинет + 404 (e2e red, затем страница)
-                  → 6 compose-smoke + CI e2e
+docs → 1 Postgres/Prisma/ready
+     → 2 заявка + OpenAPI + api-client
+     → 3 Nuxt + make dev (web)
+     → 4 токены + layout
+     → 5 Playwright harness
+     → 6 индекс (e2e red, затем страница)
+     → 7 кабинет + 404 (e2e red, затем страница)
+     → 8 compose-smoke + CI e2e
 ```
+
+Фичи 1–2 уже в `main`. Нарезка 3–8 — D-020: не возвращаться к старому комку
+«Nuxt+токены+Playwright» в одном PR.
 
 Зависимость: фича N в `main` до старта N+1.
 
