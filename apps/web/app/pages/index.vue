@@ -1,8 +1,91 @@
+<script setup lang="ts">
+import { ApiProblemError } from '@client-portal/api-client';
+import { useAsyncData, useNuxtApp } from 'nuxt/app';
+import { computed } from 'vue';
+
+const { $api } = useNuxtApp();
+
+const { data, error, status } = await useAsyncData('demo-links', async () => {
+  const response = await $api.GET('/demo/links');
+  const items = response.data?.data.items;
+  if (!items) {
+    throw new Error('Demo links response is missing data.items');
+  }
+  return items;
+});
+
+const items = computed(() => data.value ?? []);
+const errorTraceId = computed(() => traceIdFromUnknown(error.value));
+
+function traceIdFromUnknown(value: unknown): string | undefined {
+  if (value instanceof ApiProblemError) {
+    return value.problem.traceId;
+  }
+  if (typeof value !== 'object' || value === null) {
+    return undefined;
+  }
+  if ('problem' in value) {
+    const problem = value.problem;
+    if (
+      typeof problem === 'object' &&
+      problem !== null &&
+      'traceId' in problem &&
+      typeof problem.traceId === 'string'
+    ) {
+      return problem.traceId;
+    }
+  }
+  if ('cause' in value) {
+    return traceIdFromUnknown(value.cause);
+  }
+  return undefined;
+}
+
+function formatUpdatedAt(iso: string): string {
+  return new Intl.DateTimeFormat('ru-RU', {
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    month: 'long',
+    timeZone: 'UTC',
+    year: 'numeric',
+  }).format(new Date(iso));
+}
+</script>
+
 <template>
   <main>
-    <p class="text-ink-muted">
-      Каркас клиентского канала статуса. Список заявок и кабинет заказчика появятся следующими
-      шагами.
+    <p class="text-ink">Этот список не показывается заказчику.</p>
+    <p class="mt-2 text-ink-muted">Так выглядит то, что вы отправили бы заказчику в мессенджер.</p>
+
+    <p v-if="status === 'pending'" class="mt-8 text-ink-muted" role="status">
+      Загрузка списка заявок…
     </p>
+    <p v-else-if="error" class="mt-8 text-ink" role="alert">
+      Не удалось загрузить список заявок.
+      <span v-if="errorTraceId" class="mt-2 block tabular-nums text-ink-muted">
+        Код ошибки: {{ errorTraceId }}
+      </span>
+    </p>
+    <p v-else-if="items.length === 0" class="mt-8 text-ink-muted">Заявок пока нет.</p>
+    <ul v-else class="mt-8 divide-y divide-rule">
+      <li v-for="item in items" :key="item.publicNumber">
+        <a class="block py-4 text-ink hover:text-accent" :href="item.portalPath">
+          <span class="font-semibold tabular-nums underline decoration-rule underline-offset-2">
+            {{ item.publicNumber }}
+          </span>
+          <span class="text-ink-muted"> · {{ item.counterpartyName }}</span>
+          <span class="mt-1 block">{{ item.title }}</span>
+          <span class="mt-2 flex flex-wrap items-center gap-3">
+            <span class="inline-block bg-accent/15 px-2 py-0.5 text-sm font-semibold text-accent">
+              {{ item.statusLabel }}
+            </span>
+            <time class="text-sm tabular-nums text-ink-muted" :datetime="item.updatedAt">
+              {{ formatUpdatedAt(item.updatedAt) }}
+            </time>
+          </span>
+        </a>
+      </li>
+    </ul>
   </main>
 </template>

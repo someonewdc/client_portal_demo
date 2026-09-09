@@ -14,6 +14,7 @@
     "typecheck": "nuxt typecheck"
   },
   "dependencies": {
+    "@client-portal/api-client": "workspace:*",
     "@fontsource/ibm-plex-sans": "5.3.0",
     "@tailwindcss/vite": "4.3.3",
     "nuxt": "4.5.2",

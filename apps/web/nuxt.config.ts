@@ -9,6 +9,9 @@ export default defineNuxtConfig({
       },
     },
   },
+  build: {
+    transpile: ['@client-portal/api-client'],
+  },
   compatibilityDate: '2025-07-15',
   css: ['~/assets/css/main.css'],
   devServer: {
