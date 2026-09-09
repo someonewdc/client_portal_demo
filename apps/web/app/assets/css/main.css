@@ -1,0 +1,16 @@
+@import '@fontsource/ibm-plex-sans/cyrillic-400.css';
+@import '@fontsource/ibm-plex-sans/cyrillic-600.css';
+@import '@fontsource/ibm-plex-sans/latin-400.css';
+@import '@fontsource/ibm-plex-sans/latin-600.css';
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'IBM Plex Sans', ui-sans-serif, system-ui, sans-serif;
+  --color-paper: #f4f1ea;
+  --color-sheet: #fffcf7;
+  --color-ink: #1c1917;
+  --color-ink-muted: #5c564e;
+  --color-accent: #3d5a73;
+  --color-rule: #d6d0c4;
+  --container-document: 42rem;
+}

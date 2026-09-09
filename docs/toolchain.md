@@ -16,10 +16,12 @@
 | ESLint     |  9.39.5 | `packages/eslint-config` peers                                |
 | Prisma     |  7.10.0 | `apps/api` (`prisma`, `@prisma/client`, `@prisma/adapter-pg`) |
 | PostgreSQL |      17 | `compose.yaml`, CI service; хост 5433 (D-006, D-017)          |
-| Nuxt       |   4.5.2 | `apps/web` (D-022); без Tailwind/PostCSS (D-011, D-020)       |
+| Nuxt       |   4.5.2 | `apps/web` (D-022)                                            |
 | Vue        |  3.5.42 | `apps/web`, официальный Nuxt 4.5 starter                      |
+| Tailwind   |   4.3.3 | `apps/web` (`tailwindcss`, `@tailwindcss/vite`; D-023)        |
+| IBM Plex   |   5.3.0 | `@fontsource/ibm-plex-sans` (D-015, D-023)                    |
 
-Tailwind, CSS-pipeline и `@theme` — фича 4, Playwright — фича 5. Порты стенда —
+Tailwind v4 `@theme` и документный layout — фича 4 (D-023). Playwright — фича 5. Порты стенда —
 `docs/decisions.md` (D-006, D-017).
 
 CI (`.github/workflows/ci.yml`) пинит third-party actions на commit SHA. `pnpm/action-setup`
