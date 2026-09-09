@@ -29,8 +29,9 @@ dev: up
 	pnpm db:seed
 	pnpm dev
 
-verify:
+verify: up
 	pnpm db:generate
+	pnpm db:migrate
 	pnpm check:boundaries
 	pnpm lint
 	pnpm typecheck

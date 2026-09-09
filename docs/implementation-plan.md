@@ -14,7 +14,7 @@
   `db:migrate`, `db:seed`, `build`, `lint`, `check:boundaries`, `typecheck`, `test`,
   `test:packages`, `format`, `format:check`
 - Makefile: `bootstrap`, `doctor`, `up` (только Postgres :5433), `down`, `dev` (db+api),
-  `verify`
+  `verify` (`up` + migrate + корневые gates, D-018)
 - CI: Postgres service + `DATABASE_URL` на 5432, затем generate/migrate и корневые gates
 - ESLint игнорирует `apps/api/src/generated/prisma/**` и
   `packages/api-client/src/schema.d.ts`

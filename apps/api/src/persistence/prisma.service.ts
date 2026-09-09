@@ -5,9 +5,10 @@ import { PrismaPg } from '@prisma/adapter-pg';
 
 import type { ApiEnv } from '../core/config/api-env.js';
 import { PrismaClient } from '../generated/prisma/client.js';
+import type { DatabaseHealthPort } from '../health/database-health.port.js';
 
 @Injectable()
-export class PrismaService implements OnModuleDestroy {
+export class PrismaService implements DatabaseHealthPort, OnModuleDestroy {
   private readonly client: PrismaClient;
 
   constructor(@Inject(ConfigService) config: ConfigService<ApiEnv, true>) {

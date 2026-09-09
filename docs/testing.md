@@ -25,12 +25,15 @@ LLM часто пишет код, затем тесты «под него». Т�
 
 **Unit / application (Vitest в `apps/api`, packages как сейчас):**
 
-- F1: ready 503 без БД, 200 когда `SELECT 1` проходит; live не зависит от БД.
+- F1: `ReadinessService` — не ready, пока ping не успешен; live не зависит от БД.
 - F2: lookup по хешу секрета; неизвестный секрет → typed not-found; маппинг статусов и
   `stages` из четырёх шагов; seed fixture-секреты стабильны.
 
 **HTTP integration (`apps/api`):**
 
+- F1: `GET /api/v1/health/live` 200 при недоступной БД; `GET /health/ready` 503 Problem
+  Details после `markReady`, если БД недоступна; 200 `{ data.status: "ok" }` когда
+  Postgres отвечает (`make verify` / CI-сервис, не сырой `pnpm test` без БД).
 - F2: `GET /demo/links` — 5 items, поля сидов 1:1 из `docs/domain-model.md`;
   `GET /requests/{secret}` 200 для fixture; 404 Problem Details: `detail` без SQL/stack и
   без секрета; `instance`/path могут содержать секрет (D-014).

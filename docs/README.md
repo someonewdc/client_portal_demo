@@ -25,4 +25,5 @@
 
 Предметный код пишут отдельные чаты по `docs/llm/feature-NN.md`. В этом наборе документов
 кода продукта нет. Стенд — цели корневого Makefile (`bootstrap`, `up`, `down`, `dev`,
-`verify`), не сырой `docker compose` (D-013).
+`verify`), не сырой `docker compose` (D-013). `verify` поднимает Postgres и мигрирует
+до gates (D-018).

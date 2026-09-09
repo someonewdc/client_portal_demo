@@ -88,9 +88,6 @@ importers:
       class-validator:
         specifier: 0.15.1
         version: 0.15.1
-      dotenv:
-        specifier: 17.4.2
-        version: 17.4.2
       fastify:
         specifier: 5.11.0
         version: 5.11.0
@@ -125,6 +122,9 @@ importers:
       '@types/pg':
         specifier: 8.23.1
         version: 8.23.1
+      dotenv:
+        specifier: 17.4.2
+        version: 17.4.2
       prisma:
         specifier: 7.10.0
         version: 7.10.0(@types/node@24.13.3)(@types/react@19.2.18)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)(typescript@5.9.3)

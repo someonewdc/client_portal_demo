@@ -23,16 +23,15 @@ Nuxt, generated `api-client`, Playwright. mock-api нет и не появитс
 ```bash
 make bootstrap
 cp .env.example .env
-make up
 make dev
 ```
 
-`make up` поднимает только Postgres на `:5433`. `make dev` — Postgres + API на `:3001`.
-Агентам — только цели Makefile, не сырой `docker compose` / `pnpm dev` (D-013). Web origin
-`http://localhost:3000` — один стенд на машине для `:3000`/`:3001` (`docs/decisions.md`
-D-006).
+`make up` поднимает только Postgres на `:5433`. `make dev` уже зависит от `up` и поднимает
+API на `:3001`. Агентам — только цели Makefile, не сырой `docker compose` / `pnpm dev`
+(D-013). Web origin `http://localhost:3000` — один стенд на машине для `:3000`/`:3001`
+(`docs/decisions.md` D-006).
 
-Проверки: `make verify` или `pnpm db:generate`, `pnpm check:boundaries`, `pnpm lint`,
-`pnpm typecheck`, `pnpm test`, `pnpm test:packages`, `pnpm build`.
+Проверки: `make verify` (D-018: сначала Postgres + migrate, затем корневые gates). Сырой
+`pnpm test` без живой БД падает на HTTP ready=200 — это не полный аналог CI.
 
 Пакеты private, `0.0.0`. Публикация в registry не входит.
