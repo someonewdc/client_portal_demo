@@ -72,7 +72,7 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
 <template>
   <main>
     <p v-if="status === 'pending'" class="text-ink-muted" role="status">Загрузка заявки…</p>
-    <template v-else-if="isNotFound">
+    <section v-else-if="isNotFound" role="alert">
       <h2 class="text-xl font-semibold text-ink">Ссылка недействительна</h2>
       <p class="mt-3 text-ink-muted">
         Заявки по этой ссылке нет. Проверьте адрес или попросите новую ссылку у менеджера.
@@ -80,7 +80,7 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
       <p v-if="errorTraceId" class="mt-4 tabular-nums text-ink-muted">
         Код ошибки: {{ errorTraceId }}
       </p>
-    </template>
+    </section>
     <p v-else-if="error" class="text-ink" role="alert">
       Не удалось загрузить заявку.
       <span v-if="errorTraceId" class="mt-2 block tabular-nums text-ink-muted">
@@ -88,7 +88,7 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
       </span>
     </p>
     <template v-else-if="request">
-      <p class="text-xl font-semibold tabular-nums text-ink">{{ request.publicNumber }}</p>
+      <h2 class="text-xl font-semibold tabular-nums text-ink">{{ request.publicNumber }}</h2>
       <p class="mt-2 text-ink">{{ request.counterpartyName }}</p>
       <p class="mt-1 text-ink-muted">{{ request.title }}</p>
       <p class="mt-4 flex flex-wrap items-center gap-3">
@@ -100,8 +100,8 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
         </time>
       </p>
 
-      <ol class="mt-8 space-y-2">
-        <li v-for="stage in request.stages" :key="stage.status">
+      <ol class="mt-8 space-y-2" aria-label="Этапы заявки" role="list">
+        <li v-for="stage in request.stages" :key="stage.status" role="listitem">
           <span :class="stampClass(stage, request.status)">{{ stage.label }}</span>
         </li>
       </ol>
@@ -129,8 +129,13 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
       </table>
 
       <h2 class="mt-8 font-semibold text-ink">Файлы</h2>
-      <ul class="mt-3 divide-y divide-rule">
-        <li v-for="file in request.files" :key="file.fileName" class="py-3 text-ink">
+      <ul class="mt-3 divide-y divide-rule" role="list">
+        <li
+          v-for="file in request.files"
+          :key="file.fileName"
+          class="py-3 text-ink"
+          role="listitem"
+        >
           {{ file.fileName }}
         </li>
       </ul>

@@ -11,6 +11,7 @@ const quoteCabinet = {
   stages: ['Принят', 'В расчёте', 'КП готово', 'Счёт выставлен'],
   specLine: 'Вводно-распределительное устройство 400 А',
   specLineSecondary: 'Рубильник ввода',
+  questionnaireFileName: 'Опросный-лист-З-10043.pdf',
   quoteFileName: 'КП-З-10043.pdf',
 } as const;
 
@@ -27,19 +28,21 @@ test('quote cabinet shows Z-10043 seed payload from GET /requests/{accessSecret}
   await expect(
     page.getByRole('banner').getByRole('heading', { name: quoteCabinet.plantName }),
   ).toBeVisible();
-  await expect(page.getByText(quoteCabinet.publicNumber, { exact: true })).toBeVisible();
+  await expect(page.getByRole('heading', { name: quoteCabinet.publicNumber })).toBeVisible();
   await expect(page.getByText(quoteCabinet.counterpartyName)).toBeVisible();
   await expect(page.getByText(quoteCabinet.title, { exact: true })).toBeVisible();
-  await expect(page.getByText(quoteCabinet.statusLabel).first()).toBeVisible();
 
+  const stageRibbon = page.getByRole('list', { name: 'Этапы заявки' });
+  await expect(stageRibbon.getByRole('listitem')).toHaveCount(4);
   for (const label of quoteCabinet.stages) {
-    await expect(page.getByText(label).first()).toBeVisible();
+    await expect(stageRibbon.getByText(label, { exact: true })).toBeVisible();
   }
 
   await expect(page.getByText(quoteCabinet.specLine)).toBeVisible();
   await expect(page.getByText(quoteCabinet.specLineSecondary)).toBeVisible();
   await expect(page.getByText('IP54, навесной')).toBeVisible();
-  await expect(page.getByText(quoteCabinet.quoteFileName)).toBeVisible();
+  await expect(page.getByText(quoteCabinet.questionnaireFileName, { exact: true })).toBeVisible();
+  await expect(page.getByText(quoteCabinet.quoteFileName, { exact: true })).toBeVisible();
   await expect(page.locator(`time[datetime="${quoteCabinet.updatedAt}"]`)).toBeVisible();
 
   await expect(page.getByRole('button')).toHaveCount(0);
@@ -57,10 +60,15 @@ test('index click opens the filled quote cabinet, not an empty shell', async ({ 
   await page.getByRole('link', { name: new RegExp(quoteCabinet.publicNumber) }).click();
   await expect(page).toHaveURL(new RegExp(`/r/${quoteCabinet.accessSecret}$`));
 
-  await expect(page.getByText(quoteCabinet.publicNumber, { exact: true })).toBeVisible();
-  await expect(page.getByText(quoteCabinet.statusLabel).first()).toBeVisible();
+  await expect(page.getByRole('heading', { name: quoteCabinet.publicNumber })).toBeVisible();
+  await expect(
+    page.getByRole('list', { name: 'Этапы заявки' }).getByText(quoteCabinet.statusLabel, {
+      exact: true,
+    }),
+  ).toBeVisible();
   await expect(page.getByText(quoteCabinet.specLine)).toBeVisible();
-  await expect(page.getByText(quoteCabinet.quoteFileName)).toBeVisible();
+  await expect(page.getByText(quoteCabinet.questionnaireFileName, { exact: true })).toBeVisible();
+  await expect(page.getByText(quoteCabinet.quoteFileName, { exact: true })).toBeVisible();
 });
 
 test('unknown secret is a Russian dead-end without login and API 404', async ({
@@ -70,10 +78,12 @@ test('unknown secret is a Russian dead-end without login and API 404', async ({
   const documentResponse = await page.goto(`/r/${unknownSecret}`);
 
   expect(documentResponse, 'GET /r/{unknown} must receive a response from :3000').toBeTruthy();
+  expect(documentResponse?.status()).toBe(404);
 
-  await expect(page.getByRole('heading', { name: 'Ссылка недействительна' })).toBeVisible();
-  await expect(page.getByText(/заявки по этой ссылке нет/i)).toBeVisible();
-  await expect(page.getByText(/Код ошибки:/)).toBeVisible();
+  const deadEnd = page.getByRole('alert');
+  await expect(deadEnd.getByRole('heading', { name: 'Ссылка недействительна' })).toBeVisible();
+  await expect(deadEnd.getByText(/заявки по этой ссылке нет/i)).toBeVisible();
+  await expect(deadEnd.getByText(/Код ошибки:/)).toBeVisible();
   await expect(page.getByText(unknownSecret)).toHaveCount(0);
 
   await expect(page.locator('form')).toHaveCount(0);
@@ -113,7 +123,9 @@ test('unknown secret is a Russian dead-end without login and API 404', async ({
       ? body.traceId
       : '';
 
+  expect(detail.length).toBeGreaterThan(0);
   expect(detail).not.toContain(unknownSecret);
+  expect(detail.toLowerCase()).not.toMatch(/select |from |stack|prisma/i);
   expect(instance).toContain('/api/v1/requests/');
   expect(traceId.length).toBeGreaterThan(0);
 });

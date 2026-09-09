@@ -602,7 +602,9 @@ describe('feature 7 request cabinet', () => {
     assert.match(cabinetPage, /Ссылка недействительна/);
     assert.match(cabinetPage, /заявки по этой ссылке нет/i);
     assert.match(cabinetPage, /Код ошибки:/);
+    assert.match(cabinetPage, /role=["']alert["']/);
     assert.match(cabinetPage, /setResponseStatus/);
+    assert.match(cabinetPage, /<h2[^>]*>\{\{\s*request\.publicNumber\s*\}\}<\/h2>/);
     assert.match(cabinetPage, /tabular-nums/);
     assert.match(cabinetPage, /specLines/);
     assert.match(cabinetPage, /fileName/);
@@ -617,6 +619,7 @@ describe('feature 7 request cabinet', () => {
 
   it('covers cabinet and unknown-secret e2e against seed without mock-api', () => {
     const spec = readFileSync(resolve(rootDirectory, 'e2e/request-cabinet.spec.ts'), 'utf8');
+    const readme = readFileSync(resolve(rootDirectory, 'README.md'), 'utf8');
 
     assert.match(spec, /З-10043/);
     assert.match(spec, /seed-z10043-quote-kuznetsov/);
@@ -625,12 +628,19 @@ describe('feature 7 request cabinet', () => {
     assert.match(spec, /Счёт выставлен/);
     assert.match(spec, /Вводно-распределительное устройство 400 А/);
     assert.match(spec, /КП-З-10043\.pdf/);
+    assert.match(spec, /Опросный-лист-З-10043\.pdf/);
     assert.match(spec, /this-secret-does-not-exist/);
     assert.match(spec, /Ссылка недействительна/);
+    assert.match(spec, /Этапы заявки/);
+    assert.match(spec, /documentResponse\?\.status\(\)/);
+    assert.match(spec, /toBe\(404\)/);
     assert.match(spec, /application\/problem\+json/);
     assert.match(spec, /localhost:3001\/api\/v1\/requests/);
+    assert.match(spec, /detail\.length/);
     assert.doesNotMatch(spec, /waitForTimeout/);
     assert.doesNotMatch(spec, /mock-api|mock-core/);
     assert.match(makefile, /make dev \+ seed/);
+    assert.match(readme, /\/requests\/\{accessSecret\}/);
+    assert.match(readme, /:3001/);
   });
 });

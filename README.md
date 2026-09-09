@@ -41,8 +41,9 @@ client, затем корневые gates). Сырой `pnpm test` без жив
 
 E2E: один раз `pnpm exec playwright install chromium`, затем против живого стенда
 `make dev` (db+api+web) + seed — `make e2e` / `pnpm test:e2e`. `baseURL` —
-`http://localhost:3000`. Индексный spec ходит в `GET /demo/links`; Nuxt без API
-недостаточен. Если `:3000` уже занят `make dev`, Playwright его переиспользует
-(`reuseExistingServer: true`, D-021) и не стартует второй Nuxt. CI e2e — фича 8.
+`http://localhost:3000`. Индексный spec ходит в `GET /demo/links`; кабинетный — в
+`GET /requests/{accessSecret}` и в API `:3001`. Nuxt без API недостаточен. Если `:3000`
+уже занят `make dev`, Playwright его переиспользует (`reuseExistingServer: true`, D-021)
+и не стартует второй Nuxt. CI e2e — фича 8.
 
 Пакеты private, `0.0.0`. Публикация в registry не входит.
