@@ -31,18 +31,22 @@ LLM часто пишет код, затем тесты «под него». Т�
 
 **HTTP integration (`apps/api`):**
 
-- F2: `GET /demo/links` — 5 items, есть `portalPath`; `GET /requests/{secret}` 200 для
-  fixture; 404 Problem Details без утечки SQL/секрета.
+- F2: `GET /demo/links` — 5 items, поля сидов 1:1 из `docs/domain-model.md`;
+  `GET /requests/{secret}` 200 для fixture; 404 Problem Details: `detail` без SQL/stack и
+  без секрета; `instance`/path могут содержать секрет (D-014).
 
 **E2E (Playwright, скрипт `test:e2e` заводит F3):**
 
+- `baseURL` `http://localhost:3000`. Сценарии индекса и кабинета гоняют против `make dev`
+  (db+api+web) + seed, не против mock-api и не против фиктивного server.
 - F4 пишет сценарий индекса **до** страницы: дисклеймер, список из API, клик → `/r/…`.
 - F5 пишет сценарий кабинета и тупика **до** страницы.
 - Селекторы: role / label / осмысленный `data-testid`, не CSS-хрупкость. Без
   `waitForTimeout` как синхронизации (`verification-honesty`).
 - Scenario-mutating e2e — serial. Этот демо read-only, мутаций нет.
 
-**Compose-smoke (F6):** полный стенд через Makefile/`up` отвечает health и отдаёт индекс.
+**Compose-smoke (F6):** тот же `make up` после расширения (D-016) отвечает health и отдаёт
+индекс.
 
 ## Корневые команды
 

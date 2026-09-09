@@ -14,7 +14,8 @@
 
 - `AGENTS.md`
 - `docs/README.md`, `docs/implementation-status.md`, `docs/implementation-plan.md`
-- `docs/frontend.md`, `docs/architecture.md`, `docs/decisions.md` (D-005, D-006, D-011, D-012)
+- `docs/frontend.md`, `docs/architecture.md`, `docs/decisions.md` (D-005, D-006, D-011, D-012,
+  D-015, D-016)
 - `docs/testing.md`
 - `.agents/skills/git-delivery/SKILL.md`
 - `.agents/skills/change-impact-gates/SKILL.md`
@@ -35,29 +36,34 @@
   угадывать из памяти.
 - Server state: `useFetch` / `useAsyncData` + один facade над
   `createProblemAwareClient<Paths>`. Web не импортирует Prisma, Nest DTO, `apps/api`.
+  Cookie не форвардить; `credentials: 'include'` не ставить — сессии нет (D-015). Skill
+  `nuxt-ssr-data-and-ui` в части cookie/credentials к этому демо не применять.
+- Шрифт: `@fontsource/ibm-plex-sans` (кириллица), не Google Fonts CDN (D-015).
 - Playwright: заведи корневой (или web) script, который в корне доступен как `pnpm test:e2e`.
-  Имени ещё нет — заведи именно `test:e2e`.
-- Расширь `make dev`: db + api + web. Origin web `http://localhost:3000`.
+  Имени ещё нет — заведи именно `test:e2e`. `baseURL` = `http://localhost:3000`.
+- Расширь `make dev`: db + api + web. Origin web `http://localhost:3000` (D-016).
 
 ## TDD
 
 Поведение экранов 4–5 здесь не реализовывать. Для harness:
 
-1. Подключи Playwright так, чтобы `pnpm test:e2e` запускается и падает, если web не
-   слушает — или держит один минимальный smoke «document title / layout содержит
-   Нордщит», если уже рисуешь layout.
-2. Если пишешь smoke по layout — сначала red, потом layout.
-3. Не пиши e2e списка ссылок и кабинета (это фичи 4 и 5).
+1. Подключи Playwright так, чтобы `pnpm test:e2e` падает, если web не слушает `:3000` —
+   или держит один минимальный smoke «document title / layout содержит Нордщит», если уже
+   рисуешь layout. `baseURL` `http://localhost:3000`.
+2. Если пишешь smoke по layout — сначала red, потом layout. Smoke может стартовать только
+   Nuxt (`webServer`); API не мокать.
+3. Не пиши e2e списка ссылок и кабинета (это фичи 4 и 5). Их будут гонять против `make dev`
+   (db+api+web) + seed.
 
 ## Что сделать
 
 - `apps/web` в pnpm workspace.
-- Layout: бумага, IBM Plex Sans, токены из `frontend.md`, колонка документа, шапка
-  «ПК «Нордщит»».
+- Layout: бумага, IBM Plex Sans через `@fontsource/ibm-plex-sans`, токены из `frontend.md`,
+  колонка документа, шапка «ПК «Нордщит»».
 - Заглушка `/` без фейкового списка заявок: честный «каркас» или короткий служебный текст,
   не декоративные статусы без API.
 - CORS уже на `WEB_ORIGIN`; Nuxt base API URL с `/api/v1`.
-- `pnpm test:e2e` существует. Без `waitForTimeout`.
+- `pnpm test:e2e` существует. Без `waitForTimeout`. Не mock-api.
 
 ## Что не делать
 
@@ -69,7 +75,8 @@
 ## Критерии приёмки
 
 - `apps/web` собирается, `make dev` поднимает web на :3000 и api на :3001.
-- Layout визуально: off-white, один акцент стали, IBM Plex Sans, нет neon/glass.
+- Layout визуально: off-white, один акцент стали, IBM Plex Sans из `@fontsource/ibm-plex-sans`, нет neon/glass.
+- Cookie не форвардятся; нет `credentials: 'include'` как обязательного.
 - Web не импортирует Prisma / `@client-portal/api` source.
 - В корневом `package.json` есть `test:e2e` (или workspace script с таким именем, который
   `pnpm test:e2e` запускает).

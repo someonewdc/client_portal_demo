@@ -24,10 +24,13 @@ seed. Не эмулировать внешнюю шину.
 
 Секрет в URL — capability: кто знает путь `/r/{accessSecret}`, тот читает одну заявку.
 Это не пользователь, не сессия, не cookie-login. Route middleware Nuxt — UX, не security
-boundary. API сам отвечает 404, если хеш не найден.
+boundary. API сам отвечает 404, если хеш не найден. Cookie не форвардить (D-015).
 
 `GET /demo/links` отдаёт `portalPath` со секретом только потому, что это служебный экран
 ведущего. Не выдавать этот список за кабинет заказчика.
+
+Логи и 404: D-014. Path с секретом в access-логе и в `instance` допустим; `detail` и
+отдельные поля лога — нет. `nestjs-core` serializer не трогать.
 
 ## Слои Nest
 
@@ -47,6 +50,7 @@ Skill `nestjs-hexagonal-boundaries`:
 ## Стенд
 
 Lifecycle — корневой Makefile (цели заводит фича 1 и расширяют 3/6): `bootstrap`, `dev`,
-`up`, `down`, `verify` по факту файла.
+`up`, `down`, `verify` по факту файла. Смысл `up`/`dev` — D-016: сначала только Postgres,
+потом `dev`+web, потом тот же `up` = полный стенд.
 
 Порты — `docs/decisions.md`. Один стенд на машине для `:3000`/`:3001`.

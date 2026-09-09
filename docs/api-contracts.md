@@ -39,8 +39,8 @@ Prefix живёт на server URL, path keys относительные. Пос�
 }
 ```
 
-`portalPath` уже содержит секрет — ведущий кликает, не копирует ссылку вручную. Не логировать
-секрет в plaintext.
+`portalPath` уже содержит секрет — ведущий кликает, не копирует ссылку вручную. Это **тело
+ответа**, не лог. Не писать секрет/`portalPath` отдельным полем приложения (D-014).
 
 Порядок: стабильный, по `publicNumber` по возрастанию.
 
@@ -72,6 +72,11 @@ Prefix живёт на server URL, path keys относительные. Пос�
         "quantity": 1,
         "unit": "шт",
         "comment": "IP54, навесной"
+      },
+      {
+        "name": "Рубильник ввода",
+        "quantity": 1,
+        "unit": "шт"
       }
     ],
     "files": [
@@ -96,13 +101,17 @@ Prefix живёт на server URL, path keys относительные. Пос�
 `stages` всегда четыре элемента в каноническом порядке. `reachedAt: null` — шаг ещё не
 наступил.
 
+Поля `title`, `specLines`, `files`, `updatedAt` и fixture-секрет — 1:1 из каталога
+`docs/domain-model.md`. Пример выше — З-10043 из этого каталога, не образец для выдумки.
+
 ## 404
 
 Неизвестный или пустой секрет, заявка не найдена по хешу:
 
 - HTTP 404
-- Problem Details: `title` в духе «Resource not found», `detail` без SQL и без секрета,
-  `traceId` есть
+- Problem Details: `title` в духе «Resource not found»; `detail` без SQL, stack и без
+  plaintext секрета; `traceId` есть
+- `instance` и access-лог **могут** содержать path с секретом (D-014)
 - Web рисует тупик, не форму входа
 
 Несуществующий path API — тот же Problem Details filter, не HTML login.

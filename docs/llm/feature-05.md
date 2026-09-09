@@ -15,7 +15,7 @@
 - `docs/README.md`, `docs/implementation-status.md`
 - `docs/frontend.md`, `docs/demo-scenarios.md`, `docs/api-contracts.md`
 - `docs/domain-model.md`, `docs/acceptance-checklist.md`
-- `docs/decisions.md` (D-007, D-008, D-009, D-012)
+- `docs/decisions.md` (D-007, D-008, D-009, D-012, D-014, D-016)
 - `docs/testing.md`
 - `.agents/skills/git-delivery/SKILL.md`
 - `.agents/skills/change-impact-gates/SKILL.md`
@@ -39,10 +39,11 @@ SKU. Файлы — список имён без «скачать». Запре�
 
 ## TDD (обязательно e2e до страницы)
 
-1. Playwright: З-10043 — номер, «КП готово», четыре штампа, строка спецификации, имя файла
-   КП, дата обновления, «ПК «Нордщит»». Второй тест: `/r/this-secret-does-not-exist` —
-   тупик, нет полей входа/телефона/OTP.
-2. `pnpm test:e2e` — **red**.
+1. Playwright: З-10043 — номер, «КП готово», четыре штампа, строки спецификации из
+   каталога (в т.ч. «Вводно-распределительное устройство 400 А»), имя `КП-З-10043.pdf`,
+   дата обновления, «ПК «Нордщит»». Второй тест: `/r/this-secret-does-not-exist` —
+   тупик, нет полей входа/телефона/OTP. `baseURL` `http://localhost:3000`.
+2. `pnpm test:e2e` против `make dev` + seed — **red**. Не мокать API.
 3. Потом страница.
 4. Не помечай кабинет «готовым», если e2e написан после вёрстки под уже видимый DOM.
 
@@ -60,11 +61,13 @@ SKU. Файлы — список имён без «скачать». Запре�
 
 ## Критерии приёмки
 
-- Given fixture З-10043, When открыть `/r/seed-z10043-quote-kuznetsov`, Then видны номер,
-  контрагент, текущий штамп «КП готово», пройденные шаги, spec line, файл КП, `updatedAt`.
+- Given fixture З-10043 и стенд `make dev` + seed, When открыть
+  `/r/seed-z10043-quote-kuznetsov`, Then видны номер, контрагент, текущий штамп «КП готово»,
+  пройденные шаги, spec lines из каталога, файл `КП-З-10043.pdf`, `updatedAt`.
 - Given неизвестный секрет, When открыть `/r/this-secret-does-not-exist`, Then тупик на
   русском без login form.
-- Given тот же секрет, When API GET, Then 404 Problem Details.
+- Given тот же секрет, When API GET, Then 404 Problem Details (`detail` без секрета; path в
+  `instance` допустим, D-014).
 - Клик с индекса (фича 4) открывает заполненный кабинет, не пустышку.
 - Нет мёртвых кнопок.
 
