@@ -320,8 +320,9 @@ describe('feature 4 tokens and document layout', () => {
   it('installs Tailwind v4 through the official Nuxt Vite plugin and keeps test:e2e out', () => {
     const webPackage = webPackageJson();
 
-    assert.match(String(webPackage.dependencies?.tailwindcss ?? ''), /^4\./);
-    assert.match(String(webPackage.dependencies?.['@tailwindcss/vite'] ?? ''), /^4\./);
+    assert.equal(webPackage.dependencies?.tailwindcss, '4.3.3');
+    assert.equal(webPackage.dependencies?.['@tailwindcss/vite'], '4.3.3');
+    assert.equal(webPackage.dependencies?.['@fontsource/ibm-plex-sans'], '5.3.0');
     assert.match(nuxtConfigSource(), /from ['"]@tailwindcss\/vite['"]/);
     assert.match(nuxtConfigSource(), /tailwindcss\(\s*\)/);
     assert.equal(packageJson.scripts['test:e2e'], undefined);
@@ -354,6 +355,7 @@ describe('feature 4 tokens and document layout', () => {
     );
 
     const combined = graph.map((file) => file.source).join('\n');
+    assert.match(combined, /@import\s+['"]tailwindcss['"]/);
     assert.match(combined, /@theme\b/);
 
     for (const [token, hex] of Object.entries(frontendThemeColors)) {
@@ -378,8 +380,10 @@ describe('feature 4 tokens and document layout', () => {
     const combined = wiredCssGraph(nuxtConfigSource(), layoutSources())
       .map((file) => file.source)
       .join('\n');
-    assert.match(combined, /@fontsource\/ibm-plex-sans/);
-    assert.match(combined, /cyrillic/);
+    assert.match(combined, /@fontsource\/ibm-plex-sans\/cyrillic-400/);
+    assert.match(combined, /@fontsource\/ibm-plex-sans\/cyrillic-600/);
+    assert.match(combined, /@fontsource\/ibm-plex-sans\/latin-400/);
+    assert.match(combined, /@fontsource\/ibm-plex-sans\/latin-600/);
     assert.match(combined, /--font-sans:[^;]*IBM Plex Sans/);
 
     const allFiles = listWebFiles(webRoot, webFileExtensions).map((absolutePath) =>
@@ -403,6 +407,9 @@ describe('feature 4 tokens and document layout', () => {
       (file) => /<header[\s>]/.test(file.source) && /ПК «Нордщит»/.test(file.source),
     );
     assert.ok(headerLayout, 'layout component must render <header> with ПК «Нордщит»');
+    assert.match(headerLayout.source, /\bbg-paper\b/);
+    assert.match(headerLayout.source, /\bbg-sheet\b/);
+    assert.match(headerLayout.source, /\bfont-sans\b/);
     assert.match(headerLayout.source, /max-w-document/);
     assert.doesNotMatch(headerLayout.source, /glass|neon|backdrop-blur/i);
 
@@ -421,5 +428,29 @@ describe('feature 4 tokens and document layout', () => {
         `${file.path} must not scatter arbitrary hex`,
       );
     }
+  });
+
+  it('declares Russian document lang, a public title and a layout heading', () => {
+    assert.match(
+      nuxtConfigSource(),
+      /htmlAttrs:[\s\S]*?lang:\s*['"]ru['"]/,
+      'nuxt.config must set htmlAttrs.lang to ru',
+    );
+
+    const layouts = layoutSources();
+    const headingLayout = layouts.find(
+      (file) => /<h1[\s>]/.test(file.source) && /ПК «Нордщит»/.test(file.source),
+    );
+    assert.ok(
+      headingLayout,
+      'layout must render heading ПК «Нордщит», not only a <p> in the header',
+    );
+
+    const seoHost = [
+      ...layouts,
+      ...vueSources().filter((file) => file.path.endsWith('/app/app.vue')),
+    ].find((file) => /useSeoMeta\s*\(/.test(file.source));
+    assert.ok(seoHost, 'public document must call useSeoMeta');
+    assert.match(seoHost.source, /title:\s*['"]ПК «Нордщит»['"]/);
   });
 });
