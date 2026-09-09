@@ -11,9 +11,11 @@
     "dev": "nuxt dev --port 3000",
     "build": "nuxt build",
     "pretypecheck": "nuxt prepare",
-    "typecheck": "nuxt typecheck"
+    "typecheck": "nuxt typecheck",
+    "test": "node --experimental-strip-types --test tests/async-data-problem.spec.ts"
   },
   "dependencies": {
+    "@client-portal/api-client": "workspace:*",
     "@fontsource/ibm-plex-sans": "5.3.0",
     "@tailwindcss/vite": "4.3.3",
     "nuxt": "4.5.2",

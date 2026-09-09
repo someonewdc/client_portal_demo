@@ -44,9 +44,9 @@ Skill `nestjs-hexagonal-boundaries`:
 
 ## OpenAPI и клиент
 
-`pnpm generate:api` пишет `packages/api-client` (types-only `Paths`). Facade
-`createApiClient` над `createProblemAwareClient<Paths>` — фича 6 (первый `useFetch`).
-Prefix `/api/v1` на base URL. Tailwind v4 `@theme` и layout — `apps/web` (D-023).
+`pnpm generate:api` пишет `packages/api-client` (`Paths` и runtime `createApiClient`
+над `createProblemAwareClient<Paths>`). Prefix `/api/v1` на base URL. Tailwind v4
+`@theme` и layout — `apps/web` (D-023).
 
 ## Стенд
 

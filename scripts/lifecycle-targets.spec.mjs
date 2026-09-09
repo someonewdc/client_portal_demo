@@ -260,7 +260,7 @@ describe('feature 3 nuxt workspace', () => {
     assert.match(webPackage.scripts.dev, /--port[ =]3000/);
   });
 
-  it('keeps the web stub free of API lists, cabinet data and api-client facade', () => {
+  it('keeps web free of backend source and of the cabinet route', () => {
     assert.equal(existsSync(webRoot), true, 'apps/web must exist');
 
     const sourceFiles = listWebSourceFiles(webRoot);
@@ -271,15 +271,8 @@ describe('feature 3 nuxt workspace', () => {
       source: readFileSync(absolutePath, 'utf8'),
     }));
     const combined = sources.map(({ source }) => source).join('\n');
-    const indexPage = sources.find((file) => file.path.endsWith('/pages/index.vue'));
 
-    assert.ok(indexPage, 'apps/web must have a / pages/index.vue stub');
-    assert.match(indexPage.source, /Каркас клиентского канала статуса/);
-    assert.doesNotMatch(indexPage.source, /Принят|В расчёте|КП готово|Счёт выставлен/);
-    assert.doesNotMatch(combined, /createApiClient|createProblemAwareClient/);
-    assert.doesNotMatch(combined, /@client-portal\/api-client/);
     assert.doesNotMatch(combined, /@prisma\/client|@nestjs\/|apps\/api/);
-    assert.doesNotMatch(combined, /\/demo\/links/);
     assert.equal(
       sources.some((file) => /\/pages\/r\//.test(file.path)),
       false,
@@ -411,7 +404,6 @@ describe('feature 4 tokens and document layout', () => {
     const indexPage = vueSources().find((file) => file.path.endsWith('/pages/index.vue'));
     assert.ok(indexPage);
     assert.doesNotMatch(indexPage.source, /Принят|В расчёте|КП готово|Счёт выставлен/);
-    assert.doesNotMatch(indexPage.source, /\/demo\/links/);
 
     for (const file of vueSources()) {
       const markup = file.source
@@ -523,5 +515,79 @@ describe('feature 5 playwright harness', () => {
     const ci = readFileSync(resolve(rootDirectory, '.github/workflows/ci.yml'), 'utf8');
     assert.doesNotMatch(ci, /test:e2e/);
     assert.doesNotMatch(ci, /playwright/i);
+  });
+});
+
+describe('feature 6 demo links index', () => {
+  it('exports createApiClient over createProblemAwareClient from api-client', () => {
+    const apiClient = readFileSync(
+      resolve(rootDirectory, 'packages/api-client/src/index.ts'),
+      'utf8',
+    );
+    const apiClientPackage = JSON.parse(
+      readFileSync(resolve(rootDirectory, 'packages/api-client/package.json'), 'utf8'),
+    );
+    const webPackage = JSON.parse(readFileSync(resolve(webRoot, 'package.json'), 'utf8'));
+
+    assert.match(apiClient, /export function createApiClient/);
+    assert.match(apiClient, /createProblemAwareClient/);
+    assert.match(apiClient, /from ['"]@client-portal\/openapi-client-core['"]/);
+    assert.equal(
+      typeof apiClientPackage.dependencies?.['@client-portal/openapi-client-core'],
+      'string',
+    );
+    assert.equal(typeof webPackage.dependencies?.['@client-portal/api-client'], 'string');
+  });
+
+  it('loads GET /demo/links through useAsyncData without session cookies or Pinia', () => {
+    const sources = listWebSourceFiles(webRoot).map((absolutePath) =>
+      readFileSync(absolutePath, 'utf8'),
+    );
+    const combined = sources.join('\n');
+
+    assert.match(combined, /createApiClient/);
+    assert.match(combined, /useAsyncData/);
+    assert.match(combined, /\/demo\/links/);
+    assert.doesNotMatch(combined, /credentials:\s*['"]include['"]/);
+    assert.doesNotMatch(combined, /useRequestHeaders\s*\(|getRequestHeader\s*\(/);
+    assert.doesNotMatch(combined, /defineStore|from ['"]pinia['"]/);
+    assert.doesNotMatch(combined, /скопировать/);
+    assert.doesNotMatch(combined, /href=["']#["']/);
+  });
+
+  it('states loading, error with traceId and empty on the index page', () => {
+    const indexPage = readFileSync(resolve(webRoot, 'app/pages/index.vue'), 'utf8');
+    const problemHelper = readFileSync(resolve(webRoot, 'app/utils/async-data-problem.ts'), 'utf8');
+
+    assert.match(indexPage, /не показывается заказчику/);
+    assert.match(indexPage, /мессенджер/);
+    assert.match(indexPage, /pending/);
+    assert.match(indexPage, /createError/);
+    assert.match(indexPage, /data:\s*payload/);
+    assert.match(indexPage, /Заявок пока нет/);
+    assert.match(indexPage, /portalPath/);
+    assert.match(indexPage, /tabular-nums/);
+    assert.match(problemHelper, /data\.traceId/);
+    assert.doesNotMatch(indexPage, /Принят|В расчёте|КП готово|Счёт выставлен/);
+  });
+
+  it('covers the index e2e against seed URLs without a cabinet page', () => {
+    const spec = readFileSync(resolve(rootDirectory, 'e2e/demo-links.spec.ts'), 'utf8');
+    const readme = readFileSync(resolve(rootDirectory, 'README.md'), 'utf8');
+
+    assert.match(spec, /не показывается заказчику/);
+    assert.match(spec, /мессенджер/);
+    assert.match(spec, /З-10041/);
+    assert.match(spec, /З-10043/);
+    assert.match(spec, /seed-z10043-quote-kuznetsov/);
+    assert.match(spec, /updatedAt/);
+    assert.match(spec, /datetime/);
+    assert.doesNotMatch(spec, /waitForTimeout/);
+    assert.doesNotMatch(spec, /mock-api|mock-core/);
+    assert.match(readme, /make dev/);
+    assert.match(readme, /seed/);
+    assert.doesNotMatch(readme, /поднимает только Nuxt, без API/);
+    assert.match(makefile, /make dev \+ seed/);
+    assert.equal(existsSync(resolve(webRoot, 'app/pages/r')), false);
   });
 });

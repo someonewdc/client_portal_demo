@@ -48,7 +48,7 @@ schema into another product.
 
 This workspace generates `@client-portal/api-client` `Paths` from the product OpenAPI.
 Do not copy that schema into another product. The runtime facade over this transport is
-added with the storefront (feature 3). Workspace identity is private `@client-portal/*@0.0.0`.
+`createApiClient` in `@client-portal/api-client` (feature 6). Workspace identity is private `@client-portal/*@0.0.0`.
 See [`docs/shared-core.md`](../../docs/shared-core.md).
 
 Publication is out of scope until license, registry, versioning, ownership and changelog/release
