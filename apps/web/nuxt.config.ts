@@ -1,7 +1,16 @@
+import tailwindcss from '@tailwindcss/vite';
 import { defineNuxtConfig } from 'nuxt/config';
 
 export default defineNuxtConfig({
+  app: {
+    head: {
+      htmlAttrs: {
+        lang: 'ru',
+      },
+    },
+  },
   compatibilityDate: '2025-07-15',
+  css: ['~/assets/css/main.css'],
   devServer: {
     port: 3000,
   },
@@ -14,4 +23,7 @@ export default defineNuxtConfig({
     },
   },
   telemetry: false,
+  vite: {
+    plugins: [tailwindcss()],
+  },
 });

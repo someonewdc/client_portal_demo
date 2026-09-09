@@ -46,7 +46,7 @@ Skill `nestjs-hexagonal-boundaries`:
 
 `pnpm generate:api` пишет `packages/api-client` (types-only `Paths`). Facade
 `createApiClient` над `createProblemAwareClient<Paths>` — фича 6 (первый `useFetch`).
-Prefix `/api/v1` на base URL. Tailwind и CSS-pipeline — фича 4, не фича 3.
+Prefix `/api/v1` на base URL. Tailwind v4 `@theme` и layout — `apps/web` (D-023).
 
 ## Стенд
 

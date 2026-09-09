@@ -84,9 +84,19 @@ describe('feature 2 generate:api', () => {
   });
 });
 
-const forbiddenCssToolchain = /^(?:postcss|tailwindcss|@tailwindcss\/|@nuxtjs\/tailwindcss$)/;
+const forbiddenLegacyCssToolchain = /^(?:postcss|@tailwindcss\/postcss$|@nuxtjs\/tailwindcss$)/;
 const webSourceExtensions = new Set(['.ts', '.mts', '.js', '.mjs', '.vue']);
+const webFileExtensions = new Set([...webSourceExtensions, '.css']);
 const skippedWebDirectories = new Set(['.nuxt', '.output', 'dist', 'node_modules']);
+const frontendThemeColors = {
+  '--color-paper': '#f4f1ea',
+  '--color-sheet': '#fffcf7',
+  '--color-ink': '#1c1917',
+  '--color-ink-muted': '#5c564e',
+  '--color-accent': '#3d5a73',
+  '--color-rule': '#d6d0c4',
+};
+const webRoot = resolve(rootDirectory, 'apps/web');
 
 function workspaceManifests() {
   const manifests = [{ path: 'package.json', json: packageJson }];
@@ -122,25 +132,97 @@ function listedDependencies(manifest) {
   };
 }
 
-function listWebSourceFiles(directory) {
+function listWebFiles(directory, extensions = webSourceExtensions) {
   const files = [];
 
   for (const entry of readdirSync(directory, { withFileTypes: true })) {
     const absolutePath = join(directory, entry.name);
     if (entry.isDirectory()) {
       if (!skippedWebDirectories.has(entry.name)) {
-        files.push(...listWebSourceFiles(absolutePath));
+        files.push(...listWebFiles(absolutePath, extensions));
       }
       continue;
     }
 
     const extension = entry.name.slice(entry.name.lastIndexOf('.'));
-    if (webSourceExtensions.has(extension)) {
+    if (extensions.has(extension)) {
       files.push(absolutePath);
     }
   }
 
   return files;
+}
+
+function listWebSourceFiles(directory) {
+  return listWebFiles(directory, webSourceExtensions);
+}
+
+function webRelative(absolutePath) {
+  return relative(rootDirectory, absolutePath).replaceAll('\\', '/');
+}
+
+function resolveWebSpecifier(specifier, fromFile) {
+  if (specifier.startsWith('~/') || specifier.startsWith('@/')) {
+    return resolve(webRoot, 'app', specifier.slice(2));
+  }
+
+  if (specifier.startsWith('.')) {
+    return resolve(dirname(fromFile), specifier);
+  }
+
+  return null;
+}
+
+function cssSpecifiersFromSource(source) {
+  const specifiers = [
+    ...source.matchAll(/(?:@import|import)\s+['"]([^'"]+\.css)['"]/g),
+    ...source.matchAll(/from\s+['"]([^'"]+\.css)['"]/g),
+  ];
+  return specifiers.map((match) => match[1]);
+}
+
+function nuxtCssEntries(nuxtConfigSource) {
+  const block = nuxtConfigSource.match(/css:\s*\[([\s\S]*?)\]/);
+  if (!block) {
+    return [];
+  }
+
+  return [...block[1].matchAll(/['"]([^'"]+)['"]/g)].map((match) => match[1]);
+}
+
+function collectCssGraph(entryPath, seen = new Set()) {
+  if (seen.has(entryPath) || !existsSync(entryPath)) {
+    return [];
+  }
+
+  seen.add(entryPath);
+  const source = readFileSync(entryPath, 'utf8');
+  const files = [{ path: entryPath, source }];
+
+  for (const specifier of cssSpecifiersFromSource(source)) {
+    const resolved = resolveWebSpecifier(specifier, entryPath);
+    if (resolved) {
+      files.push(...collectCssGraph(resolved, seen));
+    }
+  }
+
+  return files;
+}
+
+function wiredCssGraph(nuxtConfigSource, layoutSources) {
+  const entries = [
+    ...nuxtCssEntries(nuxtConfigSource).map((specifier) =>
+      resolveWebSpecifier(specifier, resolve(webRoot, 'nuxt.config.ts')),
+    ),
+    ...layoutSources.flatMap((file) =>
+      cssSpecifiersFromSource(file.source).map((specifier) =>
+        resolveWebSpecifier(specifier, file.path),
+      ),
+    ),
+  ].filter((path) => typeof path === 'string');
+
+  const seen = new Set();
+  return entries.flatMap((path) => collectCssGraph(path, seen));
 }
 
 describe('feature 3 nuxt workspace', () => {
@@ -178,32 +260,25 @@ describe('feature 3 nuxt workspace', () => {
     assert.match(webPackage.scripts.dev, /--port[ =]3000/);
   });
 
-  it('does not add Tailwind, PostCSS or a root test:e2e script', () => {
+  it('does not add a root test:e2e script', () => {
     assert.equal(packageJson.scripts['test:e2e'], undefined);
-
-    for (const { path, json } of workspaceManifests()) {
-      for (const name of Object.keys(listedDependencies(json))) {
-        assert.equal(forbiddenCssToolchain.test(name), false, `${path} must not depend on ${name}`);
-      }
-    }
   });
 
   it('keeps the web stub free of API lists, cabinet data and api-client facade', () => {
-    const webRoot = resolve(rootDirectory, 'apps/web');
     assert.equal(existsSync(webRoot), true, 'apps/web must exist');
 
     const sourceFiles = listWebSourceFiles(webRoot);
     assert.ok(sourceFiles.length > 0, 'apps/web must contain source files');
 
     const sources = sourceFiles.map((absolutePath) => ({
-      path: relative(rootDirectory, absolutePath).replaceAll('\\', '/'),
+      path: webRelative(absolutePath),
       source: readFileSync(absolutePath, 'utf8'),
     }));
     const combined = sources.map(({ source }) => source).join('\n');
     const indexPage = sources.find((file) => file.path.endsWith('/pages/index.vue'));
 
     assert.ok(indexPage, 'apps/web must have a / pages/index.vue stub');
-    assert.match(indexPage.source, /Нордщит/);
+    assert.match(indexPage.source, /Каркас клиентского канала статуса/);
     assert.doesNotMatch(indexPage.source, /Принят|В расчёте|КП готово|Счёт выставлен/);
     assert.doesNotMatch(combined, /createApiClient|createProblemAwareClient/);
     assert.doesNotMatch(combined, /@client-portal\/api-client/);
@@ -214,5 +289,168 @@ describe('feature 3 nuxt workspace', () => {
       false,
       'cabinet route /r/{secret} belongs to a later feature',
     );
+  });
+});
+
+describe('feature 4 tokens and document layout', () => {
+  const webPackagePath = resolve(webRoot, 'package.json');
+  const nuxtConfigPath = resolve(webRoot, 'nuxt.config.ts');
+
+  function webPackageJson() {
+    return JSON.parse(readFileSync(webPackagePath, 'utf8'));
+  }
+
+  function nuxtConfigSource() {
+    return readFileSync(nuxtConfigPath, 'utf8');
+  }
+
+  function vueSources() {
+    return listWebSourceFiles(webRoot)
+      .filter((absolutePath) => absolutePath.endsWith('.vue'))
+      .map((absolutePath) => ({
+        path: webRelative(absolutePath),
+        source: readFileSync(absolutePath, 'utf8'),
+      }));
+  }
+
+  function layoutSources() {
+    return vueSources().filter((file) => /\/layouts\/[^/]+\.vue$/.test(file.path));
+  }
+
+  it('installs Tailwind v4 through the official Nuxt Vite plugin and keeps test:e2e out', () => {
+    const webPackage = webPackageJson();
+
+    assert.equal(webPackage.dependencies?.tailwindcss, '4.3.3');
+    assert.equal(webPackage.dependencies?.['@tailwindcss/vite'], '4.3.3');
+    assert.equal(webPackage.dependencies?.['@fontsource/ibm-plex-sans'], '5.3.0');
+    assert.match(nuxtConfigSource(), /from ['"]@tailwindcss\/vite['"]/);
+    assert.match(nuxtConfigSource(), /tailwindcss\(\s*\)/);
+    assert.equal(packageJson.scripts['test:e2e'], undefined);
+
+    for (const { path, json } of workspaceManifests()) {
+      for (const name of Object.keys(listedDependencies(json))) {
+        assert.equal(
+          forbiddenLegacyCssToolchain.test(name),
+          false,
+          `${path} must not depend on ${name}`,
+        );
+
+        if (path !== 'apps/web/package.json') {
+          assert.equal(
+            /^(?:tailwindcss|@tailwindcss\/)/.test(name),
+            false,
+            `${path} must not depend on ${name}`,
+          );
+        }
+      }
+    }
+  });
+
+  it('wires frontend.md @theme tokens through imported CSS, not a dead file', () => {
+    const layouts = layoutSources();
+    const graph = wiredCssGraph(nuxtConfigSource(), layouts);
+    assert.ok(
+      graph.length > 0,
+      'hex tokens must live in CSS imported from nuxt.config or a layout, not an unwired file',
+    );
+
+    const combined = graph.map((file) => file.source).join('\n');
+    assert.match(combined, /@import\s+['"]tailwindcss['"]/);
+    assert.match(combined, /@theme\b/);
+
+    for (const [token, hex] of Object.entries(frontendThemeColors)) {
+      assert.match(
+        combined,
+        new RegExp(`${token.replaceAll('-', '\\-')}:\\s*${hex}`),
+        `wired CSS must declare ${token}: ${hex}`,
+      );
+    }
+
+    const documentWidth = combined.match(/--container-document:\s*([\d.]+)rem/);
+    assert.ok(documentWidth, 'wired @theme must declare --container-document');
+    const rem = Number(documentWidth[1]);
+    assert.equal(Number.isNaN(rem), false);
+    assert.ok(rem >= 40 && rem <= 42, `--container-document must be 40–42rem, got ${rem}`);
+  });
+
+  it('loads IBM Plex Sans from @fontsource/ibm-plex-sans with cyrillic, not Google Fonts', () => {
+    const webPackage = webPackageJson();
+    assert.equal(typeof webPackage.dependencies?.['@fontsource/ibm-plex-sans'], 'string');
+
+    const combined = wiredCssGraph(nuxtConfigSource(), layoutSources())
+      .map((file) => file.source)
+      .join('\n');
+    assert.match(combined, /@fontsource\/ibm-plex-sans\/cyrillic-400/);
+    assert.match(combined, /@fontsource\/ibm-plex-sans\/cyrillic-600/);
+    assert.match(combined, /@fontsource\/ibm-plex-sans\/latin-400/);
+    assert.match(combined, /@fontsource\/ibm-plex-sans\/latin-600/);
+    assert.match(combined, /--font-sans:[^;]*IBM Plex Sans/);
+
+    const allFiles = listWebFiles(webRoot, webFileExtensions).map((absolutePath) =>
+      readFileSync(absolutePath, 'utf8'),
+    );
+    assert.doesNotMatch(allFiles.join('\n'), /fonts\.googleapis\.com|fonts\.gstatic\.com/);
+  });
+
+  it('renders the plant header from a layout component with a document column token', () => {
+    const appVue = vueSources().find((file) => file.path.endsWith('/app/app.vue'));
+    assert.ok(appVue, 'apps/web/app/app.vue must exist');
+    assert.match(appVue.source, /<NuxtLayout[\s>]/);
+
+    const layouts = layoutSources();
+    assert.ok(
+      layouts.length > 0,
+      'header must live in a Vue layout component, not only pages/index',
+    );
+
+    const headerLayout = layouts.find(
+      (file) => /<header[\s>]/.test(file.source) && /ПК «Нордщит»/.test(file.source),
+    );
+    assert.ok(headerLayout, 'layout component must render <header> with ПК «Нордщит»');
+    assert.match(headerLayout.source, /\bbg-paper\b/);
+    assert.match(headerLayout.source, /\bbg-sheet\b/);
+    assert.match(headerLayout.source, /\bfont-sans\b/);
+    assert.match(headerLayout.source, /max-w-document/);
+    assert.doesNotMatch(headerLayout.source, /glass|neon|backdrop-blur/i);
+
+    const indexPage = vueSources().find((file) => file.path.endsWith('/pages/index.vue'));
+    assert.ok(indexPage);
+    assert.doesNotMatch(indexPage.source, /Принят|В расчёте|КП готово|Счёт выставлен/);
+    assert.doesNotMatch(indexPage.source, /\/demo\/links/);
+
+    for (const file of vueSources()) {
+      const markup = file.source
+        .replace(/<script[\s\S]*?<\/script>/g, '')
+        .replace(/<style[\s\S]*?<\/style>/g, '');
+      assert.doesNotMatch(
+        markup,
+        /#[0-9a-fA-F]{3,8}\b/,
+        `${file.path} must not scatter arbitrary hex`,
+      );
+    }
+  });
+
+  it('declares Russian document lang, a public title and a layout heading', () => {
+    assert.match(
+      nuxtConfigSource(),
+      /htmlAttrs:[\s\S]*?lang:\s*['"]ru['"]/,
+      'nuxt.config must set htmlAttrs.lang to ru',
+    );
+
+    const layouts = layoutSources();
+    const headingLayout = layouts.find(
+      (file) => /<h1[\s>]/.test(file.source) && /ПК «Нордщит»/.test(file.source),
+    );
+    assert.ok(
+      headingLayout,
+      'layout must render heading ПК «Нордщит», not only a <p> in the header',
+    );
+
+    const seoHost = [
+      ...layouts,
+      ...vueSources().filter((file) => file.path.endsWith('/app/app.vue')),
+    ].find((file) => /useSeoMeta\s*\(/.test(file.source));
+    assert.ok(seoHost, 'public document must call useSeoMeta');
+    assert.match(seoHost.source, /title:\s*['"]ПК «Нордщит»['"]/);
   });
 });

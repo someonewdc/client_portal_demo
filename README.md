@@ -10,13 +10,14 @@
   `schema.d.ts` руками не править)
 - `apps/api`: `GET /api/v1/health/live`, `GET /api/v1/health/ready` (ready зависит от
   Postgres), `GET /api/v1/demo/links`, `GET /api/v1/requests/{accessSecret}`
-- `apps/web`: Nuxt 4.5.2 на `:3000`, заглушка `/` без Tailwind и без данных заявок
+- `apps/web`: Nuxt 4.5.2 на `:3000`, Tailwind v4 `@theme`, IBM Plex, документный layout;
+  заглушка `/` без данных заявок
 - PostgreSQL в Docker на хосте `5433`, Prisma 7 в `apps/api`
 - план и промпты: `docs/README.md`, `docs/implementation-plan.md`
 
-## Ещё нет (заводят фичи 4–8)
+## Ещё нет (заводят фичи 5–8)
 
-Токены layout, Playwright, экраны заявок, compose-smoke. mock-api нет и не появится.
+Playwright, экраны заявок, compose-smoke. mock-api нет и не появится.
 
 ## Запуск
 
