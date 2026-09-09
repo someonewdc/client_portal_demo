@@ -4,7 +4,7 @@
 
 Фича 2 (домен заявки, идемпотентный seed, `GET /demo/links` и
 `GET /requests/{accessSecret}`, `pnpm generate:api`, `packages/api-client`) реализована
-в `main` (PR #3). Нарезка оставшегося web — D-020 (фичи 3–8). Nuxt и e2e ещё нет.
+в `main` (PR #3). Нарезка оставшегося web — D-020 / D-021 (фичи 3–8). Nuxt и e2e ещё нет.
 
 ## Правила обновления
 
@@ -109,3 +109,6 @@
 | 2026-09-09 | Нарезка 3–8 (D-020)  | `pnpm format` затем `pnpm format:check`                                                                                                                                                                                                                                                   | exit 0                                                                                                                                      |
 | 2026-09-09 | Нарезка 3–8 (D-020)  | `git diff --check`                                                                                                                                                                                                                                                                        | exit 0                                                                                                                                      |
 | 2026-09-09 | Нарезка 3–8 (D-020)  | `pnpm lint` / `pnpm test`                                                                                                                                                                                                                                                                 | не запускались: docs-only (`change-impact-gates`)                                                                                           |
+| 2026-09-09 | Ревью нарезки 3–8    | `pnpm format` затем `pnpm format:check`                                                                                                                                                                                                                                                   | exit 0                                                                                                                                      |
+| 2026-09-09 | Ревью нарезки 3–8    | `git diff --check`                                                                                                                                                                                                                                                                        | exit 0                                                                                                                                      |
+| 2026-09-09 | Ревью нарезки 3–8    | `pnpm lint` / `pnpm test`                                                                                                                                                                                                                                                                 | не запускались: docs-only (`change-impact-gates`)                                                                                           |

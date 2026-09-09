@@ -17,8 +17,9 @@
 | Prisma     |  7.10.0 | `apps/api` (`prisma`, `@prisma/client`, `@prisma/adapter-pg`) |
 | PostgreSQL |      17 | `compose.yaml`, CI service; хост 5433 (D-006, D-017)          |
 
-Nuxt 4 заводит фича 3, Tailwind/`@theme` — фича 4, Playwright — фича 5. Патч-версии сверяют
-с официальными docs и lockfile в том чате. Порты стенда — `docs/decisions.md` (D-006, D-017).
+Nuxt 4 заводит фича 3 **без** Tailwind/PostCSS. Tailwind, CSS-pipeline и `@theme` — фича 4,
+Playwright — фича 5. Патч-версии сверяют с официальными docs и lockfile в том чате. Порты
+стенда — `docs/decisions.md` (D-006, D-017).
 
 CI (`.github/workflows/ci.yml`) пинит third-party actions на commit SHA. `pnpm/action-setup`
 идёт до `actions/setup-node` с `cache: pnpm`. Фича 1 добавила Postgres в CI; фича 8 — e2e,

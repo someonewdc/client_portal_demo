@@ -44,10 +44,12 @@ LLM часто пишет код, затем тесты «под него». Т�
 **E2E (Playwright, скрипт `test:e2e` заводит F5):**
 
 - `baseURL` `http://localhost:3000`. Сценарии индекса и кабинета гоняют против `make dev`
-  (db+api+web) + seed, не против mock-api и не против фиктивного server.
-- F5 — только harness и smoke layout («Нордщит»).
+  (db+api+web) + seed, не против mock-api и не против фиктивного server (D-021).
+- F3 не проверяет HTTP `:3000` (только workspace / Makefile). HTML на порту — smoke F5.
+- F5 — harness и smoke шапки layout; `reuseExistingServer: true`.
 - F6 пишет сценарий индекса **до** страницы: дисклеймер, список из API, клик → `/r/…`.
 - F7 пишет сценарий кабинета и тупика **до** страницы.
+- F8 гоняет те же спеки против `make up`, не против встроенного Playwright `webServer`.
 - Селекторы: role / label / осмысленный `data-testid`, не CSS-хрупкость. Без
   `waitForTimeout` как синхронизации (`verification-honesty`).
 - Scenario-mutating e2e — serial. Этот демо read-only, мутаций нет.

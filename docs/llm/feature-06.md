@@ -16,11 +16,13 @@
 - `AGENTS.md`
 - `docs/README.md`, `docs/implementation-status.md`
 - `docs/frontend.md`, `docs/demo-scenarios.md`, `docs/api-contracts.md`
-- `docs/domain-model.md`, `docs/decisions.md` (D-005, D-008, D-012, D-016, D-020)
+- `docs/domain-model.md`, `docs/decisions.md` (D-005, D-008, D-012, D-015, D-016, D-020,
+  D-021)
 - `docs/testing.md`
 - `.agents/skills/git-delivery/SKILL.md`
 - `.agents/skills/change-impact-gates/SKILL.md`
-- `.agents/skills/nuxt-ssr-data-and-ui/SKILL.md`
+- `.agents/skills/nuxt-ssr-data-and-ui/SKILL.md` — `useFetch` / facade. Часть skill про
+  cookie forwarding и `credentials: 'include'` **не применять** (D-015).
 - `.agents/skills/verification-honesty/SKILL.md`
 - `apps/web` layout, generated `packages/api-client`
 
@@ -32,9 +34,13 @@ mock-api, чат.
 
 ## Стек и границы
 
-- `useFetch`/`useAsyncData` + facade generated client. `GET /demo/links`.
+- Здесь **впервые** facade `createApiClient` над `createProblemAwareClient<Paths>` и
+  первый `useFetch`/`useAsyncData`. `GET /demo/links`.
+- Cookie не форвардить; `credentials: 'include'` не ставить (D-015).
 - Фильтры не нужны. Pinia не для этого списка.
-- Стили только из `@theme`. Русский UI. Cookie/`credentials` — D-015.
+- Стили только из `@theme`. Русский UI.
+- E2E против уже поднятого `make dev` + seed. Не стартовать второй Nuxt. Playwright
+  `webServer` не должен перехватывать `:3000` (`reuseExistingServer`, D-021).
 
 ## TDD (обязательно e2e до страницы)
 
@@ -43,7 +49,7 @@ mock-api, чат.
    `http://localhost:3000`.
 2. Запусти `pnpm test:e2e` против **живого** стенда: `make dev` (db+api+web) + seed —
    **red** (нет списка / нет текста). Не мокать `/demo/links`. Не поднимать фиктивный
-   server вместо Makefile.
+   server и не второй Nuxt на `:3000` вместо Makefile (D-021).
 3. Потом страница.
 4. Не упрощай до `expect(true)`. Не пиши e2e после UI «под скрин».
 
@@ -57,6 +63,8 @@ mock-api, чат.
 ## Что не делать
 
 - Кабинет (фича 7), кнопка «скопировать», смена статусов, каталог.
+- Cookie forwarding, `credentials: 'include'` (D-015).
+- Второй Nuxt / фиктивный `webServer` на `:3000` (D-021).
 - Пушить в `main`.
 
 ## Критерии приёмки

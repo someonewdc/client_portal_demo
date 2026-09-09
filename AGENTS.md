@@ -52,7 +52,8 @@ workspace нет и в production API не добавляй. Новый skill «
 
 Целевая (по `docs/implementation-plan.md`, появляется фичами 3–8):
 
-- `apps/web` — Nuxt 4, Tailwind v4 `@theme`, SSR через `useFetch`/`useAsyncData`;
+- `apps/web` — Nuxt 4 (фича 3 без Tailwind), Tailwind v4 `@theme` (фича 4), SSR через
+  `useFetch`/`useAsyncData` (facade — фича 6);
 - mock-api **нет и не появится**. «Система заявок» = Postgres + seed.
 
 Ещё нет, пока соответствующая фича не в `main`: Nuxt, e2e.

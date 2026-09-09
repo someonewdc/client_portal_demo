@@ -15,11 +15,12 @@
 - `docs/README.md`, `docs/implementation-status.md`
 - `docs/frontend.md`, `docs/demo-scenarios.md`, `docs/api-contracts.md`
 - `docs/domain-model.md`, `docs/acceptance-checklist.md`
-- `docs/decisions.md` (D-007, D-008, D-009, D-012, D-014, D-016, D-020)
+- `docs/decisions.md` (D-007, D-008, D-009, D-012, D-014, D-015, D-016, D-020, D-021)
 - `docs/testing.md`
 - `.agents/skills/git-delivery/SKILL.md`
 - `.agents/skills/change-impact-gates/SKILL.md`
-- `.agents/skills/nuxt-ssr-data-and-ui/SKILL.md`
+- `.agents/skills/nuxt-ssr-data-and-ui/SKILL.md` — cookie / `credentials: 'include'`
+  **не применять** (D-015).
 - `.agents/skills/nestjs-hexagonal-boundaries/SKILL.md` (если трогаешь API)
 - `.agents/skills/verification-honesty/SKILL.md`
 - `apps/web` индекс, `packages/api-client`
@@ -32,10 +33,11 @@ SKU. Файлы — список имён без «скачать». Запре�
 
 ## Стек и границы
 
-- Маршрут `/r/[accessSecret]`. Данные: `GET /requests/{accessSecret}` через generated
-  client + `useAsyncData`/`useFetch`.
+- Маршрут `/r/[accessSecret]`. Данные: `GET /requests/{accessSecret}` через facade
+  фичи 6 + `useAsyncData`/`useFetch`. Cookie / `credentials: 'include'` — D-015.
 - 404 API → тупик UI, не форма. Problem Details: безопасное сообщение + `traceId`.
 - Web не импортирует Prisma / Nest DTO.
+- E2E против `make dev` + seed, без второго Nuxt на `:3000` (D-021).
 
 ## TDD (обязательно e2e до страницы)
 
@@ -43,7 +45,8 @@ SKU. Файлы — список имён без «скачать». Запре�
    каталога (в т.ч. «Вводно-распределительное устройство 400 А»), имя `КП-З-10043.pdf`,
    дата обновления, «ПК «Нордщит»». Второй тест: `/r/this-secret-does-not-exist` —
    тупик, нет полей входа/телефона/OTP. `baseURL` `http://localhost:3000`.
-2. `pnpm test:e2e` против `make dev` + seed — **red**. Не мокать API.
+2. `pnpm test:e2e` против `make dev` + seed — **red**. Не мокать API. Не стартовать
+   второй Nuxt (D-021).
 3. Потом страница.
 4. Не помечай кабинет «готовым», если e2e написан после вёрстки под уже видимый DOM.
 
@@ -57,6 +60,8 @@ SKU. Файлы — список имён без «скачать». Запре�
 ## Что не делать
 
 - Upload, оплата, чат, OTP, редактирование, кнопка скачать, `#`.
+- Cookie forwarding, `credentials: 'include'` (D-015).
+- Второй Nuxt на `:3000` (D-021).
 - Пушить в `main`.
 
 ## Критерии приёмки

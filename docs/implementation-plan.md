@@ -24,14 +24,14 @@
 
 ## Чего ещё нет (фича должна завести; AC проверяет имя script)
 
-| Имя                                 | Где появится |
-| ----------------------------------- | ------------ |
-| `apps/web`, Nuxt, `make dev` + web  | фича 3       |
-| Tailwind `@theme`, IBM Plex, layout | фича 4       |
-| `pnpm test:e2e`, Playwright harness | фича 5       |
-| экран `/` (индекс ссылок)           | фича 6       |
-| экран `/r/{secret}` + 404           | фича 7       |
-| compose-smoke приложений, CI e2e    | фича 8       |
+| Имя                                  | Где появится          |
+| ------------------------------------ | --------------------- |
+| `apps/web`, Nuxt, `make dev` + web   | фича 3 (без Tailwind) |
+| Tailwind, `@theme`, IBM Plex, layout | фича 4                |
+| `pnpm test:e2e`, Playwright harness  | фича 5                |
+| экран `/` (индекс ссылок)            | фича 6                |
+| экран `/r/{secret}` + 404            | фича 7                |
+| compose-smoke приложений, CI e2e     | фича 8                |
 
 Не выдумывай другие имена. Если нужен новый script — заведи его в той фиче, чей AC это
 требует, и запиши в `package.json`.
@@ -41,8 +41,8 @@
 ```text
 docs → 1 Postgres/Prisma/ready
      → 2 заявка + OpenAPI + api-client
-     → 3 Nuxt + make dev (web)
-     → 4 токены + layout
+     → 3 Nuxt + make dev (web, без Tailwind)
+     → 4 Tailwind + токены + layout
      → 5 Playwright harness
      → 6 индекс (e2e red, затем страница)
      → 7 кабинет + 404 (e2e red, затем страница)

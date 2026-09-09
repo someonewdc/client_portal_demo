@@ -15,7 +15,7 @@
 - `AGENTS.md`
 - `docs/README.md`, `docs/implementation-status.md`, `docs/implementation-plan.md`
 - `docs/acceptance-checklist.md`, `docs/demo-scenarios.md`
-- `docs/decisions.md` (D-006, D-013, D-016, D-020)
+- `docs/decisions.md` (D-006, D-013, D-016, D-020, D-021)
 - `docs/testing.md`
 - `.agents/skills/git-delivery/SKILL.md`
 - `.agents/skills/change-impact-gates/SKILL.md`
@@ -39,7 +39,9 @@
   только как composition root.
 - Lifecycle: `make up` / `make down` / `make verify` по факту Makefile. Агентам не
   предписывать сырой `docker compose`, кроме skill.
-- CI: e2e на том же head SHA; не badge.
+- CI: e2e на том же head SHA; не badge. Job гоняет `pnpm test:e2e` **против `make up`**,
+  не против Playwright `webServer` (D-021). В CI `reuseExistingServer` / webServer
+  выключен или не стартует Nuxt на занятом `:3000`.
 
 ## TDD
 
@@ -64,6 +66,7 @@ E2e счастливого пути и 404 **уже должны быть** с �
 ## Что не делать
 
 - Новые экраны, каталог, mock-api, ослабление e2e.
+- CI e2e через встроенный Playwright `webServer` вместо `make up` (D-021).
 - `docker compose down -v` как «лечение» диска (`docker-reclaim-space`).
 - Пушить в `main`.
 
@@ -71,8 +74,9 @@ E2e счастливого пути и 404 **уже должны быть** с �
 
 - Given чистый checkout фич 1–7, When `make up` (уже полный стенд: web+api+postgres) и seed,
   Then ready 200, Postgres на 5433, индекс открывается.
-- `pnpm test:e2e` гоняет сценарии индекса, кабинета З-10043 и битой ссылки.
-- CI запускает e2e (не skip) на PR.
+- `pnpm test:e2e` гоняет сценарии индекса, кабинета З-10043 и битой ссылки против
+  полного стенда, не поднимая встроенный `webServer` вторым web.
+- CI запускает e2e (не skip) на PR против `make up`.
 - Нет новых мёртвых UI.
 - Существующие e2e не переписаны «подгоном» без изменения продукта.
 
