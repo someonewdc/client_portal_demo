@@ -27,9 +27,9 @@ model Request {
   title            String
   status           RequestStatus
   accessSecretHash String                @unique
-  createdAt        DateTime              @default(now())
+  createdAt        DateTime              @default(now()) @db.Timestamptz
   /// Fixture timestamps are part of the demo catalog; set explicitly instead of @updatedAt.
-  updatedAt        DateTime
+  updatedAt        DateTime              @db.Timestamptz
   specLines        RequestSpecLine[]
   files            RequestFile[]
   stageHistory     RequestStageHistory[]
@@ -46,8 +46,8 @@ model RequestSpecLine {
   quantity  Int
   unit      String
   comment   String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @db.Timestamptz
+  updatedAt DateTime @updatedAt @db.Timestamptz
 
   @@unique([requestId, position])
   @@index([requestId])
@@ -61,9 +61,9 @@ model RequestFile {
   fileName   String
   kind       RequestFileKind
   byteSize   Int
-  uploadedAt DateTime
-  createdAt  DateTime        @default(now())
-  updatedAt  DateTime        @updatedAt
+  uploadedAt DateTime        @db.Timestamptz
+  createdAt  DateTime        @default(now()) @db.Timestamptz
+  updatedAt  DateTime        @updatedAt @db.Timestamptz
 
   @@unique([requestId, position])
   @@index([requestId])
@@ -74,9 +74,9 @@ model RequestStageHistory {
   requestId String
   request   Request       @relation(fields: [requestId], references: [id], onDelete: Cascade)
   status    RequestStatus
-  reachedAt DateTime
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @updatedAt
+  reachedAt DateTime      @db.Timestamptz
+  createdAt DateTime      @default(now()) @db.Timestamptz
+  updatedAt DateTime      @updatedAt @db.Timestamptz
 
   @@unique([requestId, status])
   @@index([requestId])

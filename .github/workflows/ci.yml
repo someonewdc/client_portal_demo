@@ -48,6 +48,8 @@ jobs:
         run: pnpm db:migrate
       - name: Generate API client
         run: pnpm generate:api
+      - name: Generated OpenAPI must match the commit
+        run: git diff --exit-code -- packages/api-client/openapi.json packages/api-client/src/schema.d.ts
       - name: Lint
         run: pnpm lint
       - name: Architecture boundaries

@@ -45,7 +45,7 @@ describe('GetRequestByAccessSecretUseCase', () => {
     const hash = hashOpaqueToken(FIXTURE_SECRET);
     const lookups: string[] = [];
     const port: RequestQueryPort = {
-      listRequests: async () => [],
+      listRequestSummaries: async () => [],
       findByAccessSecretHash: async (value) => {
         lookups.push(value);
         return value === hash ? quoteRecord(hash) : null;
@@ -65,7 +65,7 @@ describe('GetRequestByAccessSecretUseCase', () => {
 
   it('throws a typed not-found error for an unknown secret', async () => {
     const port: RequestQueryPort = {
-      listRequests: async () => [],
+      listRequestSummaries: async () => [],
       findByAccessSecretHash: async () => null,
     };
     const useCase = new GetRequestByAccessSecretUseCase(port);

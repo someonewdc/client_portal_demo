@@ -3,6 +3,8 @@ import { isProblemDetails } from '@client-portal/platform-core/problem-details';
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+process.env.TZ = 'Europe/Moscow';
+
 const intendedDatabaseUrl =
   process.env.DATABASE_URL ??
   'postgresql://client_portal:client_portal@127.0.0.1:5433/client_portal';
@@ -13,32 +15,96 @@ const UNKNOWN_SECRET = 'unknown-secret-not-in-seed';
 const EXPECTED_DEMO_LINKS = [
   {
     publicNumber: 'З-10041',
+    counterpartyName: 'ООО «Северэнергомонтаж»',
     title: 'Щит ЩО-70 800 А',
+    status: 'accepted',
+    statusLabel: 'Принят',
     portalPath: '/r/seed-z10041-accepted-severenergo',
+    updatedAt: '2026-09-01T10:00:00.000Z',
   },
   {
     publicNumber: 'З-10042',
+    counterpartyName: 'АО «ПортЛайн»',
     title: 'НКУ освещения причала',
+    status: 'in_calculation',
+    statusLabel: 'В расчёте',
     portalPath: '/r/seed-z10042-calc-portline',
+    updatedAt: '2026-09-02T11:00:00.000Z',
   },
   {
     publicNumber: 'З-10043',
+    counterpartyName: 'ИП Кузнецов П.А.',
     title: 'ВРУ 400 А',
+    status: 'quote_ready',
+    statusLabel: 'КП готово',
     portalPath: '/r/seed-z10043-quote-kuznetsov',
+    updatedAt: '2026-09-04T12:00:00.000Z',
   },
   {
     publicNumber: 'З-10044',
+    counterpartyName: 'ООО «Теплицы Поволжья»',
     title: 'Щит управления теплицами',
+    status: 'invoice_issued',
+    statusLabel: 'Счёт выставлен',
     portalPath: '/r/seed-z10044-invoice-teplitsy',
+    updatedAt: '2026-09-06T15:00:00.000Z',
   },
   {
     publicNumber: 'З-10045',
+    counterpartyName: 'ЗАО «Горсвет»',
     title: 'Шкафы наружного освещения',
+    status: 'in_calculation',
+    statusLabel: 'В расчёте',
     portalPath: '/r/seed-z10045-calc-gorsvet',
+    updatedAt: '2026-09-03T14:00:00.000Z',
   },
 ] as const;
 
+const EXPECTED_Z10043 = {
+  publicNumber: 'З-10043',
+  counterpartyName: 'ИП Кузнецов П.А.',
+  title: 'ВРУ 400 А',
+  status: 'quote_ready',
+  statusLabel: 'КП готово',
+  updatedAt: '2026-09-04T12:00:00.000Z',
+  plantName: 'ПК «Нордщит»',
+  stages: [
+    { status: 'accepted', label: 'Принят', reachedAt: '2026-09-01T09:00:00.000Z' },
+    { status: 'in_calculation', label: 'В расчёте', reachedAt: '2026-09-02T11:00:00.000Z' },
+    { status: 'quote_ready', label: 'КП готово', reachedAt: '2026-09-04T12:00:00.000Z' },
+    { status: 'invoice_issued', label: 'Счёт выставлен', reachedAt: null },
+  ],
+  specLines: [
+    {
+      name: 'Вводно-распределительное устройство 400 А',
+      quantity: 1,
+      unit: 'шт',
+      comment: 'IP54, навесной',
+    },
+    {
+      name: 'Рубильник ввода',
+      quantity: 1,
+      unit: 'шт',
+    },
+  ],
+  files: [
+    {
+      fileName: 'Опросный-лист-З-10043.pdf',
+      kind: 'questionnaire',
+      byteSize: 120400,
+      uploadedAt: '2026-09-01T09:05:00.000Z',
+    },
+    {
+      fileName: 'КП-З-10043.pdf',
+      kind: 'quote',
+      byteSize: 240000,
+      uploadedAt: '2026-09-04T12:00:00.000Z',
+    },
+  ],
+} as const;
+
 function applyEnv(databaseUrl: string): void {
+  process.env.TZ = 'Europe/Moscow';
   process.env.API_PORT = '3001';
   process.env.DATABASE_URL = databaseUrl;
   process.env.LOG_LEVEL = 'error';
@@ -49,7 +115,7 @@ function applyEnv(databaseUrl: string): void {
 async function startSeededApp(): Promise<NestFastifyApplication> {
   applyEnv(intendedDatabaseUrl);
   vi.resetModules();
-  const { applyRequestSeed } = await import('../../prisma/seed.js');
+  const { applyRequestSeed } = await import('./infrastructure/apply-request-seed.js');
   await applyRequestSeed();
   await applyRequestSeed();
   const { createApplication } = await import('../bootstrap/create-application.js');
@@ -72,7 +138,7 @@ describe('request HTTP', () => {
     }
   });
 
-  it('returns five catalog demo links with title and portalPath', async () => {
+  it('returns five catalog demo links 1:1 including status, counterparty and UTC updatedAt', async () => {
     const response = await app!.inject({ method: 'GET', url: '/api/v1/demo/links' });
     const body: unknown = response.json();
     const items =
@@ -87,11 +153,10 @@ describe('request HTTP', () => {
         : [];
 
     expect(response.statusCode).toBe(200);
-    expect(items).toHaveLength(5);
-    expect(items).toEqual(EXPECTED_DEMO_LINKS.map((link) => expect.objectContaining({ ...link })));
+    expect(items).toEqual([...EXPECTED_DEMO_LINKS]);
   });
 
-  it('returns the quote fixture by access secret with catalog spec and files', async () => {
+  it('returns the quote fixture by access secret with catalog dates, stages and files 1:1', async () => {
     const response = await app!.inject({
       method: 'GET',
       url: `/api/v1/requests/${Z10043_SECRET}`,
@@ -101,62 +166,43 @@ describe('request HTTP', () => {
     const hash = hashOpaqueToken(Z10043_SECRET);
 
     expect(response.statusCode).toBe(200);
-    expect(body).toMatchObject({
-      data: {
-        publicNumber: 'З-10043',
-        title: 'ВРУ 400 А',
-        status: 'quote_ready',
-        specLines: [
-          {
-            name: 'Вводно-распределительное устройство 400 А',
-            quantity: 1,
-            unit: 'шт',
-            comment: 'IP54, навесной',
-          },
-          {
-            name: 'Рубильник ввода',
-            quantity: 1,
-            unit: 'шт',
-          },
-        ],
-      },
+    expect(body).toEqual({
+      data: EXPECTED_Z10043,
+      meta: { traceId: expect.any(String) },
     });
-    expect(body).toMatchObject({
-      data: {
-        stages: [
-          { status: 'accepted' },
-          { status: 'in_calculation' },
-          { status: 'quote_ready' },
-          { status: 'invoice_issued' },
-        ],
-      },
-    });
-    const stages =
-      typeof body === 'object' &&
-      body !== null &&
-      'data' in body &&
-      typeof body.data === 'object' &&
-      body.data !== null &&
-      'stages' in body.data &&
-      Array.isArray(body.data.stages)
-        ? body.data.stages
-        : [];
-    expect(stages).toHaveLength(4);
-    const files =
-      typeof body === 'object' &&
-      body !== null &&
-      'data' in body &&
-      typeof body.data === 'object' &&
-      body.data !== null &&
-      'files' in body.data &&
-      Array.isArray(body.data.files)
-        ? body.data.files
-        : [];
-    expect(files).toEqual(
-      expect.arrayContaining([expect.objectContaining({ fileName: 'КП-З-10043.pdf' })]),
-    );
     expect(payload).not.toContain(hash);
     expect(body).not.toMatchObject({ data: { accessSecretHash: hash } });
+  });
+
+  it('stores catalog instants as timestamptz so UTC ISO does not depend on the host TZ', async () => {
+    const { PrismaService } = await import('../persistence/prisma.service.js');
+    const columns = await app!.get(PrismaService).asClient().$queryRaw<
+      Array<{ column_name: string; data_type: string; table_name: string }>
+    >`
+      SELECT table_name, column_name, data_type
+      FROM information_schema.columns
+      WHERE table_schema = 'public'
+        AND (
+          (table_name = 'Request' AND column_name = 'updatedAt')
+          OR (table_name = 'RequestFile' AND column_name = 'uploadedAt')
+          OR (table_name = 'RequestStageHistory' AND column_name = 'reachedAt')
+        )
+      ORDER BY table_name, column_name
+    `;
+
+    expect(columns).toEqual([
+      { table_name: 'Request', column_name: 'updatedAt', data_type: 'timestamp with time zone' },
+      {
+        table_name: 'RequestFile',
+        column_name: 'uploadedAt',
+        data_type: 'timestamp with time zone',
+      },
+      {
+        table_name: 'RequestStageHistory',
+        column_name: 'reachedAt',
+        data_type: 'timestamp with time zone',
+      },
+    ]);
   });
 
   it('returns 404 Problem Details for an unknown secret without leaking SQL, stack or the secret', async () => {

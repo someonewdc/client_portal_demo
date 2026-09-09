@@ -46,9 +46,10 @@ schema into another product.
 
 ## Project-specific notes
 
-A generated project `api-client` is not in this boilerplate yet. When it appears, generate
-`Paths` from this product's OpenAPI; do not copy another project's schema. Workspace identity is
-private `@client-portal/*@0.0.0`. See [`docs/shared-core.md`](../../docs/shared-core.md).
+This workspace generates `@client-portal/api-client` `Paths` from the product OpenAPI.
+Do not copy that schema into another product. The runtime facade over this transport is
+added with the storefront (feature 3). Workspace identity is private `@client-portal/*@0.0.0`.
+See [`docs/shared-core.md`](../../docs/shared-core.md).
 
 Publication is out of scope until license, registry, versioning, ownership and changelog/release
 policy are chosen. This package has no `LICENSE` or `publishConfig`.

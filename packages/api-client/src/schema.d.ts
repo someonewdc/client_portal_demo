@@ -76,6 +76,21 @@ export interface paths {
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
+        HealthDataDto: {
+            /**
+             * @example ok
+             * @enum {string}
+             */
+            status: "ok";
+        };
+        TraceMetaDto: {
+            /** Format: uuid */
+            traceId: string;
+        };
+        HealthResponseDto: {
+            data: components["schemas"]["HealthDataDto"];
+            meta: components["schemas"]["TraceMetaDto"];
+        };
         DemoLinkItemDto: {
             /** @example З-10041 */
             publicNumber: string;
@@ -101,10 +116,6 @@ export interface components {
         DemoLinksDataDto: {
             items: components["schemas"]["DemoLinkItemDto"][];
         };
-        TraceMetaDto: {
-            /** Format: uuid */
-            traceId: string;
-        };
         DemoLinksResponseDto: {
             data: components["schemas"]["DemoLinksDataDto"];
             meta: components["schemas"]["TraceMetaDto"];
@@ -122,7 +133,10 @@ export interface components {
         };
         RequestSpecLineDto: {
             name: string;
-            /** @example 1 */
+            /**
+             * Format: int32
+             * @example 1
+             */
             quantity: number;
             /** @example шт */
             unit: string;
@@ -134,7 +148,10 @@ export interface components {
             fileName: string;
             /** @enum {string} */
             kind: "questionnaire" | "quote" | "invoice";
-            /** @example 240000 */
+            /**
+             * Format: int32
+             * @example 240000
+             */
             byteSize: number;
             /**
              * Format: date-time
@@ -220,7 +237,9 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["HealthResponseDto"];
+                };
             };
         };
     };
@@ -238,14 +257,18 @@ export interface operations {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/json": components["schemas"]["HealthResponseDto"];
+                };
             };
             /** @description API ещё не слушает, уже останавливается или база данных недоступна */
             503: {
                 headers: {
                     [name: string]: unknown;
                 };
-                content?: never;
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
             };
         };
     };
@@ -287,12 +310,13 @@ export interface operations {
                     "application/json": components["schemas"]["RequestPortalResponseDto"];
                 };
             };
+            /** @description Заявка не найдена по секрету */
             404: {
                 headers: {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ProblemDetailsDto"];
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
                 };
             };
         };

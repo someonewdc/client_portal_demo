@@ -123,6 +123,13 @@ describe('architecture boundary checker', () => {
       forbidden: "import type { AuthenticatedActor } from '../../identity/domain/identity.js';",
       rule: 'api-cross-context-import',
     },
+    {
+      name: 'treats http DTOs as a context-internal layer',
+      path: 'apps/api/src/openapi/document.ts',
+      allowed: "import { RequestsModule } from '../requests/public.js';",
+      forbidden: "import { DemoLinkItemDto } from '../requests/http/request.dto.js';",
+      rule: 'api-cross-context-import',
+    },
   ];
 
   for (const testCase of cases) {

@@ -19,13 +19,13 @@ import { TraceMetaDto } from '@client-portal/nestjs-core/openapi';
 const adapter = createCorrelatedFastifyAdapter();
 ```
 
-| Export             | Contract                                                                       |
-| ------------------ | ------------------------------------------------------------------------------ |
-| `/bootstrap`       | Correlated Fastify adapter, Helmet, validation pipe and shutdown hooks         |
-| `/logging`         | `nestjs-pino` dynamic module with safe request serializer and secret redaction |
-| `/validation`      | Strict `ValidationPipe` policy and typed per-DTO pipe                          |
-| `/problem-details` | Nest filter/logging over pure `platform-core/problem-details`                  |
-| `/openapi`         | `TraceMetaDto`, `ProblemDetailsDto` and documented rate-limit response         |
+| Export             | Contract                                                                                 |
+| ------------------ | ---------------------------------------------------------------------------------------- |
+| `/bootstrap`       | Correlated Fastify adapter, Helmet, validation pipe and shutdown hooks                   |
+| `/logging`         | `nestjs-pino` dynamic module with safe request serializer and secret redaction           |
+| `/validation`      | Strict `ValidationPipe` policy and typed per-DTO pipe                                    |
+| `/problem-details` | Nest filter/logging over pure `platform-core/problem-details`                            |
+| `/openapi`         | `TraceMetaDto`, `ProblemDetailsDto`, documented rate-limit and Problem Details responses |
 
 ## Dependencies and peers
 

@@ -55,3 +55,11 @@ export const RATE_LIMIT_RESPONSE = {
     },
   },
 } satisfies ApiResponseNoStatusOptions;
+
+export const PROBLEM_DETAILS_RESPONSE = {
+  content: {
+    [PROBLEM_DETAILS_MEDIA_TYPE]: {
+      schema: { $ref: '#/components/schemas/ProblemDetailsDto' },
+    },
+  },
+} satisfies ApiResponseNoStatusOptions;

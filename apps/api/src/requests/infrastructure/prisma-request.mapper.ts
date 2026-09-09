@@ -1,13 +1,16 @@
-import type { RequestRecord } from '../domain/request.js';
+import type { RequestRecord, RequestSummary } from '../domain/request.js';
 import { isRequestFileKind, isRequestStatus } from '../domain/request-status.js';
 
-interface PrismaRequestRow {
+interface PrismaRequestSummaryRow {
   readonly publicNumber: string;
   readonly counterpartyName: string;
   readonly title: string;
   readonly status: string;
   readonly updatedAt: Date;
   readonly accessSecretHash: string;
+}
+
+interface PrismaRequestRow extends PrismaRequestSummaryRow {
   readonly specLines: readonly {
     readonly name: string;
     readonly quantity: number;
@@ -40,7 +43,7 @@ function requireFileKind(value: string) {
   return value;
 }
 
-export function mapRequestRecord(row: PrismaRequestRow): RequestRecord {
+export function mapRequestSummary(row: PrismaRequestSummaryRow): RequestSummary {
   return {
     publicNumber: row.publicNumber,
     counterpartyName: row.counterpartyName,
@@ -48,6 +51,12 @@ export function mapRequestRecord(row: PrismaRequestRow): RequestRecord {
     status: requireStatus(row.status),
     updatedAt: row.updatedAt.toISOString(),
     accessSecretHash: row.accessSecretHash,
+  };
+}
+
+export function mapRequestRecord(row: PrismaRequestRow): RequestRecord {
+  return {
+    ...mapRequestSummary(row),
     specLines: row.specLines.map((line) => ({
       name: line.name,
       quantity: line.quantity,

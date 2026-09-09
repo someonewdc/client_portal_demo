@@ -33,6 +33,7 @@ verify: up
 	pnpm db:generate
 	pnpm db:migrate
 	pnpm generate:api
+	git diff --exit-code -- packages/api-client/openapi.json packages/api-client/src/schema.d.ts
 	pnpm check:boundaries
 	pnpm lint
 	pnpm typecheck

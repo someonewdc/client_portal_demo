@@ -19,13 +19,16 @@ export interface RequestStageHistoryEntry {
   readonly reachedAt: string;
 }
 
-export interface RequestRecord {
+export interface RequestSummary {
   readonly publicNumber: string;
   readonly counterpartyName: string;
   readonly title: string;
   readonly status: RequestStatus;
   readonly updatedAt: string;
   readonly accessSecretHash: string;
+}
+
+export interface RequestRecord extends RequestSummary {
   readonly specLines: readonly RequestSpecLine[];
   readonly files: readonly RequestFileMeta[];
   readonly stageHistory: readonly RequestStageHistoryEntry[];

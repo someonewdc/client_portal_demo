@@ -44,8 +44,9 @@ Skill `nestjs-hexagonal-boundaries`:
 
 ## OpenAPI и клиент
 
-Когда появится фича 2: `pnpm generate:api` пишет `packages/api-client`. Web — один facade
-над `createProblemAwareClient<Paths>`. Prefix `/api/v1` на base URL.
+`pnpm generate:api` пишет `packages/api-client` (types-only `Paths`; facade `createApiClient`
+— фича 3). Web — один facade над `createProblemAwareClient<Paths>`. Prefix `/api/v1` на
+base URL.
 
 ## Стенд
 

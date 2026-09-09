@@ -59,7 +59,7 @@ export class RequestSpecLineDto {
   @ApiProperty({ type: String })
   name!: string;
 
-  @ApiProperty({ type: Number, example: 1 })
+  @ApiProperty({ type: 'integer', example: 1, format: 'int32' })
   quantity!: number;
 
   @ApiProperty({ example: 'шт', type: String })
@@ -76,7 +76,7 @@ export class RequestFileDto {
   @ApiProperty({ enum: REQUEST_FILE_KINDS, type: String })
   kind!: string;
 
-  @ApiProperty({ type: Number, example: 240000 })
+  @ApiProperty({ type: 'integer', example: 240000, format: 'int32' })
   byteSize!: number;
 
   @ApiProperty({ example: '2026-09-04T12:00:00.000Z', format: 'date-time', type: String })

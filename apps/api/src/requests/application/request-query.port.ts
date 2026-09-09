@@ -1,10 +1,10 @@
-import type { RequestRecord } from '../domain/request.js';
+import type { RequestRecord, RequestSummary } from '../domain/request.js';
 
 export const REQUEST_QUERY = Symbol('REQUEST_QUERY');
 
-export type { RequestRecord };
+export type { RequestRecord, RequestSummary };
 
 export interface RequestQueryPort {
-  listRequests(): Promise<readonly RequestRecord[]>;
+  listRequestSummaries(): Promise<readonly RequestSummary[]>;
   findByAccessSecretHash(accessSecretHash: string): Promise<RequestRecord | null>;
 }

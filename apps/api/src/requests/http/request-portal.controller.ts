@@ -1,4 +1,4 @@
-import { ProblemDetailsDto } from '@client-portal/nestjs-core/openapi';
+import { PROBLEM_DETAILS_RESPONSE } from '@client-portal/nestjs-core/openapi';
 import { Controller, Get, Inject, Param, Req } from '@nestjs/common';
 import {
   ApiNotFoundResponse,
@@ -26,7 +26,10 @@ export class RequestPortalController {
   @ApiOperation({ summary: 'Кабинет одной заявки по секрету в URL' })
   @ApiParam({ name: 'accessSecret', type: String })
   @ApiOkResponse({ type: RequestPortalResponseDto })
-  @ApiNotFoundResponse({ type: ProblemDetailsDto })
+  @ApiNotFoundResponse({
+    description: 'Заявка не найдена по секрету',
+    ...PROBLEM_DETAILS_RESPONSE,
+  })
   async show(
     @Param('accessSecret') accessSecret: string,
     @Req() request: FastifyRequest,

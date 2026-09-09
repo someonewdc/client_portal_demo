@@ -34,9 +34,11 @@ LLM часто пишет код, затем тесты «под него». Т�
 - F1: `GET /api/v1/health/live` 200 при недоступной БД; `GET /health/ready` 503 Problem
   Details после `markReady`, если БД недоступна; 200 `{ data.status: "ok" }` когда
   Postgres отвечает (`make verify` / CI-сервис, не сырой `pnpm test` без БД).
-- F2: `GET /demo/links` — 5 items, поля сидов 1:1 из `docs/domain-model.md`;
-  `GET /requests/{secret}` 200 для fixture; 404 Problem Details: `detail` без SQL/stack и
-  без секрета; `instance`/path могут содержать секрет (D-014).
+- F2: `GET /demo/links` — 5 items, поля сидов 1:1 из `docs/domain-model.md` (включая
+  `status`/`statusLabel`/`counterpartyName`/`updatedAt`); `GET /requests/{secret}` 200 для
+  fixture с датами, подписями шагов и полным `files`; 404 Problem Details: `detail` без
+  SQL/stack и без секрета; `instance`/path могут содержать секрет (D-014). HTTP-тесты
+  фиксируют UTC ISO при `TZ=Europe/Moscow`; колонки дат — `timestamptz`.
 
 **E2E (Playwright, скрипт `test:e2e` заводит F3):**
 

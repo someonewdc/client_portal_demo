@@ -12,12 +12,13 @@
     }
   },
   "scripts": {
-    "generate": "pnpm dlx openapi-typescript@7.13.0 ./openapi.json -o ./src/schema.d.ts",
+    "generate": "openapi-typescript ./openapi.json -o ./src/schema.d.ts",
     "typecheck": "tsc --noEmit --incremental false",
     "build": "tsc --noEmit --incremental false"
   },
   "devDependencies": {
     "@client-portal/tsconfig": "workspace:*",
+    "openapi-typescript": "7.13.0",
     "typescript": "5.9.3"
   }
 }

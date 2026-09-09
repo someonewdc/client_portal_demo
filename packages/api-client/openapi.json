@@ -7,7 +7,14 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "Процесс жив"
+            "description": "Процесс жив",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponseDto"
+                }
+              }
+            }
           }
         },
         "summary": "Проверить, что процесс API работает",
@@ -22,10 +29,24 @@
         "parameters": [],
         "responses": {
           "200": {
-            "description": "API принимает трафик"
+            "description": "API принимает трафик",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HealthResponseDto"
+                }
+              }
+            }
           },
           "503": {
-            "description": "API ещё не слушает, уже останавливается или база данных недоступна"
+            "description": "API ещё не слушает, уже останавливается или база данных недоступна",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
           }
         },
         "summary": "Проверить готовность API принимать трафик",
@@ -81,9 +102,9 @@
             }
           },
           "404": {
-            "description": "",
+            "description": "Заявка не найдена по секрету",
             "content": {
-              "application/json": {
+              "application/problem+json": {
                 "schema": {
                   "$ref": "#/components/schemas/ProblemDetailsDto"
                 }
@@ -112,6 +133,48 @@
   ],
   "components": {
     "schemas": {
+      "HealthDataDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok"
+            ],
+            "example": "ok"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
+      "TraceMetaDto": {
+        "type": "object",
+        "properties": {
+          "traceId": {
+            "type": "string",
+            "format": "uuid"
+          }
+        },
+        "required": [
+          "traceId"
+        ]
+      },
+      "HealthResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HealthDataDto"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/TraceMetaDto"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
       "DemoLinkItemDto": {
         "type": "object",
         "properties": {
@@ -175,18 +238,6 @@
           "items"
         ]
       },
-      "TraceMetaDto": {
-        "type": "object",
-        "properties": {
-          "traceId": {
-            "type": "string",
-            "format": "uuid"
-          }
-        },
-        "required": [
-          "traceId"
-        ]
-      },
       "DemoLinksResponseDto": {
         "type": "object",
         "properties": {
@@ -238,8 +289,9 @@
             "type": "string"
           },
           "quantity": {
-            "type": "number",
-            "example": 1
+            "type": "integer",
+            "example": 1,
+            "format": "int32"
           },
           "unit": {
             "type": "string",
@@ -272,8 +324,9 @@
             ]
           },
           "byteSize": {
-            "type": "number",
-            "example": 240000
+            "type": "integer",
+            "example": 240000,
+            "format": "int32"
           },
           "uploadedAt": {
             "type": "string",
