@@ -1,0 +1,16 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+node_modules/
+.pnpm-store/
+dist/
+.nuxt/
+.output/
+coverage/
+playwright-report/
+test-results/
+blob-report/
+apps/api/src/generated/prisma/
+*.log
+.tmp/

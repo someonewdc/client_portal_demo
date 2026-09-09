@@ -1,0 +1,41 @@
+{
+  "name": "client-portal-demo",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.21.0",
+  "engines": {
+    "node": ">=24.11.0 <25",
+    "pnpm": ">=11 <12"
+  },
+  "scripts": {
+    "build:core": "pnpm --filter @client-portal/platform-core build && pnpm --filter @client-portal/nestjs-core build && pnpm --filter @client-portal/openapi-client-core build",
+    "predev": "pnpm build:core",
+    "dev": "dotenv -e .env -- pnpm --filter @client-portal/api dev",
+    "build": "pnpm -r --workspace-concurrency=1 --if-present build",
+    "lint": "eslint . --max-warnings=0",
+    "check:boundaries": "node scripts/check-boundaries.mjs",
+    "lint:fix": "eslint . --fix",
+    "pretypecheck": "pnpm build:core",
+    "typecheck": "pnpm -r --workspace-concurrency=1 --if-present typecheck",
+    "pretest": "pnpm build:core",
+    "test": "pnpm -r --workspace-concurrency=1 --if-present test && node --test scripts/check-boundaries.spec.mjs scripts/test-packages.spec.mjs",
+    "test:packages": "node --test scripts/test-packages.spec.mjs && node scripts/test-packages.mjs",
+    "format": "prettier . --write",
+    "format:check": "prettier . --check"
+  },
+  "devDependencies": {
+    "@client-portal/eslint-config": "workspace:*",
+    "@client-portal/platform-core": "workspace:*",
+    "@eslint/js": "9.39.5",
+    "@types/node": "24.13.3",
+    "dotenv-cli": "11.0.0",
+    "eslint": "9.39.5",
+    "eslint-plugin-vue": "10.10.0",
+    "globals": "17.9.0",
+    "prettier": "3.9.6",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.67.0",
+    "vue-eslint-parser": "10.4.1"
+  }
+}

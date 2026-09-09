@@ -1,0 +1,71 @@
+{
+  "name": "@client-portal/platform-core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=24.11.0 <25"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "!dist/.tsbuildinfo"
+  ],
+  "exports": {
+    "./correlation-id": {
+      "types": "./dist/correlation-id.d.ts",
+      "import": "./dist/correlation-id.js"
+    },
+    "./environment": {
+      "types": "./dist/environment.d.ts",
+      "import": "./dist/environment.js"
+    },
+    "./feature-flags": {
+      "types": "./dist/feature-flags.d.ts",
+      "import": "./dist/feature-flags.js"
+    },
+    "./http": {
+      "types": "./dist/http.d.ts",
+      "import": "./dist/http.js"
+    },
+    "./opaque-token": {
+      "types": "./dist/opaque-token.d.ts",
+      "import": "./dist/opaque-token.js"
+    },
+    "./permissions": {
+      "types": "./dist/permissions.d.ts",
+      "import": "./dist/permissions.js"
+    },
+    "./problem-details": {
+      "types": "./dist/problem-details.d.ts",
+      "import": "./dist/problem-details.js"
+    },
+    "./input": {
+      "types": "./dist/input.d.ts",
+      "import": "./dist/input.js"
+    },
+    "./json": {
+      "types": "./dist/json.d.ts",
+      "import": "./dist/json.js"
+    },
+    "./url": {
+      "types": "./dist/url.d.ts",
+      "import": "./dist/url.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit --incremental false",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@client-portal/tsconfig": "workspace:*",
+    "@types/node": "24.13.3",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  }
+}

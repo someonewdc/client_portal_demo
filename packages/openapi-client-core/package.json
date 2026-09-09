@@ -1,0 +1,36 @@
+{
+  "name": "@client-portal/openapi-client-core",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "sideEffects": false,
+  "engines": {
+    "node": ">=24.11.0 <25"
+  },
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "README.md",
+    "!dist/.tsbuildinfo"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "typecheck": "tsc --noEmit --incremental false",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@client-portal/platform-core": "workspace:*",
+    "openapi-fetch": "0.17.0"
+  },
+  "devDependencies": {
+    "@client-portal/tsconfig": "workspace:*",
+    "typescript": "5.9.3",
+    "vitest": "4.1.10"
+  }
+}

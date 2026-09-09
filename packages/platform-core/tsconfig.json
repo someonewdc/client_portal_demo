@@ -1,0 +1,13 @@
+{
+  "extends": "@client-portal/tsconfig/base.json",
+  "compilerOptions": {
+    "declaration": true,
+    "incremental": true,
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "sourceMap": true,
+    "tsBuildInfoFile": "./dist/.tsbuildinfo"
+  },
+  "include": ["src/**/*.ts"],
+  "exclude": ["dist", "node_modules", "src/**/*.spec.ts"]
+}
