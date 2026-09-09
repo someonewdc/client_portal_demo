@@ -7,7 +7,7 @@
 
 ## Зависимости
 
-Фича 1 в `main` (Postgres, Prisma, ready, `db:generate` / migrate). Фич 3–6 нет.
+Фича 1 в `main` (Postgres, Prisma, ready, `db:generate` / migrate). Фич 3–8 нет.
 
 ## Read set
 

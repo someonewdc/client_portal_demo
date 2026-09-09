@@ -1,71 +1,77 @@
-# Реализуй фичу 4: экран списка демо-ссылок
+# Реализуй фичу 4: токены Tailwind и документный layout
 
 ## Цель
 
-Ведущий за 10 секунд открывает «то, что отправили бы в мессенджер» и кликом входит в кабинет.
-Заказчик этот список не видит — это надо написать на странице явно.
+Зритель должен увидеть лист бумаги, а не серый каркас и не SaaS-дашборд. Этот шаг **впервые**
+подключает Tailwind и фиксирует визуальный язык `docs/frontend.md` на уже существующем
+`apps/web`. Данных заявок и e2e ещё нет.
 
 ## Зависимости
 
-Фичи 1–3 в `main` (API `/demo/links`, Nuxt layout, `pnpm test:e2e`). Фича 5 ещё нет:
-клик может вести на `/r/{secret}`, который пока тупик/каркас — e2e фичи 4 проверяет
-**переход URL и данные индекса**, не содержимое кабинета.
+Фичи 1–3 в `main` (`apps/web`, `make dev` с web). Фич 5–8 нет. В F3 **нет** Tailwind —
+если он уже стоит, это регресс границы D-020: сними и ставь здесь.
 
 ## Read set
 
 - `AGENTS.md`
 - `docs/README.md`, `docs/implementation-status.md`
-- `docs/frontend.md`, `docs/demo-scenarios.md`, `docs/api-contracts.md`
-- `docs/domain-model.md`, `docs/decisions.md` (D-005, D-008, D-012, D-016)
+- `docs/frontend.md` (таблица hex), `docs/decisions.md` (D-005, D-011, D-015, D-020)
 - `docs/testing.md`
 - `.agents/skills/git-delivery/SKILL.md`
 - `.agents/skills/change-impact-gates/SKILL.md`
-- `.agents/skills/nuxt-ssr-data-and-ui/SKILL.md`
+- `.agents/skills/nuxt-ssr-data-and-ui/SKILL.md` — Tailwind-first от `@theme`. Часть про
+  cookie / `credentials: 'include'` **не применять** (D-015; fetch — фича 6).
 - `.agents/skills/verification-honesty/SKILL.md`
-- `apps/web` layout, generated `packages/api-client`
+- `apps/web` из фичи 3
 
 ## Контекст продукта
 
-ПК «Нордщит», не Вольтарис. Служебный индекс, не админка. Запрещено: каталог, логин,
-копирование ссылки как основной жест, мёртвые `#`, декоративные статусы не из API,
-mock-api, чат.
+ПК «Нордщит», русский документный UI. Запрещено: glassmorphism, нейрослоп, bento, неон,
+3D, «AI dashboard», токены Вольтариса, каталог, mock-api.
 
 ## Стек и границы
 
-- `useFetch`/`useAsyncData` + facade generated client. `GET /demo/links`.
-- Фильтры не нужны. Pinia не для этого списка.
-- Стили только из `@theme`. Русский UI.
+- Здесь ставятся Tailwind v4, CSS-pipeline Nuxt (PostCSS / `@tailwindcss/vite` — тот путь,
+  который сверят с официальными docs) и `@theme`. Патч — lockfile + docs в этом чате
+  (D-011).
+- Значения `@theme` — буквально из `docs/frontend.md`: `--color-paper: #f4f1ea`,
+  `--color-sheet: #fffcf7`, `--color-ink: #1c1917`, `--color-ink-muted: #5c564e`,
+  `--color-accent: #3d5a73`, `--color-rule: #d6d0c4`.
+- Шрифт: `@fontsource/ibm-plex-sans` (кириллица), не Google Fonts CDN (D-015).
+- Script `test:e2e` **не заводить**. Не тяни `GET /demo/links`.
 
-## TDD (обязательно e2e до страницы)
+## TDD
 
-1. Напиши Playwright по AC: дисклеймер, подпись про мессенджер, 5 номеров З-10041…,
-   клик по З-10043 ведёт на `/r/seed-z10043-quote-kuznetsov`. `baseURL`
-   `http://localhost:3000`.
-2. Запусти `pnpm test:e2e` против **живого** стенда: `make dev` (db+api+web) + seed —
-   **red** (нет списка / нет текста). Не мокать `/demo/links`. Не поднимать фиктивный
-   server вместо Makefile.
-3. Потом страница.
-4. Не упрощай до `expect(true)`. Не пиши e2e после UI «под скрин».
+1. Targeted-тест, который **валится на каркасе F3**:
+   - hex из `frontend.md` есть в CSS-файле, который **импортирован** из layout или
+     `nuxt.config` (не «файл лежит в репо, но никуда не подключён»);
+   - шапка «ПК «Нордщит»» рендерится **layout-компонентом** (не сырой строкой только в
+     `pages/index`), колонка документа задана token/width из layout.
+2. **Red**, потом стили.
+3. Не зеленей от текста «Нордщит» на заглушке F3 и не от мёртвого CSS без import.
 
 ## Что сделать
 
-- Страница `/`: данные API, штамп статуса, ссылки = `portalPath`.
-- Явный текст: список не показывается заказчику.
-- Подпись в духе «так выглядит то, что вы отправили бы заказчику в мессенджер».
-- Состояния loading / error+traceId / empty.
+- Подключить Tailwind v4 и `@theme` по `frontend.md`.
+- Layout: бумага, IBM Plex, узкая колонка (~40–42rem), шапка в layout.
+- `/` остаётся каркасом без фейковых статусов, но уже внутри этого layout.
 
 ## Что не делать
 
-- Кабинет (фича 5), кнопка «скопировать», смена статусов, каталог.
+- Playwright / `pnpm test:e2e`.
+- Список сидов, кабинет, Dockerfiles, `createApiClient`.
+- Копировать `@theme` Вольтариса.
 - Пушить в `main`.
 
 ## Критерии приёмки
 
-- Given `make dev` (db+api+web) и seed применён, When открыть `/`, Then виден дисклеймер и 5
-  заявок с контрагентами, title и штампами из API (каталог `docs/domain-model.md`).
-- When клик по З-10043, Then URL `/r/seed-z10043-quote-kuznetsov`.
-- Нет ссылок `href="#"` и кнопок без действия.
-- E2E написан до реализации страницы (есть red evidence в status). Нет mock-api.
+- Layout: off-white `#f4f1ea`, один акцент `#3d5a73`, IBM Plex из
+  `@fontsource/ibm-plex-sans`, нет neon/glass.
+- Токены в `@theme` подключённого CSS; не россыпь arbitrary hex в разметке (кроме
+  геометрии).
+- Шапка живёт в layout, не только на индексной заглушке.
+- Нет списка `/demo/links` и кабинета с данными.
+- Корневого script `test:e2e` нет (не заводить).
 
 ## Проверки
 
@@ -76,10 +82,9 @@ pnpm typecheck
 pnpm test
 pnpm test:packages
 pnpm build
-pnpm test:e2e
 ```
 
-Обнови `docs/implementation-status.md` (red e2e и green e2e).
+Обнови `docs/implementation-status.md` (red и green).
 
 ## Git
 
@@ -95,4 +100,4 @@ Feature-ветка, PR в `main`, не пушить в `main`. Skill `git-delive
 
 ## Стоп
 
-Неоднозначность контракта → `docs/decisions.md`, не угадывать.
+Неоднозначность токенов → `docs/frontend.md` / `docs/decisions.md`, не выдумывать палитру.

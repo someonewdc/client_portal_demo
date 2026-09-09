@@ -13,9 +13,9 @@
 - PostgreSQL в Docker на хосте `5433`, Prisma 7 в `apps/api`
 - план и промпты: `docs/README.md`, `docs/implementation-plan.md`
 
-## Ещё нет (заводят фичи 3–6)
+## Ещё нет (заводят фичи 3–8)
 
-Nuxt, Playwright. mock-api нет и не появится.
+Nuxt, токены layout, Playwright, экраны, compose-smoke. mock-api нет и не появится.
 
 ## Запуск
 

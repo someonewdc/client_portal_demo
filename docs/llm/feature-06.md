@@ -1,80 +1,79 @@
-# Реализуй фичу 6: compose-smoke полного стенда + CI e2e
+# Реализуй фичу 6: экран списка демо-ссылок
 
 ## Цель
 
-Демо должно подниматься одной командой Makefile и проверяться в CI так же, как локально:
-счастливый путь и битая ссылка уже написаны в фичах 4–5 — их не переписывать «под стенд».
-Этот шаг — воспроизводимый стенд и ворота, не новая вёрстка.
+Ведущий за 10 секунд открывает «то, что отправили бы в мессенджер» и кликом входит в кабинет.
+Заказчик этот список не видит — это надо написать на странице явно.
 
 ## Зависимости
 
-Фичи 1–5 в `main` (экраны и Playwright-сценарии есть).
+Фичи 1–5 в `main` (API `/demo/links`, Nuxt layout, `pnpm test:e2e`). Фича 7 ещё нет:
+клик может вести на `/r/{secret}`, который пока тупик/каркас — e2e фичи 6 проверяет
+**переход URL и данные индекса**, не содержимое кабинета.
 
 ## Read set
 
 - `AGENTS.md`
-- `docs/README.md`, `docs/implementation-status.md`, `docs/implementation-plan.md`
-- `docs/acceptance-checklist.md`, `docs/demo-scenarios.md`
-- `docs/decisions.md` (D-006, D-013, D-016)
+- `docs/README.md`, `docs/implementation-status.md`
+- `docs/frontend.md`, `docs/demo-scenarios.md`, `docs/api-contracts.md`
+- `docs/domain-model.md`, `docs/decisions.md` (D-005, D-008, D-012, D-015, D-016, D-020,
+  D-021)
 - `docs/testing.md`
 - `.agents/skills/git-delivery/SKILL.md`
 - `.agents/skills/change-impact-gates/SKILL.md`
+- `.agents/skills/nuxt-ssr-data-and-ui/SKILL.md` — `useFetch` / facade. Часть skill про
+  cookie forwarding и `credentials: 'include'` **не применять** (D-015).
 - `.agents/skills/verification-honesty/SKILL.md`
-- `.agents/skills/pr-review/SKILL.md`
-- `.agents/skills/docker-reclaim-space/SKILL.md`
-- `Makefile`, `.github/workflows/ci.yml`, compose-файлы фичи 1
-- существующие Playwright spec фич 4–5
+- `apps/web` layout, generated `packages/api-client`
 
 ## Контекст продукта
 
-ПК «Нордщит», индекс + кабинет. Запрещено: mock-api, Kubernetes, Redis, переписывание e2e
-после прогона «чтобы CI стал зелёным» без бага в продукте, `waitForTimeout`.
+ПК «Нордщит», не Вольтарис. Служебный индекс, не админка. Запрещено: каталог, логин,
+копирование ссылки как основной жест, мёртвые `#`, декоративные статусы не из API,
+mock-api, чат.
 
 ## Стек и границы
 
-- Compose recipe полного стенда: **расширь существующий** `make up` до web+api+postgres
-  (D-016). Не заводи вторую цель с другим именем. Порты: web 3000, api 3001, db host 5433.
-  AC фичи 1 («Postgres слушает 5433») должен остаться истинным.
-- Dockerfile приложений — минимальные, не копия Вольтариса как продукт. Смотреть Вольтарис
-  только как composition root.
-- Lifecycle: `make up` / `make down` / `make verify` по факту Makefile. Агентам не
-  предписывать сырой `docker compose`, кроме skill.
-- CI: e2e на том же head SHA; не badge.
+- Здесь **впервые** facade `createApiClient` над `createProblemAwareClient<Paths>` и
+  первый `useFetch`/`useAsyncData`. `GET /demo/links`.
+- Cookie не форвардить; `credentials: 'include'` не ставить (D-015).
+- Фильтры не нужны. Pinia не для этого списка.
+- Стили только из `@theme`. Русский UI.
+- E2E против уже поднятого `make dev` + seed. Не стартовать второй Nuxt. Playwright
+  `webServer` не должен перехватывать `:3000` (`reuseExistingServer`, D-021).
 
-## TDD
+## TDD (обязательно e2e до страницы)
 
-E2e счастливого пути и 404 **уже должны быть** с фич 4–5. Не пиши их заново после UI.
-
-Для compose-smoke:
-
-1. Опиши проверку: после `make up` (тот же `up`, уже полный стенд) и seed
-   `GET /api/v1/health/ready` 200 и `/` отдаёт дисклеймер.
-2. Запусти против **ещё неполного** compose приложений — **red**, если smoke ещё нет.
-3. Потом Dockerfiles/compose/CI. Не подменяй `up` на «приложения без Postgres».
-4. Запрещено удалять assert e2e 4–5 или сужать grep, чтобы job прошёл.
+1. Напиши Playwright по AC: дисклеймер, подпись про мессенджер, 5 номеров З-10041…,
+   клик по З-10043 ведёт на `/r/seed-z10043-quote-kuznetsov`. `baseURL`
+   `http://localhost:3000`.
+2. Запусти `pnpm test:e2e` против **живого** стенда: `make dev` (db+api+web) + seed —
+   **red** (нет списка / нет текста). Не мокать `/demo/links`. Не поднимать фиктивный
+   server и не второй Nuxt на `:3000` вместо Makefile (D-021).
+3. Потом страница.
+4. Не упрощай до `expect(true)`. Не пиши e2e после UI «под скрин».
 
 ## Что сделать
 
-- Расширь существующий `make up` до web+api+postgres (D-016). Не заводи вторую цель полного
-  стенда.
-- CI job: Postgres (если ещё нужно), `test:e2e` на существующие спеки против этого стенда.
-- `make verify` включает применимые gates + e2e, когда стенд позволяет.
-- Короткая заметка в корневом `README.md`: как поднять демо через Makefile.
+- Страница `/`: данные API, штамп статуса, ссылки = `portalPath`.
+- Явный текст: список не показывается заказчику.
+- Подпись в духе «так выглядит то, что вы отправили бы заказчику в мессенджер».
+- Состояния loading / error+traceId / empty.
 
 ## Что не делать
 
-- Новые экраны, каталог, mock-api, ослабление e2e.
-- `docker compose down -v` как «лечение» диска (`docker-reclaim-space`).
+- Кабинет (фича 7), кнопка «скопировать», смена статусов, каталог.
+- Cookie forwarding, `credentials: 'include'` (D-015).
+- Второй Nuxt / фиктивный `webServer` на `:3000` (D-021).
 - Пушить в `main`.
 
 ## Критерии приёмки
 
-- Given чистый checkout фич 1–5, When `make up` (уже полный стенд: web+api+postgres) и seed,
-  Then ready 200, Postgres на 5433, индекс открывается.
-- `pnpm test:e2e` гоняет сценарии индекса, кабинета З-10043 и битой ссылки.
-- CI запускает e2e (не skip) на PR.
-- Нет новых мёртвых UI.
-- Существующие e2e не переписаны «подгоном» без изменения продукта.
+- Given `make dev` (db+api+web) и seed применён, When открыть `/`, Then виден дисклеймер и 5
+  заявок с контрагентами, title и штампами из API (каталог `docs/domain-model.md`).
+- When клик по З-10043, Then URL `/r/seed-z10043-quote-kuznetsov`.
+- Нет ссылок `href="#"` и кнопок без действия.
+- E2E написан до реализации страницы (есть red evidence в status). Нет mock-api.
 
 ## Проверки
 
@@ -88,8 +87,7 @@ pnpm build
 pnpm test:e2e
 ```
 
-`generate:api` / `db:generate` — только если трогал контракт/схему. Обнови
-`docs/implementation-status.md`.
+Обнови `docs/implementation-status.md` (red e2e и green e2e).
 
 ## Git
 
@@ -97,13 +95,12 @@ Feature-ветка, PR в `main`, не пушить в `main`. Skill `git-delive
 
 ## После merge
 
-В следующем чате запусти skill `pr-review` на этот PR (дифф + реальные CI jobs на head
-SHA).
+В следующем чате запусти skill `pr-review` на этот PR.
 
 ## Честность отчёта
 
-Выполнено / проверено / не проверено / заблокировано. Для нового smoke — red и green.
+Выполнено / проверено / не проверено / заблокировано. Red и green обязательны.
 
 ## Стоп
 
-Неоднозначность портов/compose → `docs/decisions.md`, не занимать чужой стенд вслепую.
+Неоднозначность контракта → `docs/decisions.md`, не угадывать.

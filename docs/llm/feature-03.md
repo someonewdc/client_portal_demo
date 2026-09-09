@@ -1,87 +1,84 @@
-# Реализуй фичу 3: Nuxt-каркас + токены + Playwright harness
+# Реализуй фичу 3: Nuxt в workspace + `make dev` с web
 
 ## Цель
 
-Зрителю нужен лист бумаги, а не SaaS-дашборд. Этот шаг ставит `apps/web` с токенами
-`docs/frontend.md` и **harness Playwright**, чтобы фичи 4–5 писали e2e до страниц. Списка
-ссылок и кабинета ещё нет.
+Появится место, куда ведущий откроет `http://localhost:3000`. Этот шаг только вставляет
+`apps/web` в монорепо и в Makefile. Без CSS-pipeline, без Playwright, без списка ссылок и
+кабинета.
 
 ## Зависимости
 
-Фичи 1 и 2 в `main` (`api-client`, seed, API). Фич 4–6 нет.
+Фичи 1 и 2 в `main`. Фич 4–8 нет.
 
 ## Read set
 
 - `AGENTS.md`
 - `docs/README.md`, `docs/implementation-status.md`, `docs/implementation-plan.md`
-- `docs/frontend.md`, `docs/architecture.md`, `docs/decisions.md` (D-005, D-006, D-011, D-012,
-  D-015, D-016)
+- `docs/architecture.md`, `docs/decisions.md` (D-006, D-011, D-013, D-015, D-016, D-020)
 - `docs/testing.md`
 - `.agents/skills/git-delivery/SKILL.md`
 - `.agents/skills/change-impact-gates/SKILL.md`
-- `.agents/skills/nuxt-ssr-data-and-ui/SKILL.md`
+- `.agents/skills/nuxt-ssr-data-and-ui/SKILL.md` — только границы «web не импортирует
+  Prisma / Nest / `apps/api`» и «не Pinia для server state». Часть skill про
+  `useFetch` / cookie / `credentials: 'include'` **не применять**: первого fetch ещё нет
+  (facade — фича 6, D-015).
 - `.agents/skills/foundation-package-conventions/SKILL.md`
 - `.agents/skills/verification-honesty/SKILL.md`
-- корневой `package.json`, `Makefile`, `packages/eslint-config/index.mjs`
-- `packages/api-client` (уже сгенерирован фичей 2)
+- корневой `package.json`, `pnpm-workspace.yaml`, `Makefile`, `packages/eslint-config/index.mjs`
+
+Не обязательно читать `packages/api-client` как работу этой фичи.
 
 ## Контекст продукта
 
-ПК «Нордщит», русский документный UI. Запрещено: каталог, glassmorphism, нейрослоп, bento,
-неон, 3D, «AI dashboard», токены Вольтариса, mock-api, Pinia для server state.
+ПК «Нордщит», канал статуса по ссылке, не витрина Вольтариса. Запрещено: каталог, mock-api,
+чат, OTP, копирование `apps/web` Вольтариса, Pinia для server state.
 
 ## Стек и границы
 
-- Nuxt 4, Tailwind v4 `@theme`, Vue 3. Патч-версии — официальные docs + lockfile, не
-  угадывать из памяти.
-- Server state: `useFetch` / `useAsyncData` + один facade над
-  `createProblemAwareClient<Paths>`. Web не импортирует Prisma, Nest DTO, `apps/api`.
-  Cookie не форвардить; `credentials: 'include'` не ставить — сессии нет (D-015). Skill
-  `nuxt-ssr-data-and-ui` в части cookie/credentials к этому демо не применять.
-- Шрифт: `@fontsource/ibm-plex-sans` (кириллица), не Google Fonts CDN (D-015).
-- Playwright: заведи корневой (или web) script, который в корне доступен как `pnpm test:e2e`.
-  Имени ещё нет — заведи именно `test:e2e`. `baseURL` = `http://localhost:3000`.
-- Расширь `make dev`: db + api + web. Origin web `http://localhost:3000` (D-016).
+- Nuxt 4, Vue 3. Патч-версии — официальные docs + lockfile в этом чате (D-011).
+- **Не** ставить Tailwind, PostCSS, `@tailwindcss/vite`, `@nuxtjs/tailwindcss`, `@theme`,
+  `@fontsource/*`. CSS-pipeline — фича 4.
+- **Не** заводить `pnpm test:e2e` — фича 5.
+- **Не** заводить facade `createApiClient` / вызовы generated client — фича 6.
+- Web не импортирует Prisma, Nest DTO, `apps/api`.
+- Расширь `make dev`: db + api + web на `:3000`. `make up` по-прежнему только Postgres
+  (D-016).
 
 ## TDD
 
-Поведение экранов 4–5 здесь не реализовывать. Для harness:
-
-1. Подключи Playwright так, чтобы `pnpm test:e2e` падает, если web не слушает `:3000` —
-   или держит один минимальный smoke «document title / layout содержит Нордщит», если уже
-   рисуешь layout. `baseURL` `http://localhost:3000`.
-2. Если пишешь smoke по layout — сначала red, потом layout. Smoke может стартовать только
-   Nuxt (`webServer`); API не мокать.
-3. Не пиши e2e списка ссылок и кабинета (это фичи 4 и 5). Их будут гонять против `make dev`
-   (db+api+web) + seed.
+1. Targeted-тест **workspace**, не HTTP: `apps/web` есть в `pnpm-workspace.yaml` /
+   корневом `typecheck` и `build`; `make dev` зависит от web (как
+   `scripts/lifecycle-targets.spec.mjs` в фиче 1 проверяет текст целей).
+2. **Red**, потом каркас.
+3. Не пиши e2e, curl к `:3000` и Playwright. HTML на порту — smoke фичи 5.
+4. Не рисуй список заявок и штампы без API.
 
 ## Что сделать
 
-- `apps/web` в pnpm workspace.
-- Layout: бумага, IBM Plex Sans через `@fontsource/ibm-plex-sans`, токены из `frontend.md`,
-  колонка документа, шапка «ПК «Нордщит»».
-- Заглушка `/` без фейкового списка заявок: честный «каркас» или короткий служебный текст,
-  не декоративные статусы без API.
-- CORS уже на `WEB_ORIGIN`; Nuxt base API URL с `/api/v1`.
-- `pnpm test:e2e` существует. Без `waitForTimeout`. Не mock-api.
+- `apps/web` в pnpm workspace, Nuxt слушает `:3000` (процесс есть; приёмка порта — не этот
+  PR).
+- Заглушка `/`: честный каркас (например имя завода текстом), не декоративные статусы.
+- Можно завести `NUXT_PUBLIC_*` base URL с prefix `/api/v1` впрок — без fetch.
+- Расширь `make dev`. Обнови корневой `typecheck`/`build`, если web не подхватывается.
 
 ## Что не делать
 
-- Страницу списка сидов и кабинет `/r/{secret}` (фичи 4–5).
-- Каталог, UI-kit, Pinia catalog.
-- Копировать `apps/web` Вольтариса.
+- Tailwind, PostCSS, Vite CSS plugin (`@tailwindcss/vite` и аналоги), `@theme`,
+  `@fontsource/ibm-plex-sans`.
+- Playwright, `createApiClient`, индекс `/demo/links`, кабинет `/r/{secret}`.
+- Dockerfiles приложений (фича 8).
 - Пушить в `main`.
 
 ## Критерии приёмки
 
-- `apps/web` собирается, `make dev` поднимает web на :3000 и api на :3001.
-- Layout визуально: off-white, один акцент стали, IBM Plex Sans из `@fontsource/ibm-plex-sans`, нет neon/glass.
-- Cookie не форвардятся; нет `credentials: 'include'` как обязательного.
+- `apps/web` входит в `pnpm typecheck` и `pnpm build`.
+- `make dev` в Makefile зависит от web (наряду с db+api). Grep/`lifecycle-targets` это
+  ловит. Отдельный assert «curl :3000» не требуется.
+- Нет Tailwind / PostCSS / `@tailwindcss/*` / `@nuxtjs/tailwindcss` в workspace
+  dependencies.
+- Нет `test:e2e` в корневом `package.json`.
+- Нет списка из API, кабинета с данными и facade над `api-client`.
 - Web не импортирует Prisma / `@client-portal/api` source.
-- В корневом `package.json` есть `test:e2e` (или workspace script с таким именем, который
-  `pnpm test:e2e` запускает).
-- Нет маршрута кабинета с данными и нет списка из `/demo/links` (или есть только пустой
-  каркас без притворных статусов).
 
 ## Проверки
 
@@ -92,11 +89,9 @@ pnpm typecheck
 pnpm test
 pnpm test:packages
 pnpm build
-pnpm test:e2e
 ```
 
-`generate:api` / `db:generate` — только если трогал контракт/схему. Обнови
-`docs/implementation-status.md`.
+`test:e2e` нет — не выдумывай. Обнови `docs/implementation-status.md` (red и green).
 
 ## Git
 
@@ -108,9 +103,8 @@ Feature-ветка, PR в `main`, не пушить в `main`. Skill `git-delive
 
 ## Честность отчёта
 
-Выполнено / проверено / не проверено / заблокировано. Для layout-smoke — red и green, если
-тест писали.
+Выполнено / проверено / не проверено / заблокировано. Red и green обязательны.
 
 ## Стоп
 
-Неоднозначность контракта или версии Nuxt → `docs/decisions.md` + lockfile, не угадывать.
+Неоднозначность версии Nuxt → `docs/decisions.md` + lockfile, не угадывать.

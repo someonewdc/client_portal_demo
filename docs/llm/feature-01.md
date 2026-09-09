@@ -59,7 +59,7 @@ Protostar показывает канал статуса не-SKU заявки �
   `db:migrate`, `db:seed` (stub/идемпотентный no-op или пустой seed).
 - Makefile: `up` (только Postgres, хост 5433), `down`, `dev` (db + api), `verify`
   (корневые gates заготовки). Не заменяй `bootstrap`/`doctor`. Не клади api/web в
-  `up` на этом шаге: фича 6 расширит тот же `up` до полного стенда; порт 5433 не
+  `up` на этом шаге: фича 8 расширит тот же `up` до полного стенда; порт 5433 не
   менять (D-016).
 - CI: сервис Postgres + `DATABASE_URL` на 5432 в job-сети; `db:generate` до typecheck/test
   если types уже импортируются.
