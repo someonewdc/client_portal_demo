@@ -19,16 +19,16 @@
 
 ## Чего ещё нет (фича должна завести; AC проверяет имя script)
 
-| Имя                                           | Где появится                                |
-| --------------------------------------------- | ------------------------------------------- |
-| `pnpm db:generate` / `db:migrate` / `db:seed` | фича 1                                      |
-| Makefile `up` / `down` / `dev` / `verify`     | фича 1 (`dev` = db+api; фича 3 добавит web) |
-| `DATABASE_URL`, compose Postgres, Prisma 7    | фича 1                                      |
-| `pnpm generate:api`, `packages/api-client`    | фича 2                                      |
-| `apps/web`, Nuxt, Tailwind `@theme`           | фича 3                                      |
-| `pnpm test:e2e`, Playwright harness           | фича 3                                      |
-| экраны `/` и `/r/{secret}`                    | фичи 4 и 5                                  |
-| compose-smoke приложений, CI e2e              | фича 6 (если не закрыто раньше)             |
+| Имя                                           | Где появится                                                                                                                                 |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pnpm db:generate` / `db:migrate` / `db:seed` | фича 1                                                                                                                                       |
+| Makefile `up` / `down` / `dev` / `verify`     | фича 1: `up` = только Postgres :5433; `dev` = db+api. Фича 3 добавляет web в `dev`. Фича 6 расширяет тот же `up` до web+api+postgres (D-016) |
+| `DATABASE_URL`, compose Postgres, Prisma 7    | фича 1                                                                                                                                       |
+| `pnpm generate:api`, `packages/api-client`    | фича 2                                                                                                                                       |
+| `apps/web`, Nuxt, Tailwind `@theme`           | фича 3                                                                                                                                       |
+| `pnpm test:e2e`, Playwright harness           | фича 3                                                                                                                                       |
+| экраны `/` и `/r/{secret}`                    | фичи 4 и 5                                                                                                                                   |
+| compose-smoke приложений, CI e2e              | фича 6 (если не закрыто раньше)                                                                                                              |
 
 Не выдумывай другие имена. Если нужен новый script — заведи его в той фиче, чей AC это
 требует, и запиши в `package.json`.

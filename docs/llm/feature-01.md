@@ -14,7 +14,7 @@ PostgreSQL и заставляет `/health/ready` говорить правду
 
 - `AGENTS.md`
 - `docs/README.md`, `docs/implementation-status.md`, `docs/implementation-plan.md`
-- `docs/decisions.md` (D-003, D-006, D-010, D-012, D-013)
+- `docs/decisions.md` (D-003, D-006, D-010, D-012, D-013, D-016)
 - `docs/architecture.md`, `docs/testing.md`
 - `.agents/skills/git-delivery/SKILL.md`
 - `.agents/skills/change-impact-gates/SKILL.md`
@@ -37,8 +37,12 @@ Protostar показывает канал статуса не-SKU заявки �
 - Prisma 7 ESM в `apps/api`: `prisma.config.ts`, client `apps/api/src/generated/prisma`.
 - Domain заявки не создавать. Ready проверяет БД через Prisma `$queryRaw` `SELECT 1` (или
   эквивалент). Если генератор требует модель — техническая не-продуктовая таблица, не UI.
-- `DATABASE_URL` в env validation (`validateApiEnv`).
-- Compose: имя проекта/контейнера с префиксом `client-portal-`.
+- `DATABASE_URL` **обязателен** в `validateApiEnv` (не optional). Обнови
+  `apps/api/src/core/config/api-env.spec.ts`: валидный fixture должен содержать
+  `DATABASE_URL`. Это новый контракт env, не ослабление assert. Тест «принимает
+  boilerplate без `DATABASE_URL`» должен стать red, затем требовать URL.
+- Compose: имя проекта/контейнера с префиксом `client-portal-`. Только Postgres, без
+  api/web в compose на этом шаге (D-016).
 - Не клади Prisma в core packages. `pnpm check:boundaries` обязателен.
 
 ## TDD
@@ -53,8 +57,10 @@ Protostar показывает канал статуса не-SKU заявки �
 - Docker Compose только Postgres (host 5433 → 5432).
 - Скрипты в корневом `package.json` (имён ещё нет — заведи именно эти): `db:generate`,
   `db:migrate`, `db:seed` (stub/идемпотентный no-op или пустой seed).
-- Makefile: `up` (поднять Postgres), `down`, `dev` (db + api), `verify` (корневые gates
-  заготовки). Не заменяй `bootstrap`/`doctor`.
+- Makefile: `up` (только Postgres, хост 5433), `down`, `dev` (db + api), `verify`
+  (корневые gates заготовки). Не заменяй `bootstrap`/`doctor`. Не клади api/web в
+  `up` на этом шаге: фича 6 расширит тот же `up` до полного стенда; порт 5433 не
+  менять (D-016).
 - CI: сервис Postgres + `DATABASE_URL` на 5432 в job-сети; `db:generate` до typecheck/test
   если types уже импортируются.
 - `.env.example`: `DATABASE_URL` на localhost:5433.
@@ -74,7 +80,7 @@ Protostar показывает канал статуса не-SKU заявки �
 - Given любая БД, When `GET /api/v1/health/live`, Then 200.
 - В корневом `package.json` есть `db:generate`, `db:migrate`, `db:seed`.
 - В Makefile есть `up`, `down`, `dev`, `verify`.
-- `make up` слушает Postgres на 5433.
+- `make up` слушает Postgres на 5433 (compose без api/web на этом шаге).
 - Нет `apps/mock-api`, нет домена заявки.
 
 ## Проверки

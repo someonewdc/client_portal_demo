@@ -31,7 +31,8 @@ Glassmorphism, градиентные стеклянные карточки, ben
 ## Токены
 
 Одна гарнитура: **IBM Plex Sans** (кириллица) + `font-variant-numeric: tabular-nums` для
-номеров заявок и дат. Не Inter как «дефолт SaaS», не декоративный serif.
+номеров заявок и дат. Грузить пакет `@fontsource/ibm-plex-sans`, не Google Fonts CDN
+(D-015). Не Inter как «дефолт SaaS», не декоративный serif.
 
 Предлагаемые значения для `@theme` (фича 3 фиксирует в CSS, не копирует токены Вольтариса):
 
