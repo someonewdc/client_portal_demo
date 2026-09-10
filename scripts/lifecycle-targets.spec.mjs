@@ -36,12 +36,10 @@ describe('feature 1 lifecycle targets', () => {
     assert.match(verify.recipe, /^\tpnpm db:migrate$/m);
   });
 
-  it('exposes Postgres on host 5433 without api or web compose services', () => {
+  it('exposes Postgres on host 5433', () => {
     const compose = readFileSync(resolve(rootDirectory, 'compose.yaml'), 'utf8');
     assert.match(compose, /5433:5432/);
-    assert.match(compose, /client-portal-/);
-    assert.doesNotMatch(compose, /^ {2}api:/m);
-    assert.doesNotMatch(compose, /^ {2}web:/m);
+    assert.match(compose, /client-portal-postgres/);
   });
 });
 
@@ -248,7 +246,9 @@ describe('feature 3 nuxt workspace', () => {
     assert.equal(existsSync(webPackagePath), true, 'apps/web/package.json must exist');
     const webPackage = JSON.parse(readFileSync(webPackagePath, 'utf8'));
 
-    assert.equal(dev.prerequisites, 'up');
+    assert.match(dev.recipe, /stop api web/);
+    assert.match(dev.recipe, /up -d --wait postgres/);
+    assert.doesNotMatch(dev.recipe, /--build/);
     assert.match(dev.recipe, /^\tpnpm db:generate$/m);
     assert.match(dev.recipe, /^\tpnpm db:migrate$/m);
     assert.match(dev.recipe, /^\tpnpm db:seed$/m);
@@ -461,7 +461,12 @@ describe('feature 5 playwright harness', () => {
     assert.equal(packageJson.devDependencies?.['@playwright/test'], '1.63.0');
 
     const e2e = makefileTarget('e2e');
+    assert.match(e2e.recipe, /playwright install --with-deps chromium/);
     assert.match(e2e.recipe, /^\tpnpm test:e2e$/m);
+    assert.ok(
+      e2e.recipe.indexOf('playwright install') < e2e.recipe.indexOf('pnpm test:e2e'),
+      'make e2e must install Chromium before pnpm test:e2e',
+    );
 
     for (const { path, json } of workspaceManifests()) {
       if (path === 'package.json') {
@@ -506,10 +511,6 @@ describe('feature 5 playwright harness', () => {
     assert.doesNotMatch(headerSpec.source, /\/r\//);
     assert.doesNotMatch(headerSpec.source, /З-1004\d/);
     assert.doesNotMatch(headerSpec.source, /мессенджер|Ссылка недействительна|mock-api|mock-core/);
-
-    const ci = readFileSync(resolve(rootDirectory, '.github/workflows/ci.yml'), 'utf8');
-    assert.doesNotMatch(ci, /test:e2e/);
-    assert.doesNotMatch(ci, /playwright/i);
   });
 });
 
@@ -644,3 +645,198 @@ describe('feature 7 request cabinet', () => {
     assert.match(readme, /:3001/);
   });
 });
+
+describe('feature 8 compose-smoke and CI e2e', () => {
+  function composeSource() {
+    return readFileSync(resolve(rootDirectory, 'compose.yaml'), 'utf8');
+  }
+
+  function ciSource() {
+    return readFileSync(resolve(rootDirectory, '.github/workflows/ci.yml'), 'utf8');
+  }
+
+  function ciE2eJob() {
+    const ci = ciSource();
+    const start = ci.search(/^ {2}e2e:/m);
+    assert.ok(start !== -1, 'CI must declare an e2e job');
+    const fromJob = ci.slice(start);
+    const nextJob = fromJob.slice(1).search(/^ {2}[a-zA-Z]/m);
+    return nextJob === -1 ? fromJob : fromJob.slice(0, nextJob + 1);
+  }
+
+  it('expands the existing make up target to web, api and Postgres on demo ports', () => {
+    const compose = composeSource();
+    const up = makefileTarget('up');
+
+    assert.match(compose, /5433:5432/);
+    assert.match(compose, /^ {2}postgres:/m);
+    assert.match(compose, /^ {2}api:/m);
+    assert.match(compose, /^ {2}web:/m);
+    assert.match(compose, /3001:3001/);
+    assert.match(compose, /3000:3000/);
+    assert.match(compose, /client-portal-postgres/);
+    assert.match(compose, /client-portal-api/);
+    assert.match(compose, /client-portal-web/);
+    assert.match(compose, /build:/);
+    assert.doesNotMatch(compose, /mock-api|mock-core|redis|kubernetes/i);
+
+    assert.match(up.recipe, /up -d --wait postgres/);
+    assert.match(up.recipe, /^\tpnpm db:generate$/m);
+    assert.match(up.recipe, /^\tpnpm db:migrate$/m);
+    assert.match(up.recipe, /^\tpnpm db:seed$/m);
+    assert.match(up.recipe, /up -d --wait --build/);
+    assert.doesNotMatch(makefile, /^full:/m);
+    assert.doesNotMatch(makefile, /^stand:/m);
+    assert.doesNotMatch(makefile, /^up-full:/m);
+  });
+
+  it('ships application Dockerfiles and splits Nuxt SSR API URL from the browser origin', () => {
+    const compose = composeSource();
+    const nuxtConfig = readFileSync(resolve(webRoot, 'nuxt.config.ts'), 'utf8');
+    const apiPlugin = readFileSync(resolve(webRoot, 'app/plugins/api.ts'), 'utf8');
+    const rootDockerfile = existsSync(resolve(rootDirectory, 'Dockerfile'));
+    const appDockerfiles =
+      existsSync(resolve(rootDirectory, 'apps/api/Dockerfile')) &&
+      existsSync(resolve(rootDirectory, 'apps/web/Dockerfile'));
+
+    assert.equal(
+      rootDockerfile || appDockerfiles,
+      true,
+      'api and web images need Dockerfiles (root multi-stage or apps/*/Dockerfile)',
+    );
+    assert.match(compose, /NUXT_PUBLIC_API_BASE_URL:\s*http:\/\/localhost:3001\/api\/v1/);
+    assert.match(compose, /NUXT_API_BASE_URL:\s*http:\/\/api:3001\/api\/v1/);
+    assert.match(
+      compose,
+      /DATABASE_URL:\s*postgresql:\/\/client_portal:client_portal@postgres:5432\/client_portal/,
+    );
+    assert.match(nuxtConfig, /apiBaseUrl:/);
+    assert.match(apiPlugin, /import\.meta\.server/);
+    const [clientPath, ...serverPath] = apiPlugin.split('import.meta.server');
+    assert.doesNotMatch(
+      clientPath,
+      /config\.apiBaseUrl/,
+      'private apiBaseUrl must not be read before the import.meta.server branch',
+    );
+    assert.match(serverPath.join('import.meta.server'), /config\.apiBaseUrl/);
+    assert.doesNotMatch(apiPlugin, /credentials:\s*['"]include['"]/);
+  });
+
+  it('copies only api dist with prod deps and Nuxt output into runtime images', () => {
+    const dockerfilePath = resolve(rootDirectory, 'Dockerfile');
+    assert.equal(existsSync(dockerfilePath), true, 'root Dockerfile must exist');
+    const dockerfile = readFileSync(dockerfilePath, 'utf8');
+    const api = dockerfileStage(dockerfile, 'api');
+    const web = dockerfileStage(dockerfile, 'web');
+
+    assert.doesNotMatch(
+      api,
+      /COPY --from=\S+ \/workspace \/workspace/,
+      'api runtime must not copy the whole workspace tree',
+    );
+    assert.doesNotMatch(
+      web,
+      /COPY --from=\S+ \/workspace \/workspace/,
+      'web runtime must not copy the whole workspace tree',
+    );
+    assert.match(dockerfile, /deploy --prod/);
+    assert.doesNotMatch(
+      dockerfile,
+      /deploy --prod --legacy/,
+      'legacy deploy leaves workspace package symlinks pointing at /workspace',
+    );
+    assert.match(api, /dist\/main\.js/);
+    assert.match(web, /\.output/);
+    assert.doesNotMatch(web, /apps\/api\/src/);
+    assert.doesNotMatch(api, /apps\/web\/app/);
+  });
+
+  it('probes ready 200, Postgres 5433 and the index disclaimer after make up', () => {
+    const smokePath = resolve(rootDirectory, 'scripts/compose-smoke.mjs');
+    assert.equal(existsSync(smokePath), true, 'scripts/compose-smoke.mjs must exist');
+
+    const smoke = readFileSync(smokePath, 'utf8');
+    assert.match(smoke, /localhost:3001\/api\/v1\/health\/ready/);
+    assert.match(smoke, /localhost:3000/);
+    assert.match(smoke, /не показывается заказчику/);
+    assert.match(smoke, /5433/);
+    assert.match(smoke, /client-portal-api/);
+    assert.match(smoke, /client-portal-web/);
+    assert.match(smoke, /client-portal-postgres/);
+    assert.doesNotMatch(smoke, /waitForTimeout/);
+    assert.doesNotMatch(smoke, /mock-api|mock-core/);
+    assert.doesNotMatch(packageJson.scripts.test, /compose-smoke/);
+  });
+
+  it('verify runs compose-smoke and e2e after the root gates when the stand is up', () => {
+    const verify = makefileTarget('verify');
+    assert.equal(verify.prerequisites, 'up');
+    assert.match(verify.recipe, /^\tpnpm check:boundaries$/m);
+    assert.match(verify.recipe, /^\tpnpm build$/m);
+    assert.match(verify.recipe, /scripts\/compose-smoke\.mjs/);
+    assert.match(verify.recipe, /playwright install --with-deps chromium/);
+    assert.match(verify.recipe, /^\tpnpm test:e2e$/m);
+    const smokeIndex = verify.recipe.indexOf('scripts/compose-smoke.mjs');
+    const e2eIndex = verify.recipe.indexOf('pnpm test:e2e');
+    const buildIndex = verify.recipe.indexOf('pnpm build');
+    const installIndex = verify.recipe.indexOf('playwright install');
+    assert.ok(buildIndex !== -1 && smokeIndex > buildIndex && e2eIndex > smokeIndex);
+    assert.ok(
+      installIndex !== -1 && installIndex < e2eIndex,
+      'make verify must install Chromium before pnpm test:e2e',
+    );
+  });
+
+  it('CI e2e job runs Playwright against make up without a second Nuxt webServer', () => {
+    const job = ciE2eJob();
+    const config = playwrightConfigSource();
+    const demoLinks = readFileSync(resolve(rootDirectory, 'e2e/demo-links.spec.ts'), 'utf8');
+    const cabinet = readFileSync(resolve(rootDirectory, 'e2e/request-cabinet.spec.ts'), 'utf8');
+
+    assert.match(job, /make up/);
+    assert.match(job, /pnpm test:e2e/);
+    assert.match(job, /playwright install/);
+    assert.match(job, /chromium/);
+    assert.doesNotMatch(job, /continue-on-error:\s*true/);
+    assert.doesNotMatch(job, /if:\s*false/);
+    assert.doesNotMatch(job, /mock-api|webServer:/);
+    assert.match(job, /5433/);
+    assert.doesNotMatch(job, /localhost:5432/);
+
+    assert.match(config, /process\.env\.CI\s*\?/);
+    assert.match(config, /reuseExistingServer:\s*true/);
+    assert.doesNotMatch(config, /reuseExistingServer:\s*!process\.env\.CI/);
+    assert.match(config, /command:\s*['"][^'"]*@client-portal\/web[^'"]*['"]/);
+    assert.doesNotMatch(config, /@client-portal\/api/);
+
+    assert.match(demoLinks, /не показывается заказчику/);
+    assert.match(demoLinks, /З-10043/);
+    assert.match(cabinet, /З-10043/);
+    assert.match(cabinet, /this-secret-does-not-exist/);
+    assert.match(cabinet, /Ссылка недействительна/);
+    assert.doesNotMatch(demoLinks, /waitForTimeout/);
+    assert.doesNotMatch(cabinet, /waitForTimeout/);
+  });
+
+  it('documents raising the demo through make up in the root README', () => {
+    const readme = readFileSync(resolve(rootDirectory, 'README.md'), 'utf8');
+    assert.match(readme, /make up/);
+    assert.match(readme, /:3000/);
+    assert.match(readme, /:3001/);
+    assert.match(readme, /5433/);
+    assert.doesNotMatch(readme, /make up` поднимает только Postgres/);
+    assert.doesNotMatch(readme, /CI e2e — фича 8/);
+    assert.doesNotMatch(readme, /Ещё нет \(заводит фича 8\)/);
+    assert.match(readme, /make e2e/);
+    assert.match(readme, /make verify/);
+    assert.match(readme, /playwright install --with-deps chromium/);
+  });
+});
+
+function dockerfileStage(source, name) {
+  const start = source.search(new RegExp(`^FROM .+ AS ${name}$`, 'm'));
+  assert.ok(start !== -1, `missing Dockerfile stage ${name}`);
+  const fromStage = source.slice(start);
+  const next = fromStage.slice(1).search(/^FROM /m);
+  return next === -1 ? fromStage : fromStage.slice(0, next + 1);
+}
