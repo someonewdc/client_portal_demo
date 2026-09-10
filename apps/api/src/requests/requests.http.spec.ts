@@ -283,6 +283,43 @@ describe('request HTTP', () => {
     ]);
   });
 
+  it('enforces unique RequestFile ("requestId","fileName") so a leaf lookup cannot collide', async () => {
+    const { PrismaService } = await import('../persistence/prisma.service.js');
+    const columns = await app!.get(PrismaService).asClient().$queryRaw<
+      Array<{ column_name: string; table_name: string }>
+    >`
+      SELECT table_name, column_name
+      FROM information_schema.columns
+      WHERE table_schema = 'public'
+        AND table_name = 'RequestFile'
+        AND column_name IN ('requestId', 'fileName')
+      ORDER BY column_name
+    `;
+    const indexes = await app!.get(PrismaService).asClient().$queryRaw<
+      Array<{ indexdef: string; indexname: string }>
+    >`
+      SELECT indexname, indexdef
+      FROM pg_indexes
+      WHERE schemaname = 'public'
+        AND tablename = 'RequestFile'
+        AND indexdef ILIKE '%UNIQUE%'
+        AND indexdef LIKE '%("requestId", "fileName")%'
+      ORDER BY indexname
+    `;
+
+    expect(columns).toEqual([
+      { column_name: 'fileName', table_name: 'RequestFile' },
+      { column_name: 'requestId', table_name: 'RequestFile' },
+    ]);
+    expect(indexes).toEqual([
+      {
+        indexdef:
+          'CREATE UNIQUE INDEX "RequestFile_requestId_fileName_key" ON public."RequestFile" USING btree ("requestId", "fileName")',
+        indexname: 'RequestFile_requestId_fileName_key',
+      },
+    ]);
+  });
+
   it('returns 404 Problem Details for an unknown secret without leaking SQL, stack or the secret', async () => {
     const response = await app!.inject({
       method: 'GET',

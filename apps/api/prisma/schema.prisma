@@ -66,6 +66,7 @@ model RequestFile {
   updatedAt  DateTime        @updatedAt @db.Timestamptz
 
   @@unique([requestId, position])
+  @@unique([requestId, fileName])
   @@index([requestId])
 }
 
