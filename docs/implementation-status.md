@@ -2,10 +2,11 @@
 
 ## Текущее состояние
 
-Фича 17 (HTTP-статус HTML следует за ошибкой API) в поставке этого PR. Код
-фич 18–27 не начинать, пока соответствующая фича не в `main`. Оператор
-дефектов кода: `выполни задачу N` → `docs/remediation-plan.md`. Фича 16 на
-`main` (#21). Фича 15 на `main` (#20). Фича 14 на `main` (#18, D-030…D-035).
+Фича 18 (неполный каталог → 500) в поставке этого PR. Код фич 19–27 не
+начинать, пока соответствующая фича не в `main`. Оператор дефектов кода:
+`выполни задачу N` → `docs/remediation-plan.md`. Фича 17 на `main` (#22).
+Фича 16 на `main` (#21). Фича 15 на `main` (#20). Фича 14 на `main`
+(#18, D-030…D-035).
 
 UX/UI понятности (D-036…D-040) — docs-only нарезка на `main` (#19): оператор
 `выполни ux задачу N` → `docs/ux/README.md`. Без `ux` фраза `выполни задачу N`
@@ -43,7 +44,8 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | Фича 15 decode param один раз     | проверен                          |
 | Фича 16 reactive useRequestPortal | проверен                          |
 | Фича 17 HTTP-статус HTML ошибки   | проверен                          |
-| Фичи 18–27 задачи 4–13            | не начаты                         |
+| Фича 18 неполный каталог → 500    | проверен                          |
+| Фичи 19–27 задачи 5–13            | не начаты                         |
 | UX docs нарезка (D-036…D-040)     | выполнен                          |
 | UX задачи 1–12                    | не начаты                         |
 
@@ -324,3 +326,7 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | 2026-09-11 | Фича 17 TDD green      | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                                                                                                                                                          | exit 0: 42 passed, включая `setResponseStatus(documentStatus)` на индексе, кабинете и листе                                                                        |
 | 2026-09-11 | Фича 17 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: web 14, scripts 77, 5 tarballs; Nuxt 4.5.2 production build                                                                                                |
 | 2026-09-11 | Фича 17 HTML-статус    | `curl -sS -o /dev/null -w '%{http_code}'` на `/`, `/r/seed-z10043-quote-kuznetsov`, `/r/this-secret-does-not-exist`, лист `КП-З-10043.pdf`, отсутствующий файл                                                                                                                            | 200 / 200 / 404 / 200 / 404; тупик «Ссылка недействительна»; 5xx API живьём не ломали                                                                              |
+| 2026-09-11 | Merge main #22         | `git fetch origin` / `git pull --ff-only origin main`                                                                                                                                                                                                                                     | `main` `ced9ae7` Фича 17 (#22); локальный `main` был на F16 `8496041`                                                                                              |
+| 2026-09-11 | Фича 18 TDD red        | `pnpm --filter @client-portal/api exec vitest run src/requests/application/get-demo-links.use-case.spec.ts src/requests/requests.http.spec.ts`                                                                                                                                            | exit 1: однорядный валидный хеш и пустой list резолвятся; HTTP после deleteMany З-10043 даёт 200                                                                   |
+| 2026-09-11 | Фича 18 TDD green      | `pnpm --filter @client-portal/api exec vitest run src/requests/application/get-demo-links.use-case.spec.ts src/requests/requests.http.spec.ts`                                                                                                                                            | exit 0: 10 passed; полный каталог 1:1, неполный/пустой/orphan → RequestFixtureMismatchError                                                                        |
+| 2026-09-11 | Фича 18 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 25, web 14, scripts 77, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
