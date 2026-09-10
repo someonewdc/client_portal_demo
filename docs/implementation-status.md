@@ -2,10 +2,10 @@
 
 ## Текущее состояние
 
-Фича 16 (реактивный ключ кабинета) в поставке этого PR. Код фич 17–27 не
-начинать, пока соответствующая фича не в `main`. Оператор дефектов кода:
-`выполни задачу N` → `docs/remediation-plan.md`. Фича 15 на `main` (#20).
-Фича 14 на `main` (#18, D-030…D-035).
+Фича 17 (HTTP-статус HTML следует за ошибкой API) в поставке этого PR. Код
+фич 18–27 не начинать, пока соответствующая фича не в `main`. Оператор
+дефектов кода: `выполни задачу N` → `docs/remediation-plan.md`. Фича 16 на
+`main` (#21). Фича 15 на `main` (#20). Фича 14 на `main` (#18, D-030…D-035).
 
 UX/UI понятности (D-036…D-040) — docs-only нарезка на `main` (#19): оператор
 `выполни ux задачу N` → `docs/ux/README.md`. Без `ux` фраза `выполни задачу N`
@@ -42,7 +42,8 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | Фича 14 docs нарезка дефектов     | выполнен                          |
 | Фича 15 decode param один раз     | проверен                          |
 | Фича 16 reactive useRequestPortal | проверен                          |
-| Фичи 17–27 задачи 3–13            | не начаты                         |
+| Фича 17 HTTP-статус HTML ошибки   | проверен                          |
+| Фичи 18–27 задачи 4–13            | не начаты                         |
 | UX docs нарезка (D-036…D-040)     | выполнен                          |
 | UX задачи 1–12                    | не начаты                         |
 
@@ -316,3 +317,10 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | 2026-09-11 | Фича 16 TDD green      | `pnpm --filter @client-portal/web test`                                                                                                                                                                                                                                                   | exit 0: 13 tests, включая `requestPortalCacheKey('seed-z10043-quote-kuznetsov')`                                                                                   |
 | 2026-09-11 | Фича 16 TDD green      | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                                                                                                                                                          | exit 0: 41 passed, включая `watch` / `requestPortalCacheKey` и отсутствие `NuxtLink`                                                                               |
 | 2026-09-11 | Фича 16 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: web 13, scripts 76, 5 tarballs; Nuxt 4.5.2 production build                                                                                                |
+| 2026-09-11 | Merge main #21         | `git fetch origin` / `git pull --ff-only origin main`                                                                                                                                                                                                                                     | `main` `8496041` Фича 16 (#21); локальный `main` был на F15 `822c6fa`                                                                                              |
+| 2026-09-11 | Фича 17 TDD red        | `pnpm --filter @client-portal/web test`                                                                                                                                                                                                                                                   | exit 1: нет экспорта `documentStatusFromAsyncData`                                                                                                                 |
+| 2026-09-11 | Фича 17 TDD red        | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                                                                                                                                                          | exit 1: нет `documentStatusFromAsyncData`; `setResponseStatus` только в ветке `isNotFound` / литерал 404                                                           |
+| 2026-09-11 | Фича 17 TDD green      | `pnpm --filter @client-portal/web test`                                                                                                                                                                                                                                                   | exit 0: 14 tests, включая `{ statusCode: 404 }`/`503`, `{ status: 500 }`, `undefined` → 200, `Error('network')` → 502                                              |
+| 2026-09-11 | Фича 17 TDD green      | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                                                                                                                                                          | exit 0: 42 passed, включая `setResponseStatus(documentStatus)` на индексе, кабинете и листе                                                                        |
+| 2026-09-11 | Фича 17 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: web 14, scripts 77, 5 tarballs; Nuxt 4.5.2 production build                                                                                                |
+| 2026-09-11 | Фича 17 HTML-статус    | `curl -sS -o /dev/null -w '%{http_code}'` на `/`, `/r/seed-z10043-quote-kuznetsov`, `/r/this-secret-does-not-exist`, лист `КП-З-10043.pdf`, отсутствующий файл                                                                                                                            | 200 / 200 / 404 / 200 / 404; тупик «Ссылка недействительна»; 5xx API живьём не ломали                                                                              |

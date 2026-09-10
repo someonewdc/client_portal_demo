@@ -675,6 +675,45 @@ describe('feature 7 request cabinet', () => {
   });
 });
 
+describe('feature 17 document error status', () => {
+  it('sets HTML document status from any async-data error, not only isNotFound 404', () => {
+    const indexPage = readFileSync(resolve(webRoot, 'app/pages/index.vue'), 'utf8');
+    const cabinetPage = readFileSync(
+      resolve(webRoot, 'app/pages/r/[accessSecret]/index.vue'),
+      'utf8',
+    );
+    const sheetPage = readFileSync(
+      resolve(webRoot, 'app/pages/r/[accessSecret]/d/[fileName].vue'),
+      'utf8',
+    );
+    const helper = readFileSync(resolve(webRoot, 'app/utils/async-data-problem.ts'), 'utf8');
+
+    assert.match(helper, /export function documentStatusFromAsyncData/);
+
+    for (const [label, source] of [
+      ['apps/web/app/pages/index.vue', indexPage],
+      ['apps/web/app/pages/r/[accessSecret]/index.vue', cabinetPage],
+      ['apps/web/app/pages/r/[accessSecret]/d/[fileName].vue', sheetPage],
+    ]) {
+      assert.match(
+        source,
+        /documentStatusFromAsyncData/,
+        `${label} must compute document status from async-data errors`,
+      );
+      assert.match(
+        source,
+        /setResponseStatus\(\s*documentStatus/,
+        `${label} must call setResponseStatus with the computed document status`,
+      );
+      assert.doesNotMatch(
+        source,
+        /if\s*\(\s*isNotFound\.value\s*\)\s*\{\s*setResponseStatus\(404\)/,
+        `${label} must not gate setResponseStatus only on isNotFound`,
+      );
+    }
+  });
+});
+
 describe('feature 13 HTML file sheet playbook', () => {
   it('documents the file sheet route in the stand playbook', () => {
     const readme = readFileSync(resolve(rootDirectory, 'README.md'), 'utf8');

@@ -62,3 +62,11 @@ export function statusCodeFromAsyncDataError(error: unknown, fallback = 502): nu
 
   return statusCodeFromThrown(error, fallback);
 }
+
+export function documentStatusFromAsyncData(error: unknown, fallback = 200): number {
+  if (error == null) {
+    return fallback;
+  }
+
+  return statusCodeFromAsyncDataError(error);
+}

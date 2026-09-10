@@ -3,6 +3,7 @@ import { describe, it } from 'node:test';
 
 import {
   asyncDataProblemPayload,
+  documentStatusFromAsyncData,
   statusCodeFromAsyncDataError,
   statusCodeFromThrown,
   traceIdFromAsyncDataError,
@@ -53,5 +54,15 @@ describe('async-data-problem payload', () => {
     );
     assert.equal(statusCodeFromAsyncDataError(problemError), 503);
     assert.equal(statusCodeFromAsyncDataError(new Error('network')), 502);
+  });
+});
+
+describe('document status from async data', () => {
+  it('maps API error codes onto the HTML document status and keeps success at 200', () => {
+    assert.equal(documentStatusFromAsyncData({ statusCode: 404 }), 404);
+    assert.equal(documentStatusFromAsyncData({ statusCode: 503 }), 503);
+    assert.equal(documentStatusFromAsyncData({ status: 500 }), 500);
+    assert.equal(documentStatusFromAsyncData(undefined), 200);
+    assert.equal(documentStatusFromAsyncData(new Error('network')), 502);
   });
 });

@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { createError, useAsyncData, useNuxtApp } from 'nuxt/app';
+import { createError, setResponseStatus, useAsyncData, useNuxtApp } from 'nuxt/app';
 import { computed } from 'vue';
 
 import {
   asyncDataProblemPayload,
+  documentStatusFromAsyncData,
   statusCodeFromThrown,
   traceIdFromAsyncDataError,
 } from '~/utils/async-data-problem';
@@ -31,6 +32,10 @@ const { data, error, status } = await useAsyncData('demo-links', async () => {
 
 const items = computed(() => data.value ?? []);
 const errorTraceId = computed(() => traceIdFromAsyncDataError(error.value));
+const documentStatus = documentStatusFromAsyncData(error.value);
+if (documentStatus !== 200) {
+  setResponseStatus(documentStatus);
+}
 
 function formatUpdatedAt(iso: string): string {
   return new Intl.DateTimeFormat('ru-RU', {

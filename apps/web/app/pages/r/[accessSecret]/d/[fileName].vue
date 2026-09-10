@@ -3,6 +3,7 @@ import { setResponseStatus, useRoute } from 'nuxt/app';
 import { computed } from 'vue';
 
 import { useRequestPortal } from '~/composables/useRequestPortal';
+import { documentStatusFromAsyncData } from '~/utils/async-data-problem';
 import {
   fileKindLabel,
   fileSheetLead,
@@ -25,8 +26,9 @@ const isMissingFile = computed(
     file.value == null,
 );
 
-if (isNotFound.value || isMissingFile.value) {
-  setResponseStatus(404);
+const documentStatus = documentStatusFromAsyncData(error.value, isMissingFile.value ? 404 : 200);
+if (documentStatus !== 200) {
+  setResponseStatus(documentStatus);
 }
 </script>
 
