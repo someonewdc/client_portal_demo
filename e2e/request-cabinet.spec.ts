@@ -116,13 +116,82 @@ test('quote cabinet lists files as records and keeps the comment column', async 
   await expect(quoteFile.getByText('240 КБ', { exact: true })).toBeVisible();
   await expect(quoteFile.locator('time')).toHaveAttribute('datetime', '2026-09-04T12:00:00.000Z');
 
-  await expect(questionnaire.getByRole('link')).toHaveCount(0);
-  await expect(quoteFile.getByRole('link')).toHaveCount(0);
+  const quoteSheetHref = `/r/${quoteCabinet.accessSecret}/d/${encodeURIComponent(quoteCabinet.quoteFileName)}`;
+  const questionnaireSheetHref = `/r/${quoteCabinet.accessSecret}/d/${encodeURIComponent(quoteCabinet.questionnaireFileName)}`;
+  await expect(
+    quoteFile.getByRole('link', { name: quoteCabinet.quoteFileName, exact: true }),
+  ).toHaveAttribute('href', quoteSheetHref);
+  await expect(
+    questionnaire.getByRole('link', { name: quoteCabinet.questionnaireFileName, exact: true }),
+  ).toHaveAttribute('href', questionnaireSheetHref);
   await expect(page.locator('[download]')).toHaveCount(0);
   await expect(page.getByRole('button')).toHaveCount(0);
 
   await expect(page.getByRole('columnheader', { name: 'Комментарий' })).toBeVisible();
   await expect(page.getByText('IP54, навесной')).toBeVisible();
+});
+
+test('quote cabinet file name opens an HTML document sheet', async ({ page }) => {
+  const response = await page.goto(`/r/${quoteCabinet.accessSecret}`);
+
+  expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  const quoteSheetHref = `/r/${quoteCabinet.accessSecret}/d/${encodeURIComponent(quoteCabinet.quoteFileName)}`;
+  const quoteFile = page
+    .getByRole('list', { name: 'Файлы' })
+    .getByRole('listitem')
+    .filter({ hasText: quoteCabinet.quoteFileName });
+  const link = quoteFile.getByRole('link', { name: quoteCabinet.quoteFileName, exact: true });
+
+  await expect(link).toHaveAttribute('href', quoteSheetHref);
+  await link.click();
+
+  await expect(page).toHaveURL(new RegExp(`/r/${quoteCabinet.accessSecret}/d/`));
+  await expect(page.getByRole('heading', { name: quoteCabinet.quoteFileName })).toBeVisible();
+  await expect(page.getByText('КП', { exact: true })).toBeVisible();
+  await expect(page.getByText('240 КБ', { exact: true })).toBeVisible();
+  await expect(page.locator('time')).toHaveAttribute('datetime', '2026-09-04T12:00:00.000Z');
+  await expect(page.getByText('Коммерческое предложение.', { exact: true })).toBeVisible();
+  await expect(page.getByText(quoteCabinet.specLine)).toBeVisible();
+  await expect(page.getByText(quoteCabinet.specLineSecondary)).toBeVisible();
+  await expect(
+    page.getByRole('link', { name: `К заявке ${quoteCabinet.publicNumber}` }),
+  ).toBeVisible();
+  await expect(page.locator('[download]')).toHaveCount(0);
+  await expect(page.getByRole('link', { name: /скачать/i })).toHaveCount(0);
+  await expect(page.getByRole('button')).toHaveCount(0);
+});
+
+test('quote cabinet file sheet returns to the request', async ({ page }) => {
+  const sheetPath = `/r/${quoteCabinet.accessSecret}/d/${encodeURIComponent(quoteCabinet.quoteFileName)}`;
+  const response = await page.goto(sheetPath);
+
+  expect(response, 'GET /r/{secret}/d/{fileName} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await page.getByRole('link', { name: `К заявке ${quoteCabinet.publicNumber}` }).click();
+  await expect(page).toHaveURL(new RegExp(`/r/${quoteCabinet.accessSecret}$`));
+  await expect(page.getByRole('heading', { name: quoteCabinet.publicNumber })).toBeVisible();
+});
+
+test('unknown file name on a live secret is a Russian dead-end', async ({ page }) => {
+  const response = await page.goto(
+    `/r/${quoteCabinet.accessSecret}/d/${encodeURIComponent('нет-такого.pdf')}`,
+  );
+
+  expect(response, 'GET /r/{secret}/d/{unknown} must receive a response from :3000').toBeTruthy();
+  expect(response?.status()).toBe(404);
+
+  const deadEnd = page.getByRole('alert');
+  await expect(deadEnd.getByRole('heading', { name: 'Ссылка недействительна' })).toBeVisible();
+  await expect(deadEnd.getByText(/заявки по этой ссылке нет/i)).toBeVisible();
+  await expect(page.getByRole('heading', { name: quoteCabinet.publicNumber })).toHaveCount(0);
+  await expect(page.getByRole('heading', { name: quoteCabinet.quoteFileName })).toHaveCount(0);
+
+  await expect(page.locator('form')).toHaveCount(0);
+  await expect(page.getByRole('textbox')).toHaveCount(0);
+  await expect(page.getByRole('button')).toHaveCount(0);
 });
 
 test('calculation cabinet hides an empty specification comment column', async ({ page }) => {

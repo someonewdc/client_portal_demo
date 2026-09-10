@@ -590,21 +590,29 @@ describe('feature 6 demo links index', () => {
 
 describe('feature 7 request cabinet', () => {
   it('loads GET /requests/{accessSecret} through useAsyncData without session cookies', () => {
-    const cabinetPage = readFileSync(resolve(webRoot, 'app/pages/r/[accessSecret].vue'), 'utf8');
+    const cabinetPage = readFileSync(
+      resolve(webRoot, 'app/pages/r/[accessSecret]/index.vue'),
+      'utf8',
+    );
+    const portalComposable = readFileSync(
+      resolve(webRoot, 'app/composables/useRequestPortal.ts'),
+      'utf8',
+    );
+    const cabinetSources = `${cabinetPage}\n${portalComposable}`;
     const sources = listWebSourceFiles(webRoot).map((absolutePath) =>
       readFileSync(absolutePath, 'utf8'),
     );
     const combined = sources.join('\n');
 
-    assert.match(cabinetPage, /useAsyncData/);
-    assert.match(cabinetPage, /\/requests\/\{accessSecret\}/);
-    assert.match(cabinetPage, /createError/);
-    assert.match(cabinetPage, /data:\s*payload/);
+    assert.match(cabinetSources, /useAsyncData/);
+    assert.match(cabinetSources, /\/requests\/\{accessSecret\}/);
+    assert.match(cabinetSources, /createError/);
+    assert.match(cabinetSources, /data:\s*payload/);
     assert.match(cabinetPage, /Ссылка недействительна/);
     assert.match(cabinetPage, /заявки по этой ссылке нет/i);
     assert.match(cabinetPage, /Код ошибки:/);
     assert.match(cabinetPage, /role=["']alert["']/);
-    assert.match(cabinetPage, /setResponseStatus/);
+    assert.match(cabinetSources, /setResponseStatus/);
     assert.match(cabinetPage, /<h2[^>]*>\{\{\s*request\.publicNumber\s*\}\}<\/h2>/);
     assert.match(cabinetPage, /tabular-nums/);
     assert.match(cabinetPage, /specLines/);

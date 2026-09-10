@@ -56,6 +56,7 @@ LLM часто пишет код, затем тесты «под него». Т�
 - F10 пишет e2e рамки документа и ленты 1–4 с `reachedAt` / `ещё нет` **до** правки Vue.
 - F11 пишет unit formatters и e2e файлов-записей / колонки комментария **до** UI.
 - F12 пишет e2e заголовка индекса и инструкции клика **до** правки `index.vue`.
+- F13 пишет unit `requestFileHref` / зачина листа и e2e клика имени файла **до** Vue.
 - Селекторы: role / label / осмысленный `data-testid`, не CSS-хрупкость. Без
   `waitForTimeout` как синхронизации (`verification-honesty`).
 - Scenario-mutating e2e — serial. Этот демо read-only, мутаций нет.
