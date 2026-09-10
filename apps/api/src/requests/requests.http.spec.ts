@@ -191,6 +191,49 @@ describe('request HTTP', () => {
     });
   });
 
+  it('fails closed when a catalog request is missing, then seed restores the catalog envelope', async () => {
+    const { PrismaService } = await import('../persistence/prisma.service.js');
+    await app!
+      .get(PrismaService)
+      .asClient()
+      .request.deleteMany({ where: { publicNumber: 'З-10043' } });
+
+    const dirty = await app!.inject({ method: 'GET', url: '/api/v1/demo/links' });
+    const dirtyBody: unknown = dirty.json();
+    const detail =
+      typeof dirtyBody === 'object' &&
+      dirtyBody !== null &&
+      'detail' in dirtyBody &&
+      typeof dirtyBody.detail === 'string'
+        ? dirtyBody.detail
+        : '';
+
+    expect(dirty.statusCode).toBe(500);
+    expect(dirty.headers['content-type']).toContain('application/problem+json');
+    expect(isProblemDetails(dirtyBody)).toBe(true);
+    expect(dirtyBody).toMatchObject({
+      status: 500,
+      title: 'Internal server error',
+      detail: 'The server could not complete the request',
+    });
+    expect(detail.toLowerCase()).not.toMatch(/select |from |stack|prisma/i);
+    expect(dirtyBody).not.toEqual(
+      expect.objectContaining({
+        data: { items: EXPECTED_DEMO_LINKS.filter((item) => item.publicNumber !== 'З-10043') },
+      }),
+    );
+
+    const { applyRequestSeed } = await import('./infrastructure/apply-request-seed.js');
+    await applyRequestSeed();
+
+    const healed = await app!.inject({ method: 'GET', url: '/api/v1/demo/links' });
+    expect(healed.statusCode).toBe(200);
+    expect(healed.json()).toEqual({
+      data: { items: [...EXPECTED_DEMO_LINKS] },
+      meta: { traceId: expect.any(String) },
+    });
+  });
+
   it('returns the quote fixture by access secret with catalog dates, stages and files 1:1', async () => {
     const response = await app!.inject({
       method: 'GET',
