@@ -21,6 +21,7 @@ export default defineNuxtConfig({
     enabled: false,
   },
   runtimeConfig: {
+    apiBaseUrl: '',
     public: {
       apiBaseUrl: 'http://localhost:3001/api/v1',
     },

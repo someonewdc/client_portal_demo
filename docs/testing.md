@@ -55,7 +55,7 @@ LLM часто пишет код, затем тесты «под него». Т�
 - Scenario-mutating e2e — serial. Этот демо read-only, мутаций нет.
 
 **Compose-smoke (F8):** тот же `make up` после расширения (D-016) отвечает health и отдаёт
-индекс.
+индекс (`scripts/compose-smoke.mjs`).
 
 ## Корневые команды
 

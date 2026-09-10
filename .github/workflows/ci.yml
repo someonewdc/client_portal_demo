@@ -62,3 +62,20 @@ jobs:
         run: pnpm test:packages
       - name: Build
         run: pnpm build
+
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DATABASE_URL: postgresql://client_portal:client_portal@localhost:5433/client_portal
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+      - uses: ./.github/actions/setup-workspace
+      - name: Install Playwright Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Start the full compose stand
+        run: make up
+      - name: Compose smoke
+        run: node scripts/compose-smoke.mjs
+      - name: End-to-end tests
+        run: pnpm test:e2e

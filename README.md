@@ -15,11 +15,10 @@
 - Playwright: `pnpm test:e2e` / `make e2e` (smoke шапки, индекс, кабинет, битая ссылка на
   `:3000`)
 - PostgreSQL в Docker на хосте `5433`, Prisma 7 в `apps/api`
+- `make up` — полный стенд web+api+postgres; CI e2e гоняет те же спеки против него
 - план и промпты: `docs/README.md`, `docs/implementation-plan.md`
 
-## Ещё нет (заводит фича 8)
-
-compose-smoke, CI e2e. mock-api нет и не появится.
+mock-api нет и не появится.
 
 ## Запуск
 
@@ -28,22 +27,25 @@ compose-smoke, CI e2e. mock-api нет и не появится.
 ```bash
 make bootstrap
 cp .env.example .env
-make dev
+make up
 ```
 
-`make up` поднимает только Postgres на `:5433`. `make dev` зависит от `up` и поднимает API
-на `:3001` и web на `:3000`. Агентам — только цели Makefile, не сырой `docker compose` /
-`pnpm dev` (D-013). Один стенд на машине для `:3000`/`:3001` (`docs/decisions.md` D-006).
+`make up` поднимает Postgres на `:5433`, API на `:3001` и web на `:3000`, применяет
+миграции и seed. Индекс: `http://localhost:3000`. `make dev` стартует из compose только
+Postgres и гоняет API/web на хосте (hot reload). Агентам — только цели Makefile, не сырой
+`docker compose` / `pnpm dev` (D-013). Один стенд на машине для `:3000`/`:3001`
+(`docs/decisions.md` D-006).
 
-Проверки: `make verify` (D-018: Postgres + migrate + `generate:api` + diff generated
-client, затем корневые gates). Сырой `pnpm test` без живой БД падает на HTTP ready=200 —
-это не полный аналог CI.
+Проверки: `make verify` (D-018: полный `up` + migrate + `generate:api` + diff generated
+client, корневые gates, compose-smoke, e2e). Сырой `pnpm test` без живой БД падает на HTTP
+ready=200 — это не полный аналог CI.
 
-E2E: один раз `pnpm exec playwright install chromium`, затем против живого стенда
-`make dev` (db+api+web) + seed — `make e2e` / `pnpm test:e2e`. `baseURL` —
+E2E: один раз `pnpm exec playwright install chromium`, затем против полного стенда
+`make up` или против `make dev` + seed — `make e2e` / `pnpm test:e2e`. `baseURL` —
 `http://localhost:3000`. Индексный spec ходит в `GET /demo/links`; кабинетный — в
 `GET /requests/{accessSecret}` и в API `:3001`. Nuxt без API недостаточен. Если `:3000`
-уже занят `make dev`, Playwright его переиспользует (`reuseExistingServer: true`, D-021)
-и не стартует второй Nuxt. CI e2e — фича 8.
+уже занят стендом, локальный Playwright его переиспользует (`reuseExistingServer: true`,
+D-021) и не стартует второй Nuxt. В CI `webServer` выключен: job поднимает `make up` и
+гоняет `pnpm test:e2e`.
 
 Пакеты private, `0.0.0`. Публикация в registry не входит.

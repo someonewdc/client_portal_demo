@@ -17,14 +17,21 @@ doctor:
 	@pnpm --version
 	@test -f pnpm-lock.yaml
 
+# Full stand: web :3000, api :3001, Postgres host 5433 (D-016). Seed before api/web.
 up:
-	$(compose) up -d --wait
+	$(compose) up -d --wait postgres
+	pnpm db:generate
+	pnpm db:migrate
+	pnpm db:seed
+	$(compose) up -d --wait --build
 
 down:
 	$(compose) down
 
-# db + api + @client-portal/web on :3000 (root `pnpm dev`). `up` stays Postgres-only.
-dev: up
+# db + api + @client-portal/web on :3000 (root `pnpm dev`).
+# Compose starts only postgres so host processes keep :3000/:3001.
+dev:
+	$(compose) up -d --wait postgres
 	pnpm db:generate
 	pnpm db:migrate
 	pnpm db:seed
@@ -41,8 +48,10 @@ verify: up
 	pnpm test
 	pnpm test:packages
 	pnpm build
+	node scripts/compose-smoke.mjs
+	pnpm test:e2e
 
-# Index + cabinet e2e on :3000 against make dev + seed (D-021).
+# Index + cabinet e2e on :3000 against make dev + seed (D-021) or make up (F8).
 # Playwright reuses Nuxt when that stand already holds the port; a Nuxt-only
 # webServer is not enough for the demo-links and request-cabinet specs.
 e2e:

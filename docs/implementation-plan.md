@@ -16,11 +16,13 @@
 - Root scripts (копировать буквально): `build:core`, `dev` (api+web), `db:generate`,
   `db:migrate`, `db:seed`, `generate:api`, `build`, `lint`, `check:boundaries`, `typecheck`,
   `test`, `test:e2e`, `test:packages`, `format`, `format:check`
-- Makefile: `bootstrap`, `doctor`, `up` (только Postgres :5433), `down`, `dev` (db+api+web),
-  `e2e` (`pnpm test:e2e`), `verify` (`up` + migrate + `generate:api` + diff generated client +
-  корневые gates, D-018)
-- CI: Postgres service + `DATABASE_URL` на 5432, затем generate/migrate, `generate:api`,
-  `git diff --exit-code` на `openapi.json` / `schema.d.ts`, затем корневые gates
+- Makefile: `bootstrap`, `doctor`, `up` (web+api+postgres :3000/:3001/host :5433), `down`,
+  `dev` (только Postgres из compose + api/web на хосте), `e2e` (`pnpm test:e2e`), `verify`
+  (`up` + migrate + `generate:api` + diff generated client + корневые gates + compose-smoke +
+  e2e, D-018)
+- CI: job `verify` — Postgres service + `DATABASE_URL` на 5432, generate/migrate,
+  `generate:api`, `git diff --exit-code` на `openapi.json` / `schema.d.ts`, корневые gates;
+  job `e2e` — `make up` (хост 5433) + `pnpm test:e2e`
 - generated `packages/api-client` (`openapi.json` / `schema.d.ts` руками не править)
 - ESLint игнорирует `apps/api/src/generated/prisma/**` и
   `packages/api-client/src/schema.d.ts`
@@ -28,12 +30,8 @@
 
 ## Чего ещё нет (фича должна завести; AC проверяет имя script)
 
-| Имя                              | Где появится |
-| -------------------------------- | ------------ |
-| compose-smoke приложений, CI e2e | фича 8       |
-
-Не выдумывай другие имена. Если нужен новый script — заведи его в той фиче, чей AC это
-требует, и запиши в `package.json`.
+Предметный MVP закрыт фичей 8. Не выдумывай другие имена. Если нужен новый script — заведи
+его в той фиче, чей AC это требует, и запиши в `package.json`.
 
 ## Порядок
 

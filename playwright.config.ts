@@ -1,5 +1,14 @@
 import { defineConfig, devices } from '@playwright/test';
 
+const webServer = {
+  command: 'pnpm --filter @client-portal/web dev',
+  url: 'http://localhost:3000',
+  reuseExistingServer: true,
+  timeout: 120_000,
+  stdout: 'pipe' as const,
+  stderr: 'pipe' as const,
+};
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
@@ -16,12 +25,5 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
   ],
-  webServer: {
-    command: 'pnpm --filter @client-portal/web dev',
-    url: 'http://localhost:3000',
-    reuseExistingServer: true,
-    timeout: 120_000,
-    stdout: 'pipe',
-    stderr: 'pipe',
-  },
+  ...(process.env.CI ? {} : { webServer }),
 });

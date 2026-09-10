@@ -26,5 +26,5 @@ Tailwind v4 `@theme` и документный layout — фича 4 (D-023). Pl
 (D-024). Порты стенда — `docs/decisions.md` (D-006, D-017).
 
 CI (`.github/workflows/ci.yml`) пинит third-party actions на commit SHA. `pnpm/action-setup`
-идёт до `actions/setup-node` с `cache: pnpm`. Фича 1 добавила Postgres в CI; фича 8 — e2e,
-если harness уже есть.
+идёт до `actions/setup-node` с `cache: pnpm`. Фича 1 добавила Postgres в CI; фича 8 — e2e
+против `make up`.
