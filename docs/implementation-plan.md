@@ -12,7 +12,7 @@
   `API_PORT=3001`, `WEB_ORIGIN=http://localhost:3000`, `DATABASE_URL`
 - `apps/web`: Nuxt 4.5.2, Tailwind v4 `@theme`, IBM Plex, layout; индекс `/` из
   `GET /demo/links` (`createApiClient`, `useAsyncData`); кабинет `/r/{secret}` и тупик 404;
-  `NUXT_PUBLIC_API_BASE_URL` с `/api/v1`
+  `NUXT_PUBLIC_API_BASE_URL` с `/api/v1`. IA статусного документа (D-027) — фичи 9–12.
 - Root scripts (копировать буквально): `build:core`, `dev` (api+web), `db:generate`,
   `db:migrate`, `db:seed`, `generate:api`, `build`, `lint`, `check:boundaries`, `typecheck`,
   `test`, `test:e2e`, `test:packages`, `format`, `format:check`
@@ -30,8 +30,9 @@ chromium` + `pnpm test:e2e`), `verify` (`up` + migrate + `generate:api` + diff g
 
 ## Чего ещё нет (фича должна завести; AC проверяет имя script)
 
-Предметный MVP закрыт фичей 8. Не выдумывай другие имена. Если нужен новый script — заведи
-его в той фиче, чей AC это требует, и запиши в `package.json`.
+Предметный HTTP/MVP закрыт фичей 8. IA статусного документа — фичи 9–12 (D-027). Не
+выдумывай другие имена. Если нужен новый script — заведи его в той фиче, чей AC это
+требует, и запиши в `package.json`.
 
 ## Порядок
 
@@ -44,9 +45,14 @@ docs → 1 Postgres/Prisma/ready
      → 6 индекс (e2e red, затем страница)
      → 7 кабинет + 404 (e2e red, затем страница)
      → 8 compose-smoke + CI e2e
+     → 9 docs статусного документа (D-027)
+     → 10 кабинет: рамка + лента процесса (e2e red, затем страница)
+     → 11 кабинет: файлы-записи + колонка комментария (unit+e2e red, затем код)
+     → 12 индекс: заголовок и жест клика (e2e red, затем страница)
 ```
 
-Фичи 1–7 уже в поставке. Нарезка 8 — D-020: не смешивать кабинет с compose-smoke/CI e2e.
+Фичи 1–8 уже в поставке. Нарезка 9–12 — D-027: не смешивать процесс кабинета с файлами
+и индексом; F10 и F11 оба правят один Vue — только последовательно.
 
 Зависимость: фича N в `main` до старта N+1.
 

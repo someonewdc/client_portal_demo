@@ -2,7 +2,7 @@
 
 ## Текущее состояние
 
-Фича 8 (compose-smoke полного стенда + CI e2e) реализована.
+Фича 9 (docs статусного документа, D-027) выполнена. Фичи 10–12 ещё нет.
 
 ## Правила обновления
 
@@ -13,19 +13,20 @@
 
 ## Этапы
 
-| Этап                          | Состояние                         |
-| ----------------------------- | --------------------------------- |
-| Boilerplate workspace         | проверен                          |
-| Документы плана и промпты фич | выполнен (main `cad60b4`, без PR) |
-| Правки контракта по ревью     | выполнен (main `95767dc`, PR #1)  |
-| Фича 1 Postgres/Prisma/ready  | проверен                          |
-| Фича 2 заявка + OpenAPI       | проверен                          |
-| Фича 3 Nuxt + make dev        | проверен                          |
-| Фича 4 токены + layout        | проверен                          |
-| Фича 5 Playwright harness     | проверен                          |
-| Фича 6 индекс ссылок          | проверен                          |
-| Фича 7 кабинет + 404          | проверен                          |
-| Фича 8 compose-smoke / CI e2e | проверен                          |
+| Этап                           | Состояние                         |
+| ------------------------------ | --------------------------------- |
+| Boilerplate workspace          | проверен                          |
+| Документы плана и промпты фич  | выполнен (main `cad60b4`, без PR) |
+| Правки контракта по ревью      | выполнен (main `95767dc`, PR #1)  |
+| Фича 1 Postgres/Prisma/ready   | проверен                          |
+| Фича 2 заявка + OpenAPI        | проверен                          |
+| Фича 3 Nuxt + make dev         | проверен                          |
+| Фича 4 токены + layout         | проверен                          |
+| Фича 5 Playwright harness      | проверен                          |
+| Фича 6 индекс ссылок           | проверен                          |
+| Фича 7 кабинет + 404           | проверен                          |
+| Фича 8 compose-smoke / CI e2e  | проверен                          |
+| Фича 9 docs статусный документ | выполнен                          |
 
 ## Журнал проверки
 
@@ -214,3 +215,6 @@
 | 2026-09-10 | Ревью #11 gates       | `pnpm test`                                                                                                                                                                                                                                                                               | exit 0: platform-core 29, nestjs-core 4, openapi-client-core 3, api 22, api-client 1, web 3, scripts 58                                                            |
 | 2026-09-10 | Ревью #11 gates       | `pnpm format` затем `pnpm format:check`                                                                                                                                                                                                                                                   | exit 0                                                                                                                                                             |
 | 2026-09-10 | Ревью #11 gates       | `pnpm typecheck` / `pnpm test:packages` / `pnpm build` / `make verify`                                                                                                                                                                                                                    | не запускались: slim images + Makefile/docs, без смены контракта/schema (`change-impact-gates`)                                                                    |
+| 2026-09-10 | Фича 9 docs           | `pnpm format` затем `pnpm format:check`                                                                                                                                                                                                                                                   | exit 0                                                                                                                                                             |
+| 2026-09-10 | Фича 9 docs           | `git diff --check`                                                                                                                                                                                                                                                                        | exit 0                                                                                                                                                             |
+| 2026-09-10 | Фича 9 docs           | `pnpm lint` / `pnpm test` / `pnpm test:e2e`                                                                                                                                                                                                                                               | не запускались: docs-only (`change-impact-gates`)                                                                                                                  |
