@@ -2,11 +2,11 @@
 
 ## Текущее состояние
 
-Фича 19 (уникальное `fileName` в заявке) в поставке этого PR. Код фич 20–27
-не начинать, пока соответствующая фича не в `main`. Оператор дефектов кода:
-`выполни задачу N` → `docs/remediation-plan.md`. Фича 18 на `main` (#23).
-Фича 17 на `main` (#22). Фича 16 на `main` (#21). Фича 15 на `main` (#20).
-Фича 14 на `main` (#18, D-030…D-035).
+Фича 20 (заголовки capability на Nuxt) в поставке этого PR. Код фич 21–27
+не начинать, пока соответствующая фича не в `main`. Фича 19 на `main` (#24).
+Оператор дефектов кода: `выполни задачу N` → `docs/remediation-plan.md`.
+Фича 18 на `main` (#23). Фича 17 на `main` (#22). Фича 16 на `main` (#21).
+Фича 15 на `main` (#20). Фича 14 на `main` (#18, D-030…D-035).
 
 UX/UI понятности (D-036…D-040) — docs-only нарезка на `main` (#19): оператор
 `выполни ux задачу N` → `docs/ux/README.md`. Без `ux` фраза `выполни задачу N`
@@ -46,7 +46,8 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | Фича 17 HTTP-статус HTML ошибки   | проверен                          |
 | Фича 18 неполный каталог → 500    | проверен                          |
 | Фича 19 уникальное fileName       | проверен                          |
-| Фичи 20–27 задачи 6–13            | не начаты                         |
+| Фича 20 заголовки capability HTML | проверен                          |
+| Фичи 21–27 задачи 7–13            | не начаты                         |
 | UX docs нарезка (D-036…D-040)     | выполнен                          |
 | UX задачи 1–12                    | не начаты                         |
 
@@ -336,3 +337,8 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | 2026-09-11 | Фича 19 migrate        | `pnpm db:generate` затем `pnpm db:migrate`                                                                                                                                                                                                                                                | exit 0; Prisma Client 7.10.0; applied `20260911020000_request_file_name_unique` на `127.0.0.1:5433`                                                                |
 | 2026-09-11 | Фича 19 TDD green      | `pnpm --filter @client-portal/api exec vitest run src/requests/requests.http.spec.ts`                                                                                                                                                                                                     | exit 0: 7 passed; unique `RequestFile_requestId_fileName_key`; GET З-10043 те же два файла                                                                         |
 | 2026-09-11 | Фича 19 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 26, web 14, scripts 77, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-11 | Merge main #24         | `git fetch origin` / `git pull --ff-only origin main`                                                                                                                                                                                                                                     | `main` `f24024a` Фича 19 (#24); локальный `main` был на F18 `736801f`                                                                                              |
+| 2026-09-11 | Фича 20 TDD red        | `pnpm test:e2e`                                                                                                                                                                                                                                                                           | exit 1: `cache-control` пустой на `/` и `/r/seed-z10043-quote-kuznetsov`; 12 passed, 2 failed                                                                      |
+| 2026-09-11 | Фича 20 TDD green      | `pnpm test:e2e`                                                                                                                                                                                                                                                                           | exit 0: 14 passed, включая index/cabinet `no-store` / `no-referrer` / `noindex` / `DENY` / `nosniff`                                                               |
+| 2026-09-11 | Фича 20 headers        | `curl -sS -D - -o /dev/null` на `/`, `/r/seed-z10043-quote-kuznetsov`, `/_nuxt/builds/latest.json`                                                                                                                                                                                        | HTML: пять заголовков D-032; `/_nuxt` без `no-store` (`public, max-age=0`)                                                                                         |
+| 2026-09-11 | Фича 20 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 26, web 14, scripts 77, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |

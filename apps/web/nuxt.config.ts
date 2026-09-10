@@ -1,6 +1,14 @@
 import tailwindcss from '@tailwindcss/vite';
 import { defineNuxtConfig } from 'nuxt/config';
 
+const capabilityPageHeaders = {
+  'Cache-Control': 'private, no-store',
+  'Referrer-Policy': 'no-referrer',
+  'X-Robots-Tag': 'noindex, nofollow',
+  'X-Frame-Options': 'DENY',
+  'X-Content-Type-Options': 'nosniff',
+};
+
 export default defineNuxtConfig({
   app: {
     head: {
@@ -19,6 +27,10 @@ export default defineNuxtConfig({
   },
   devtools: {
     enabled: false,
+  },
+  routeRules: {
+    '/': { headers: capabilityPageHeaders },
+    '/r/**': { headers: capabilityPageHeaders },
   },
   runtimeConfig: {
     apiBaseUrl: '',
