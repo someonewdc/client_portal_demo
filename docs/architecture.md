@@ -27,10 +27,15 @@ seed. Не эмулировать внешнюю шину.
 boundary. API сам отвечает 404, если хеш не найден. Cookie не форвардить (D-015).
 
 `GET /demo/links` отдаёт `portalPath` со секретом только потому, что это служебный экран
-ведущего. Не выдавать этот список за кабинет заказчика.
+ведущего. Не выдавать этот список за кабинет заказчика. Неполный или пустой каталог —
+500, не усечённый список (D-019, D-031; код — фича 18).
 
 Логи и 404: D-014. Path с секретом в access-логе и в `instance` допустим; `detail` и
 отдельные поля лога — нет. `nestjs-core` serializer не трогать.
+
+Заголовки capability (D-032; код — фичи 20–21): HTML `/` и `/r/**` и JSON
+`/demo/links` + `/requests/{secret}` — `Cache-Control: private, no-store`; web ещё
+no-referrer / noindex / DENY / nosniff. Не включать SWR/ISR на `/r/**`.
 
 ## Слои Nest
 
@@ -57,4 +62,5 @@ Postgres, потом `dev`+web, с фичи 8 тот же `up` = полный с
 `dev`. `verify` — D-018: `up` + migrate + `generate:api` + diff generated client + gates +
 compose-smoke + Chromium + e2e.
 
-Порты — `docs/decisions.md`. Один стенд на машине для `:3000`/`:3001`.
+Порты — `docs/decisions.md`. Один стенд на машине для `:3000`/`:3001`. Публикация
+Compose на хост — `127.0.0.1` (D-033; код — фича 27).

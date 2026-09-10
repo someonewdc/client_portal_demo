@@ -56,6 +56,7 @@ workspace нет и в production API не добавляй. Новый skill «
   `credentials: 'include'`); `make up` = web+api+postgres `:3000`/`:3001`/host `5433`;
   `make dev` = db на хосте + api+web;
   `make restart` = `down` + leftover `node` на портах стенда + `dev` (D-028, без kill Docker Desktop);
+  нарезка дефектов после F13 — `docs/remediation-plan.md` (фичи 14–27, D-030);
 - Playwright: `pnpm test:e2e` / `make e2e` (smoke шапки, индекс, кабинет З-10043, битая
   ссылка, D-021); CI job `e2e` против `make up`;
 - PostgreSQL в Docker (хост 5433), Prisma 7 в `apps/api`.
