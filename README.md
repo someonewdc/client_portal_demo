@@ -32,9 +32,12 @@ make up
 
 `make up` поднимает Postgres на `:5433`, API на `:3001` и web на `:3000`, применяет
 миграции и seed. Индекс: `http://localhost:3000`. `make dev` останавливает compose `api`/`web`
-(если их поднял `up`) и гоняет API/web на хосте (hot reload), Postgres остаётся в Docker. Агентам — только цели Makefile, не сырой
+(если их поднял `up`), освобождает leftover `:3000`/`:3001` и гоняет API/web на хосте
+(hot reload), Postgres остаётся в Docker. `make restart` = `down` + `dev`: гасит контейнеры
+и процессы на `:3000`/`:3001`/`:5433`, затем поднимает стенд заново. `make down` тоже
+забирает leftover-слушателей на этих портах. Агентам — только цели Makefile, не сырой
 `docker compose` / `pnpm dev` (D-013). Один стенд на машине для `:3000`/`:3001`
-(`docs/decisions.md` D-006).
+(`docs/decisions.md` D-006, D-028).
 
 Проверки: `make verify` (D-018: полный `up` + migrate + `generate:api` + diff generated
 client, корневые gates, compose-smoke, `playwright install --with-deps chromium`, e2e).

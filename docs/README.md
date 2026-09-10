@@ -25,6 +25,6 @@
 
 Предметный код пишут отдельные чаты по `docs/llm/feature-NN.md`. В этом наборе документов
 кода продукта нет. Стенд — цели корневого Makefile (`bootstrap`, `up`, `down`, `dev`,
-`verify`), не сырой `docker compose` (D-013). `verify` поднимает полный стенд, мигрирует,
+`restart`, `verify`), не сырой `docker compose` (D-013, D-028). `verify` поднимает полный стенд, мигрирует,
 генерирует api-client и сверяет diff до gates, затем compose-smoke, ставит Chromium и гоняет
 e2e (D-018).
