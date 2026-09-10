@@ -3,6 +3,7 @@ import { setResponseStatus } from 'nuxt/app';
 import { computed } from 'vue';
 
 import { useRequestPortal } from '~/composables/useRequestPortal';
+import { documentStatusFromAsyncData } from '~/utils/async-data-problem';
 import {
   fileKindLabel,
   formatByteSize,
@@ -11,8 +12,9 @@ import {
 } from '~/utils/request-file-display';
 
 const { accessSecret, error, errorTraceId, isNotFound, request, status } = await useRequestPortal();
-if (isNotFound.value) {
-  setResponseStatus(404);
+const documentStatus = documentStatusFromAsyncData(error.value);
+if (documentStatus !== 200) {
+  setResponseStatus(documentStatus);
 }
 
 const hasSpecComments = computed(
