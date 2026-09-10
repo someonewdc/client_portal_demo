@@ -2,7 +2,7 @@
 
 ## Текущее состояние
 
-Фича 9 (docs статусного документа, D-027) выполнена. Фичи 10–12 ещё нет.
+Фича 10 (рамка кабинета + лента процесса) проверена. Фичи 11–12 ещё нет.
 
 ## Правила обновления
 
@@ -13,20 +13,21 @@
 
 ## Этапы
 
-| Этап                           | Состояние                         |
-| ------------------------------ | --------------------------------- |
-| Boilerplate workspace          | проверен                          |
-| Документы плана и промпты фич  | выполнен (main `cad60b4`, без PR) |
-| Правки контракта по ревью      | выполнен (main `95767dc`, PR #1)  |
-| Фича 1 Postgres/Prisma/ready   | проверен                          |
-| Фича 2 заявка + OpenAPI        | проверен                          |
-| Фича 3 Nuxt + make dev         | проверен                          |
-| Фича 4 токены + layout         | проверен                          |
-| Фича 5 Playwright harness      | проверен                          |
-| Фича 6 индекс ссылок           | проверен                          |
-| Фича 7 кабинет + 404           | проверен                          |
-| Фича 8 compose-smoke / CI e2e  | проверен                          |
-| Фича 9 docs статусный документ | выполнен                          |
+| Этап                            | Состояние                         |
+| ------------------------------- | --------------------------------- |
+| Boilerplate workspace           | проверен                          |
+| Документы плана и промпты фич   | выполнен (main `cad60b4`, без PR) |
+| Правки контракта по ревью       | выполнен (main `95767dc`, PR #1)  |
+| Фича 1 Postgres/Prisma/ready    | проверен                          |
+| Фича 2 заявка + OpenAPI         | проверен                          |
+| Фича 3 Nuxt + make dev          | проверен                          |
+| Фича 4 токены + layout          | проверен                          |
+| Фича 5 Playwright harness       | проверен                          |
+| Фича 6 индекс ссылок            | проверен                          |
+| Фича 7 кабинет + 404            | проверен                          |
+| Фича 8 compose-smoke / CI e2e   | проверен                          |
+| Фича 9 docs статусный документ  | выполнен                          |
+| Фича 10 кабинет рамка + процесс | проверен                          |
 
 ## Журнал проверки
 
@@ -218,3 +219,12 @@
 | 2026-09-10 | Фича 9 docs           | `pnpm format` затем `pnpm format:check`                                                                                                                                                                                                                                                   | exit 0                                                                                                                                                             |
 | 2026-09-10 | Фича 9 docs           | `git diff --check`                                                                                                                                                                                                                                                                        | exit 0                                                                                                                                                             |
 | 2026-09-10 | Фича 9 docs           | `pnpm lint` / `pnpm test` / `pnpm test:e2e`                                                                                                                                                                                                                                               | не запускались: docs-only (`change-impact-gates`)                                                                                                                  |
+| 2026-09-10 | Фича 10 TDD red       | `pnpm test:e2e`                                                                                                                                                                                                                                                                           | exit 1: `getByText('Статус заявки')` not found на кабинете З-10043                                                                                                 |
+| 2026-09-10 | Фича 10 TDD green     | `pnpm test:e2e`                                                                                                                                                                                                                                                                           | exit 0: 6 passed, включая рамку документа и ленту 1–4 с `reachedAt` / «ещё нет»                                                                                    |
+| 2026-09-10 | Фича 10 gates         | `pnpm check:boundaries`                                                                                                                                                                                                                                                                   | exit 0                                                                                                                                                             |
+| 2026-09-10 | Фича 10 gates         | `pnpm lint`                                                                                                                                                                                                                                                                               | exit 0                                                                                                                                                             |
+| 2026-09-10 | Фича 10 gates         | `pnpm typecheck`                                                                                                                                                                                                                                                                          | exit 0, включая `nuxt typecheck`                                                                                                                                   |
+| 2026-09-10 | Фича 10 gates         | `pnpm test`                                                                                                                                                                                                                                                                               | exit 0: platform-core 29, nestjs-core 4, openapi-client-core 3, api 22, api-client 1, web 3, scripts 58                                                            |
+| 2026-09-10 | Фича 10 gates         | `pnpm test:packages`                                                                                                                                                                                                                                                                      | exit 0: 5 tarballs, 17 ESM imports, 3 TypeScript consumers                                                                                                         |
+| 2026-09-10 | Фича 10 gates         | `pnpm build`                                                                                                                                                                                                                                                                              | exit 0, включая Nuxt 4.5.2 production build                                                                                                                        |
+| 2026-09-10 | Фича 10 gates         | `pnpm format` затем `pnpm format:check`                                                                                                                                                                                                                                                   | exit 0                                                                                                                                                             |

@@ -88,21 +88,34 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
       </span>
     </p>
     <template v-else-if="request">
-      <h2 class="text-xl font-semibold tabular-nums text-ink">{{ request.publicNumber }}</h2>
-      <p class="mt-2 text-ink">{{ request.counterpartyName }}</p>
+      <p class="text-sm text-ink-muted">Статус заявки</p>
+      <h2 class="mt-2 text-xl font-semibold tabular-nums text-ink">{{ request.publicNumber }}</h2>
+      <p class="mt-2 text-ink">Менеджер отправил вам эту ссылку. Вход не нужен.</p>
+      <p class="mt-4 text-ink">{{ request.counterpartyName }}</p>
       <p class="mt-1 text-ink-muted">{{ request.title }}</p>
-      <p class="mt-4 flex flex-wrap items-center gap-3">
-        <span class="inline-block bg-accent/15 px-2 py-0.5 text-sm font-semibold text-accent">
-          {{ request.statusLabel }}
-        </span>
+      <p class="mt-4">
         <time class="text-sm tabular-nums text-ink-muted" :datetime="request.updatedAt">
           {{ formatUpdatedAt(request.updatedAt) }}
         </time>
       </p>
 
-      <ol class="mt-8 space-y-2" aria-label="Этапы заявки" role="list">
-        <li v-for="stage in request.stages" :key="stage.status" role="listitem">
+      <ol class="mt-8 space-y-3" aria-label="Этапы заявки" role="list">
+        <li
+          v-for="(stage, index) in request.stages"
+          :key="stage.status"
+          class="flex flex-wrap items-baseline gap-3"
+          role="listitem"
+        >
+          <span class="tabular-nums text-sm text-ink-muted">{{ index + 1 }}</span>
           <span :class="stampClass(stage, request.status)">{{ stage.label }}</span>
+          <time
+            v-if="stage.reachedAt !== null"
+            class="text-sm tabular-nums text-ink-muted"
+            :datetime="stage.reachedAt"
+          >
+            {{ formatUpdatedAt(stage.reachedAt) }}
+          </time>
+          <span v-else class="text-sm text-ink-muted">ещё нет</span>
         </li>
       </ol>
 
