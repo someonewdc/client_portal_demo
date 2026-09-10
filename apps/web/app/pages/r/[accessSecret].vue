@@ -8,6 +8,7 @@ import {
   statusCodeFromThrown,
   traceIdFromAsyncDataError,
 } from '~/utils/async-data-problem';
+import { fileKindLabel, formatByteSize } from '~/utils/request-file-display';
 
 const { $api } = useNuxtApp();
 const route = useRoute();
@@ -40,6 +41,9 @@ const { data, error, status } = await useAsyncData(`request-portal:${accessSecre
 const request = computed(() => data.value);
 const errorTraceId = computed(() => traceIdFromAsyncDataError(error.value));
 const isNotFound = computed(() => statusCodeFromAsyncDataError(error.value, 0) === 404);
+const hasSpecComments = computed(
+  () => request.value?.specLines.some((line) => Boolean(line.comment)) === true,
+);
 
 if (isNotFound.value) {
   setResponseStatus(404);
@@ -128,7 +132,7 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
             <th class="py-2 pr-4 font-semibold">Наименование</th>
             <th class="py-2 pr-4 font-semibold">Кол-во</th>
             <th class="py-2 pr-4 font-semibold">Ед.</th>
-            <th class="py-2 font-semibold">Комментарий</th>
+            <th v-if="hasSpecComments" class="py-2 font-semibold">Комментарий</th>
           </tr>
         </thead>
         <tbody>
@@ -136,20 +140,27 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
             <td class="py-3 pr-4 text-ink">{{ line.name }}</td>
             <td class="py-3 pr-4 tabular-nums text-ink">{{ line.quantity }}</td>
             <td class="py-3 pr-4 text-ink">{{ line.unit }}</td>
-            <td class="py-3 text-ink-muted">{{ line.comment }}</td>
+            <td v-if="hasSpecComments" class="py-3 text-ink-muted">{{ line.comment }}</td>
           </tr>
         </tbody>
       </table>
 
       <h2 class="mt-8 font-semibold text-ink">Файлы</h2>
-      <ul class="mt-3 divide-y divide-rule" role="list">
+      <ul class="mt-3 divide-y divide-rule" aria-label="Файлы" role="list">
         <li
           v-for="file in request.files"
           :key="file.fileName"
-          class="py-3 text-ink"
+          class="flex flex-wrap items-baseline gap-x-3 gap-y-1 py-3 text-ink"
           role="listitem"
         >
-          {{ file.fileName }}
+          <span class="text-sm font-semibold text-ink-muted">{{ fileKindLabel(file.kind) }}</span>
+          <span>{{ file.fileName }}</span>
+          <span class="tabular-nums text-sm text-ink-muted">{{
+            formatByteSize(file.byteSize)
+          }}</span>
+          <time class="text-sm tabular-nums text-ink-muted" :datetime="file.uploadedAt">
+            {{ formatUpdatedAt(file.uploadedAt) }}
+          </time>
         </li>
       </ul>
     </template>

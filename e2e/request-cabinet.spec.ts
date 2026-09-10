@@ -93,6 +93,49 @@ test('quote cabinet reads as a status document with a dated process list', async
   await expect(page.locator('a[href="#"]')).toHaveCount(0);
 });
 
+test('quote cabinet lists files as records and keeps the comment column', async ({ page }) => {
+  const response = await page.goto(`/r/${quoteCabinet.accessSecret}`);
+
+  expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  const files = page.getByRole('list', { name: 'Файлы' });
+  const questionnaire = files.getByRole('listitem').filter({
+    hasText: quoteCabinet.questionnaireFileName,
+  });
+  const quoteFile = files.getByRole('listitem').filter({ hasText: quoteCabinet.quoteFileName });
+
+  await expect(questionnaire.getByText('Опросный лист', { exact: true })).toBeVisible();
+  await expect(questionnaire.getByText('120 КБ', { exact: true })).toBeVisible();
+  await expect(questionnaire.locator('time')).toHaveAttribute(
+    'datetime',
+    '2026-09-01T09:05:00.000Z',
+  );
+
+  await expect(quoteFile.getByText('КП', { exact: true })).toBeVisible();
+  await expect(quoteFile.getByText('240 КБ', { exact: true })).toBeVisible();
+  await expect(quoteFile.locator('time')).toHaveAttribute('datetime', '2026-09-04T12:00:00.000Z');
+
+  await expect(questionnaire.getByRole('link')).toHaveCount(0);
+  await expect(quoteFile.getByRole('link')).toHaveCount(0);
+  await expect(page.locator('[download]')).toHaveCount(0);
+  await expect(page.getByRole('button')).toHaveCount(0);
+
+  await expect(page.getByRole('columnheader', { name: 'Комментарий' })).toBeVisible();
+  await expect(page.getByText('IP54, навесной')).toBeVisible();
+});
+
+test('calculation cabinet hides an empty specification comment column', async ({ page }) => {
+  const response = await page.goto('/r/seed-z10042-calc-portline');
+
+  expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expect(page.getByRole('heading', { name: 'З-10042' })).toBeVisible();
+  await expect(page.getByRole('columnheader', { name: 'Комментарий' })).toHaveCount(0);
+  await expect(page.getByRole('cell', { name: 'НКУ освещения причала' })).toBeVisible();
+});
+
 test('index click opens the filled quote cabinet, not an empty shell', async ({ page }) => {
   const response = await page.goto('/');
 
