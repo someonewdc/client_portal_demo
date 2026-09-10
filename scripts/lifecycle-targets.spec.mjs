@@ -591,21 +591,29 @@ describe('feature 6 demo links index', () => {
 
 describe('feature 7 request cabinet', () => {
   it('loads GET /requests/{accessSecret} through useAsyncData without session cookies', () => {
-    const cabinetPage = readFileSync(resolve(webRoot, 'app/pages/r/[accessSecret].vue'), 'utf8');
+    const cabinetPage = readFileSync(
+      resolve(webRoot, 'app/pages/r/[accessSecret]/index.vue'),
+      'utf8',
+    );
+    const portalComposable = readFileSync(
+      resolve(webRoot, 'app/composables/useRequestPortal.ts'),
+      'utf8',
+    );
+    const cabinetSources = `${cabinetPage}\n${portalComposable}`;
     const sources = listWebSourceFiles(webRoot).map((absolutePath) =>
       readFileSync(absolutePath, 'utf8'),
     );
     const combined = sources.join('\n');
 
-    assert.match(cabinetPage, /useAsyncData/);
-    assert.match(cabinetPage, /\/requests\/\{accessSecret\}/);
-    assert.match(cabinetPage, /createError/);
-    assert.match(cabinetPage, /data:\s*payload/);
+    assert.match(cabinetSources, /useAsyncData/);
+    assert.match(cabinetSources, /\/requests\/\{accessSecret\}/);
+    assert.match(cabinetSources, /createError/);
+    assert.match(cabinetSources, /data:\s*payload/);
     assert.match(cabinetPage, /Ссылка недействительна/);
     assert.match(cabinetPage, /заявки по этой ссылке нет/i);
     assert.match(cabinetPage, /Код ошибки:/);
     assert.match(cabinetPage, /role=["']alert["']/);
-    assert.match(cabinetPage, /setResponseStatus/);
+    assert.match(cabinetSources, /setResponseStatus/);
     assert.match(cabinetPage, /<h2[^>]*>\{\{\s*request\.publicNumber\s*\}\}<\/h2>/);
     assert.match(cabinetPage, /tabular-nums/);
     assert.match(cabinetPage, /specLines/);
@@ -644,6 +652,32 @@ describe('feature 7 request cabinet', () => {
     assert.match(makefile, /make dev \+ seed/);
     assert.match(readme, /\/requests\/\{accessSecret\}/);
     assert.match(readme, /:3001/);
+  });
+});
+
+describe('feature 13 HTML file sheet playbook', () => {
+  it('documents the file sheet route in the stand playbook', () => {
+    const readme = readFileSync(resolve(rootDirectory, 'README.md'), 'utf8');
+    const domainModel = readFileSync(resolve(rootDirectory, 'docs/domain-model.md'), 'utf8');
+
+    assert.match(readme, /\/r\/\{secret\}\/d\/\{fileName\}/);
+    assert.match(domainModel, /localhost:3000\/r\/\{accessSecret\}\/d\/\{fileName\}/);
+  });
+
+  it('scans the file sheet page for a reactive file name and no download CTA', () => {
+    const sheetPage = readFileSync(
+      resolve(webRoot, 'app/pages/r/[accessSecret]/d/[fileName].vue'),
+      'utf8',
+    );
+
+    assert.match(
+      sheetPage,
+      /fileName = computed\(\(\) =>\s*routeParamValue\(route\.params\.fileName\)\)/,
+    );
+    assert.match(sheetPage, /item\.fileName === fileName\.value/);
+    assert.doesNotMatch(sheetPage, /скачать/);
+    assert.doesNotMatch(sheetPage, /\bdownload\b/);
+    assert.doesNotMatch(sheetPage, /href=["']#["']/);
   });
 });
 

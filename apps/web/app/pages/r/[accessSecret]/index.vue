@@ -1,64 +1,23 @@
 <script setup lang="ts">
-import { createError, setResponseStatus, useAsyncData, useNuxtApp, useRoute } from 'nuxt/app';
+import { setResponseStatus } from 'nuxt/app';
 import { computed } from 'vue';
 
+import { useRequestPortal } from '~/composables/useRequestPortal';
 import {
-  asyncDataProblemPayload,
-  statusCodeFromAsyncDataError,
-  statusCodeFromThrown,
-  traceIdFromAsyncDataError,
-} from '~/utils/async-data-problem';
-import { fileKindLabel, formatByteSize } from '~/utils/request-file-display';
+  fileKindLabel,
+  formatByteSize,
+  formatRequestUpdatedAt,
+  requestFileHref,
+} from '~/utils/request-file-display';
 
-const { $api } = useNuxtApp();
-const route = useRoute();
-const accessSecretParam = route.params.accessSecret;
-const accessSecret = Array.isArray(accessSecretParam)
-  ? (accessSecretParam[0] ?? '')
-  : (accessSecretParam ?? '');
-
-const { data, error, status } = await useAsyncData(`request-portal:${accessSecret}`, async () => {
-  try {
-    const response = await $api.GET('/requests/{accessSecret}', {
-      params: { path: { accessSecret } },
-    });
-    const portal = response.data?.data;
-    if (!portal) {
-      throw new Error('Request portal response is missing data');
-    }
-    return portal;
-  } catch (caught) {
-    const payload = asyncDataProblemPayload(caught);
-    throw createError({
-      cause: caught,
-      message: 'Не удалось загрузить заявку.',
-      statusCode: statusCodeFromThrown(caught),
-      ...(payload === undefined ? {} : { data: payload }),
-    });
-  }
-});
-
-const request = computed(() => data.value);
-const errorTraceId = computed(() => traceIdFromAsyncDataError(error.value));
-const isNotFound = computed(() => statusCodeFromAsyncDataError(error.value, 0) === 404);
-const hasSpecComments = computed(
-  () => request.value?.specLines.some((line) => Boolean(line.comment)) === true,
-);
-
+const { accessSecret, error, errorTraceId, isNotFound, request, status } = await useRequestPortal();
 if (isNotFound.value) {
   setResponseStatus(404);
 }
 
-function formatUpdatedAt(iso: string): string {
-  return new Intl.DateTimeFormat('ru-RU', {
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    month: 'long',
-    timeZone: 'UTC',
-    year: 'numeric',
-  }).format(new Date(iso));
-}
+const hasSpecComments = computed(
+  () => request.value?.specLines.some((line) => Boolean(line.comment)) === true,
+);
 
 function stampClass(stage: { reachedAt: string | null; status: string }, currentStatus: string) {
   if (stage.status === currentStatus) {
@@ -99,7 +58,7 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
       <p class="mt-1 text-ink-muted">{{ request.title }}</p>
       <p class="mt-4">
         <time class="text-sm tabular-nums text-ink-muted" :datetime="request.updatedAt">
-          {{ formatUpdatedAt(request.updatedAt) }}
+          {{ formatRequestUpdatedAt(request.updatedAt) }}
         </time>
       </p>
 
@@ -117,7 +76,7 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
             class="text-sm tabular-nums text-ink-muted"
             :datetime="stage.reachedAt"
           >
-            {{ formatUpdatedAt(stage.reachedAt) }}
+            {{ formatRequestUpdatedAt(stage.reachedAt) }}
           </time>
           <span v-else class="text-sm text-ink-muted">ещё нет</span>
         </li>
@@ -154,12 +113,17 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
           role="listitem"
         >
           <span class="text-sm font-semibold text-ink-muted">{{ fileKindLabel(file.kind) }}</span>
-          <span>{{ file.fileName }}</span>
+          <a
+            class="underline decoration-rule underline-offset-2 hover:text-accent"
+            :href="requestFileHref(accessSecret, file.fileName)"
+          >
+            {{ file.fileName }}
+          </a>
           <span class="tabular-nums text-sm text-ink-muted">{{
             formatByteSize(file.byteSize)
           }}</span>
           <time class="text-sm tabular-nums text-ink-muted" :datetime="file.uploadedAt">
-            {{ formatUpdatedAt(file.uploadedAt) }}
+            {{ formatRequestUpdatedAt(file.uploadedAt) }}
           </time>
         </li>
       </ul>

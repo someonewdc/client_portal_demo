@@ -51,9 +51,10 @@ workspace нет и в production API не добавляй. Новый skill «
 - `apps/api` — NestJS/Fastify, health, `GET /api/v1/demo/links` и
   `GET /api/v1/requests/{accessSecret}` (заявки в Postgres + seed);
 - `apps/web` — Nuxt 4.5.2, Tailwind v4 `@theme`, IBM Plex, документный layout; индекс `/`
-  из `GET /demo/links`; кабинет `/r/{secret}` (процесс с датами и файлы-записи, D-027) и
-  тупик 404 (`useAsyncData`, без cookie / `credentials: 'include'`); `make up` =
-  web+api+postgres `:3000`/`:3001`/host `5433`; `make dev` = db на хосте + api+web;
+  из `GET /demo/links`; кабинет `/r/{secret}` (процесс с датами и файлы-записи, D-027),
+  HTML-лист `/r/{secret}/d/{fileName}` (D-029) и тупик 404 (`useAsyncData`, без cookie /
+  `credentials: 'include'`); `make up` = web+api+postgres `:3000`/`:3001`/host `5433`;
+  `make dev` = db на хосте + api+web;
   `make restart` = `down` + leftover `node` на портах стенда + `dev` (D-028, без kill Docker Desktop);
 - Playwright: `pnpm test:e2e` / `make e2e` (smoke шапки, индекс, кабинет З-10043, битая
   ссылка, D-021); CI job `e2e` против `make up`;

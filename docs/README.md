@@ -21,7 +21,7 @@
 | Решения (имя, порты, enum)    | [`decisions.md`](decisions.md)                                                  |
 | Ядро packages                 | [`shared-core.md`](shared-core.md)                                              |
 | Версии toolchain              | [`toolchain.md`](toolchain.md)                                                  |
-| Копируемый промпт фичи N      | [`llm/feature-01.md`](llm/feature-01.md) … [`feature-12.md`](llm/feature-12.md) |
+| Копируемый промпт фичи N      | [`llm/feature-01.md`](llm/feature-01.md) … [`feature-13.md`](llm/feature-13.md) |
 
 Предметный код пишут отдельные чаты по `docs/llm/feature-NN.md`. В этом наборе документов
 кода продукта нет. Стенд — цели корневого Makefile (`bootstrap`, `up`, `down`, `dev`,
