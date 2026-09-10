@@ -22,9 +22,14 @@
 | Ядро packages                 | [`shared-core.md`](shared-core.md)                                              |
 | Версии toolchain              | [`toolchain.md`](toolchain.md)                                                  |
 | Копируемый промпт фичи N      | [`llm/feature-01.md`](llm/feature-01.md) … [`feature-27.md`](llm/feature-27.md) |
-| Дефекты: задача N оператору   | [`remediation-plan.md`](remediation-plan.md) (`выполни задачу N`)               |
+| Дефекты кода: задача N        | [`remediation-plan.md`](remediation-plan.md) (`выполни задачу N`)               |
+| UX/UI понятности: задача N    | [`ux/README.md`](ux/README.md) (`выполни ux задачу N` → `ux/task-NN.md`)        |
 
-Предметный код пишут отдельные чаты по `docs/llm/feature-NN.md`. В этом наборе документов
+Предметный код (фичи 1–27) пишут отдельные чаты по `docs/llm/feature-NN.md`
+(`выполни задачу N`). Доработки UX/UI понятности — по `docs/ux/task-NN.md`
+(`выполни ux задачу N`), не в общем скоупе фич. Без слова `ux` фраза
+`выполни задачу N` не открывает `docs/ux/`.
+В этом наборе документов
 кода продукта нет. Стенд — цели корневого Makefile (`bootstrap`, `up`, `down`, `dev`,
 `restart`, `verify`), не сырой `docker compose` (D-013, D-028). `verify` поднимает полный стенд, мигрирует,
 генерирует api-client и сверяет diff до gates, затем compose-smoke, ставит Chromium и гоняет
