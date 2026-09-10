@@ -2,10 +2,9 @@
 
 ## Текущее состояние
 
-Фича 14 (docs нарезки дефектов, D-030…D-035) в поставке этого PR; правки по ревью
-#18: путь оператора, D-034, TDD F18, per-IP F24. Код фич 15–27 не начинать, пока
-соответствующая фича не в `main`. Оператор: `выполни задачу N` →
-`docs/remediation-plan.md`. Фича 13 на `main` проверена (D-029).
+Фича 15 (decode route param один раз) в поставке этого PR. Код фич 16–27 не
+начинать, пока соответствующая фича не в `main`. Оператор: `выполни задачу N` →
+`docs/remediation-plan.md`. Фича 14 на `main` (#18, D-030…D-035).
 
 ## Правила обновления
 
@@ -35,7 +34,8 @@
 | Фича 12 индекс заголовок и жест | проверен                          |
 | Фича 13 кабинет HTML-лист файла | проверен                          |
 | Фича 14 docs нарезка дефектов   | выполнен                          |
-| Фичи 15–27 задачи 1–13          | не начаты                         |
+| Фича 15 decode param один раз   | проверен                          |
+| Фичи 16–27 задачи 2–13          | не начаты                         |
 
 ## Журнал проверки
 
@@ -296,3 +296,6 @@
 | 2026-09-10 | Merge main #16         | `git merge origin/main`                                                                                                                                                                                                                                                                   | D-028 уже `make restart` в `main`; HTML-лист перенумерован в D-029                                                                                                 |
 | 2026-09-10 | Фича 14 docs           | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0; docs-only (D-030…D-035, промпты 15–27)                                                                                                                     |
 | 2026-09-11 | Ревью #18 docs         | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0; путь `remediation-plan.md`, D-034 до F25, TDD F18 переписать happy, F24 per-IP                                                                             |
+| 2026-09-11 | Фича 15 TDD red        | `pnpm --filter @client-portal/web test`                                                                                                                                                                                                                                                   | exit 1: `routeParamValue('file%2Fname.pdf')` даёт `file/name.pdf` — второй `decodeURIComponent` съедает `%2F`                                                      |
+| 2026-09-11 | Фича 15 TDD green      | `pnpm --filter @client-portal/web test`                                                                                                                                                                                                                                                   | exit 0: 12 tests, включая `file%2Fname.pdf` без превращения в `/` и `КП-З-10043.pdf` без изменений                                                                 |
+| 2026-09-11 | Фича 15 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: web 12, scripts 75, 5 tarballs; Nuxt 4.5.2 production build                                                                                                |

@@ -2,13 +2,14 @@
 import { setResponseStatus, useRoute } from 'nuxt/app';
 import { computed } from 'vue';
 
-import { useRequestPortal, routeParamValue } from '~/composables/useRequestPortal';
+import { useRequestPortal } from '~/composables/useRequestPortal';
 import {
   fileKindLabel,
   fileSheetLead,
   formatByteSize,
   formatRequestUpdatedAt,
 } from '~/utils/request-file-display';
+import { routeParamValue } from '~/utils/route-param-value';
 
 const route = useRoute();
 const { accessSecret, error, errorTraceId, isNotFound, request, status } = await useRequestPortal();

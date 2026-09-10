@@ -7,15 +7,7 @@ import {
   statusCodeFromThrown,
   traceIdFromAsyncDataError,
 } from '~/utils/async-data-problem';
-
-export function routeParamValue(value: string | string[] | undefined): string {
-  const raw = Array.isArray(value) ? (value[0] ?? '') : (value ?? '');
-  try {
-    return decodeURIComponent(raw);
-  } catch {
-    return raw;
-  }
-}
+import { routeParamValue } from '~/utils/route-param-value';
 
 export async function useRequestPortal() {
   const { $api } = useNuxtApp();
