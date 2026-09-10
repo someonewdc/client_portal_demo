@@ -99,10 +99,11 @@ test('quote cabinet lists files as records and keeps the comment column', async 
   expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
   expect(response?.ok()).toBe(true);
 
-  const questionnaire = page.getByRole('listitem').filter({
+  const files = page.getByRole('list', { name: 'Файлы' });
+  const questionnaire = files.getByRole('listitem').filter({
     hasText: quoteCabinet.questionnaireFileName,
   });
-  const quoteFile = page.getByRole('listitem').filter({ hasText: quoteCabinet.quoteFileName });
+  const quoteFile = files.getByRole('listitem').filter({ hasText: quoteCabinet.quoteFileName });
 
   await expect(questionnaire.getByText('Опросный лист', { exact: true })).toBeVisible();
   await expect(questionnaire.getByText('120 КБ', { exact: true })).toBeVisible();
@@ -130,6 +131,7 @@ test('calculation cabinet hides an empty specification comment column', async ({
   expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
   expect(response?.ok()).toBe(true);
 
+  await expect(page.getByRole('heading', { name: 'З-10042' })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: 'Комментарий' })).toHaveCount(0);
   await expect(page.getByRole('cell', { name: 'НКУ освещения причала' })).toBeVisible();
 });

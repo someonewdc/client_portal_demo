@@ -146,7 +146,7 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
       </table>
 
       <h2 class="mt-8 font-semibold text-ink">Файлы</h2>
-      <ul class="mt-3 divide-y divide-rule" role="list">
+      <ul class="mt-3 divide-y divide-rule" aria-label="Файлы" role="list">
         <li
           v-for="file in request.files"
           :key="file.fileName"
