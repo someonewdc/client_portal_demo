@@ -12,15 +12,17 @@
   `API_PORT=3001`, `WEB_ORIGIN=http://localhost:3000`, `DATABASE_URL`
 - `apps/web`: Nuxt 4.5.2, Tailwind v4 `@theme`, IBM Plex, layout; индекс `/` из
   `GET /demo/links` (`createApiClient`, `useAsyncData`); кабинет `/r/{secret}` и тупик 404;
-  HTML-лист файла `/r/{secret}/d/{fileName}` (D-028); `NUXT_PUBLIC_API_BASE_URL` с `/api/v1`.
+  HTML-лист файла `/r/{secret}/d/{fileName}` (D-029); `NUXT_PUBLIC_API_BASE_URL` с `/api/v1`.
   IA статусного документа (D-027) — фичи 9–12; клик по файлу — фича 13.
 - Root scripts (копировать буквально): `build:core`, `dev` (api+web), `db:generate`,
   `db:migrate`, `db:seed`, `generate:api`, `build`, `lint`, `check:boundaries`, `typecheck`,
   `test`, `test:e2e`, `test:packages`, `format`, `format:check`
 - Makefile: `bootstrap`, `doctor`, `up` (web+api+postgres :3000/:3001/host :5433), `down`,
-  `dev` (только Postgres из compose + api/web на хосте), `e2e` (`playwright install --with-deps
-chromium` + `pnpm test:e2e`), `verify` (`up` + migrate + `generate:api` + diff generated
-  client + корневые gates + compose-smoke + Chromium + e2e, D-018)
+  `free-ports`, `restart` (`down` + `dev`, D-028), `dev` (только Postgres из compose +
+  api/web на хосте; leftover `node` на `:3000`/`:3001` освобождает до `pnpm dev`), `e2e`
+  (`playwright install --with-deps chromium` + `pnpm test:e2e`), `verify` (`up` + migrate +
+  `generate:api` + diff generated client + корневые gates + compose-smoke + Chromium + e2e,
+  D-018)
 - CI: job `verify` — Postgres service + `DATABASE_URL` на 5432, generate/migrate,
   `generate:api`, `git diff --exit-code` на `openapi.json` / `schema.d.ts`, корневые gates;
   job `e2e` — `make up` (хост 5433) + `pnpm test:e2e`
@@ -32,7 +34,7 @@ chromium` + `pnpm test:e2e`), `verify` (`up` + migrate + `generate:api` + diff g
 ## Чего ещё нет (фича должна завести; AC проверяет имя script)
 
 Предметный HTTP/MVP закрыт фичей 8. IA статусного документа — фичи 9–12 (D-027).
-HTML-лист файла — фича 13 (D-028). Не выдумывай другие имена. Если нужен новый script —
+HTML-лист файла — фича 13 (D-029). Не выдумывай другие имена. Если нужен новый script —
 заведи его в той фиче, чей AC это требует, и запиши в `package.json`.
 
 ## Порядок
@@ -53,7 +55,7 @@ docs → 1 Postgres/Prisma/ready
      → 13 кабинет: HTML-лист файла по клику на имя (unit+e2e red, затем страницы)
 ```
 
-Фичи 1–12 уже в поставке. Нарезка 9–12 — D-027. Фича 13 — D-028: имена файлов кликабельны,
+Фичи 1–12 уже в поставке. Нарезка 9–12 — D-027. Фича 13 — D-029: имена файлов кликабельны,
 бинарников нет.
 
 Зависимость: фича N в `main` до старта N+1.

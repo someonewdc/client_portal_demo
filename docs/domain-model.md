@@ -16,7 +16,7 @@
   источник правды: не выдумывать другие title/строки.
 - `files` — метаданные вложений: `fileName`, `kind` (`questionnaire` / `quote` / `invoice`),
   `byteSize` (integer), `uploadedAt`. Бинарников и загрузки с диска нет. В UI имя открывает
-  HTML-лист `/r/{accessSecret}/d/{fileName}` (D-028), не download.
+  HTML-лист `/r/{accessSecret}/d/{fileName}` (D-029), не download.
 - `stageHistory` — когда заявка достигла каждого пройденного статуса (для ленты штампов).
 
 Внутренние поля (не в кабинете как «логин»):
@@ -53,7 +53,7 @@
 - Path, логи и `instance` — `docs/decisions.md` D-014.
 
 Кабинет: `http://localhost:3000/r/{accessSecret}`. HTML-лист файла:
-`http://localhost:3000/r/{accessSecret}/d/{fileName}` (D-028).
+`http://localhost:3000/r/{accessSecret}/d/{fileName}` (D-029).
 
 ## Сиды (5 заявок)
 

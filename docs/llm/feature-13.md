@@ -3,7 +3,7 @@
 ## Цель
 
 Имя файла в кабинете открывает HTML-лист по тому же секрету. Скачивать нечего — PDF и
-кнопки «скачать» нет (D-009, D-028).
+кнопки «скачать» нет (D-009, D-029).
 
 ## Зависимости
 
@@ -14,7 +14,7 @@
 - `AGENTS.md`
 - `docs/README.md`, `docs/implementation-status.md`
 - `docs/frontend.md`, `docs/domain-model.md` (files З-10043)
-- `docs/decisions.md` (D-009, D-012, D-015, D-021, D-027, D-028)
+- `docs/decisions.md` (D-009, D-012, D-015, D-021, D-027, D-028, D-029)
 - `docs/testing.md`
 - `.agents/skills/git-delivery/SKILL.md`
 - `.agents/skills/change-impact-gates/SKILL.md`
@@ -73,7 +73,7 @@
 
 ## Что сделать
 
-- HTML-лист по D-028 / `docs/frontend.md`.
+- HTML-лист по D-029 / `docs/frontend.md`.
 - Кликабельно только имя файла.
 
 ## Что не делать
@@ -122,4 +122,4 @@ pnpm test:e2e
 ## Стоп
 
 Неоднозначность контракта → `docs/decisions.md`, не угадывать. Если хочется PDF или
-кнопку «скачать» — стоп, D-009 / D-028.
+кнопку «скачать» — стоп, D-009 / D-029.

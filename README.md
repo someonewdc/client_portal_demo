@@ -12,7 +12,7 @@
   Postgres), `GET /api/v1/demo/links`, `GET /api/v1/requests/{accessSecret}`
 - `apps/web`: Nuxt 4.5.2 на `:3000`, Tailwind v4 `@theme`, IBM Plex, документный layout;
   индекс `/` из `GET /demo/links`; кабинет `/r/{secret}`, HTML-лист `/r/{secret}/d/{fileName}`
-  (D-028) и тупик 404
+  (D-029) и тупик 404
 - Playwright: `pnpm test:e2e` / `make e2e` (smoke шапки, индекс, кабинет, битая ссылка на
   `:3000`)
 - PostgreSQL в Docker на хосте `5433`, Prisma 7 в `apps/api`
@@ -33,9 +33,12 @@ make up
 
 `make up` поднимает Postgres на `:5433`, API на `:3001` и web на `:3000`, применяет
 миграции и seed. Индекс: `http://localhost:3000`. `make dev` останавливает compose `api`/`web`
-(если их поднял `up`) и гоняет API/web на хосте (hot reload), Postgres остаётся в Docker. Агентам — только цели Makefile, не сырой
+(если их поднял `up`), освобождает leftover Nest/Nuxt (`node`) на `:3000`/`:3001` и гоняет API/web на хосте
+(hot reload), Postgres остаётся в Docker. `make restart` = `down` + `dev`: гасит контейнеры
+и leftover `node` на `:3000`/`:3001`/`:5433` (Docker Desktop / `docker-proxy` не убивает), затем
+поднимает стенд заново. `make down` тоже забирает leftover-`node` на этих портах. Агентам — только цели Makefile, не сырой
 `docker compose` / `pnpm dev` (D-013). Один стенд на машине для `:3000`/`:3001`
-(`docs/decisions.md` D-006).
+(`docs/decisions.md` D-006, D-028).
 
 Проверки: `make verify` (D-018: полный `up` + migrate + `generate:api` + diff generated
 client, корневые gates, compose-smoke, `playwright install --with-deps chromium`, e2e).
