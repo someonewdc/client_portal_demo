@@ -889,6 +889,7 @@ describe('stand restart and leftover ports', () => {
     assert.match(script, /vpnkit/);
     assert.match(script, /docker-pr/);
     assert.match(script, /classifyListener/);
+    assert.match(script, /mainthread/);
 
     const decisions = readFileSync(resolve(rootDirectory, 'docs/decisions.md'), 'utf8');
     assert.match(decisions, /D-028/);

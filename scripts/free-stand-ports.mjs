@@ -56,7 +56,8 @@ export function classifyListener(command) {
     return 'protected';
   }
 
-  if (base === 'node' || base === 'nodejs') {
+  // Linux lsof/ss report libuv's thread name instead of the node binary.
+  if (base === 'node' || base === 'nodejs' || base === 'mainthread') {
     return 'reclaim';
   }
 

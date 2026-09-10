@@ -173,6 +173,7 @@ describe('free-stand-ports script', () => {
 
       const result = await runFreeStandPorts([port]);
       assert.equal(result.code, 0, result.stderr);
+      assert.match(result.stdout, /freeing :/);
       await waitForExit(listener);
       assert.equal(await isPortListening(port), false);
     } finally {
@@ -189,6 +190,7 @@ describe('free-stand-ports script', () => {
 
       const result = await runFreeStandPorts([port], { FREE_STAND_PORTS_TERM_MS: '50' });
       assert.equal(result.code, 0, result.stderr);
+      assert.match(result.stdout, /freeing :/);
       await waitForExit(listener);
       assert.equal(await isPortListening(port), false);
     } finally {
@@ -216,6 +218,7 @@ describe('free-stand-ports listener classification', () => {
     assert.equal(classifyListener('docker-pr'), 'protected');
     assert.equal(classifyListener('node'), 'reclaim');
     assert.equal(classifyListener('nodejs'), 'reclaim');
+    assert.equal(classifyListener('MainThread'), 'reclaim');
     assert.equal(classifyListener('postgres'), 'other');
   });
 
