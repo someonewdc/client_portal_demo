@@ -7,8 +7,9 @@
 `docs/remediation-plan.md`.
 
 UX/UI понятности (D-036…D-040) — docs-only нарезка этого PR: оператор
-`выполни задачу N` → `docs/ux/README.md`. Код UX-задач 1–12 в этом PR не писать.
-Не класть UX-промпты в `docs/llm/feature-NN.md`. Фича 13 на `main` проверена (D-029).
+`выполни ux задачу N` → `docs/ux/README.md`. Без `ux` фраза `выполни задачу N`
+не ведёт в `docs/ux/`. Код UX-задач 1–12 в этом PR не писать. Не класть UX-промпты
+в `docs/llm/feature-NN.md`. Фича 13 на `main` проверена (D-029).
 
 ## Правила обновления
 
@@ -302,3 +303,4 @@ UX/UI понятности (D-036…D-040) — docs-only нарезка этог
 | 2026-09-10 | Фича 14 docs           | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0; docs-only (D-030…D-035, промпты 15–27)                                                                                                                     |
 | 2026-09-11 | Ревью #18 docs         | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0; путь `remediation-plan.md`, D-034 до F25, TDD F18 переписать happy, F24 per-IP                                                                             |
 | 2026-09-11 | UX docs нарезка        | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0; docs-only (D-036…D-040, `docs/ux/task-01`…`12`); lint/test продукта не запускались                                                                         |
+| 2026-09-11 | Ревью #19 docs         | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0; вход UX = `выполни ux задачу N`; TDD 3/5/7/11; frontend/acceptance — цель после UX; lint/test продукта не запускались                                      |

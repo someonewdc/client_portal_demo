@@ -3,9 +3,11 @@
 Этот репозиторий — pnpm workspace на переносимом ядре (`@client-portal/platform-core`,
 `nestjs-core`, `openapi-client-core`). Предметный продукт (фичи 1–27) реализуй
 **только** по промпту `docs/llm/feature-NN.md` в отдельном чате, один PR на фичу.
-Доработки UX/UI понятности — **только** по `docs/ux/task-NN.md` (не клади их в
-`docs/llm/`). Не копируй `apps/*` Вольтариса и не добавляй mock-api. Работай
-небольшими проверяемыми изменениями.
+Доработки UX/UI понятности — **только** по `docs/ux/task-NN.md` (вход:
+`выполни ux задачу N`; не клади их в `docs/llm/`). Фраза `выполни задачу N` без
+`ux` — только дефекты кода (`docs/remediation-plan.md`, D-030). Не копируй
+`apps/*` Вольтариса и не добавляй mock-api. Работай небольшими проверяемыми
+изменениями.
 
 ## Приоритет источников
 
@@ -21,8 +23,9 @@
 ## Что читать
 
 Всегда начни с этого файла, `docs/README.md` и `docs/implementation-status.md`. Карта
-документов — в `docs/README.md`. Копируемый промпт фичи — `docs/llm/feature-NN.md`.
-Копируемый промпт UX — `docs/ux/task-NN.md`.
+документов — в `docs/README.md`. Копируемый промпт фичи — `docs/llm/feature-NN.md`
+(`выполни задачу N`). Копируемый промпт UX — `docs/ux/task-NN.md` (`выполни ux
+задачу N`).
 
 Skills в `.agents/skills/` — повседневные процедуры. Открой нужный skill в том же изменении:
 
@@ -60,7 +63,8 @@ workspace нет и в production API не добавляй. Новый skill «
   `make dev` = db на хосте + api+web;
   `make restart` = `down` + leftover `node` на портах стенда + `dev` (D-028, без kill Docker Desktop);
   нарезка дефектов после F13 — `docs/remediation-plan.md` (фичи 14–27, D-030);
-  UX/UI понятности — `docs/ux/README.md` (задачи 1–12, D-036…D-040), не feature-NN;
+  UX/UI понятности — `docs/ux/README.md` (`выполни ux задачу N`, задачи 1–12,
+  D-036…D-040), не feature-NN;
 - Playwright: `pnpm test:e2e` / `make e2e` (smoke шапки, индекс, кабинет З-10043, битая
   ссылка, D-021); CI job `e2e` против `make up`;
 - PostgreSQL в Docker (хост 5433), Prisma 7 в `apps/api`.

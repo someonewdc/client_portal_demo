@@ -15,7 +15,7 @@
   HTML-лист файла `/r/{secret}/d/{fileName}` (D-029); `NUXT_PUBLIC_API_BASE_URL` с `/api/v1`.
   IA статусного документа (D-027) — фичи 9–12; клик по файлу — фича 13.
   Нарезка дефектов (D-030) — фича 14 docs; задачи 1–13 = фичи 15–27.
-  UX/UI понятности (D-036) — `docs/ux/`, не feature-NN.
+  UX/UI понятности (D-036) — `docs/ux/` (`выполни ux задачу N`), не feature-NN.
 - Root scripts (копировать буквально): `build:core`, `dev` (api+web), `db:generate`,
   `db:migrate`, `db:seed`, `generate:api`, `build`, `lint`, `check:boundaries`, `typecheck`,
   `test`, `test:e2e`, `test:packages`, `format`, `format:check`
@@ -83,7 +83,8 @@ docs → 1 Postgres/Prisma/ready
 ## UX/UI понятности (не фичи 15–27)
 
 Отдельный трек: [`docs/ux/README.md`](ux/README.md), промпты `docs/ux/task-01.md` …
-`task-12.md`. Оператор: `выполни задачу N`. Не занимает номера `feature-NN`.
+`task-12.md`. Оператор: `выполни ux задачу N`. Не занимает номера `feature-NN`.
+Фраза `выполни задачу N` без `ux` — только remediation (D-030).
 Не блокирует F15–27 и ими не блокируется (rebase при пересечении Vue). Контракт —
 D-036…D-040. Код UX не писать в docs-PR нарезки.
 
