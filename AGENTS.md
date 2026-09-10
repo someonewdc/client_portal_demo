@@ -41,7 +41,7 @@ workspace нет и в production API не добавляй. Новый skill «
 
 ## Топология
 
-Сейчас (фича 6 в поставке):
+Сейчас (фича 7 в поставке):
 
 - pnpm workspace, Node 24.18 / pnpm 11;
 - reusable packages: `tsconfig`, `eslint-config`, `platform-core`, `nestjs-core`,
@@ -51,17 +51,18 @@ workspace нет и в production API не добавляй. Новый skill «
 - `apps/api` — NestJS/Fastify, health, `GET /api/v1/demo/links` и
   `GET /api/v1/requests/{accessSecret}` (заявки в Postgres + seed);
 - `apps/web` — Nuxt 4.5.2, Tailwind v4 `@theme`, IBM Plex, документный layout; индекс `/`
-  из `GET /demo/links` (`useAsyncData`, без cookie / `credentials: 'include'`);
-  `make dev` = db+api+web `:3000`;
-- Playwright: `pnpm test:e2e` / `make e2e` (smoke шапки + индекс ссылок, D-021);
+  из `GET /demo/links`; кабинет `/r/{secret}` и тупик 404 (`useAsyncData`, без cookie /
+  `credentials: 'include'`); `make dev` = db+api+web `:3000`;
+- Playwright: `pnpm test:e2e` / `make e2e` (smoke шапки, индекс, кабинет З-10043, битая
+  ссылка, D-021);
 - PostgreSQL в Docker (хост 5433), Prisma 7 в `apps/api`.
 
-Целевая (по `docs/implementation-plan.md`, появляется фичами 7–8):
+Целевая (по `docs/implementation-plan.md`, появляется фичей 8):
 
-- кабинет `/r/{secret}` и тупик 404;
+- compose-smoke / CI e2e;
 - mock-api **нет и не появится**. «Система заявок» = Postgres + seed.
 
-Ещё нет, пока соответствующая фича не в `main`: кабинет заявки, CI e2e.
+Ещё нет, пока соответствующая фича не в `main`: CI e2e.
 
 Не добавляй Nx/Turborepo и не включай Nest monorepo mode. Не публикуй packages.
 

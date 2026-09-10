@@ -11,14 +11,15 @@
 - `apps/api`: `GET /api/v1/health/live`, `GET /api/v1/health/ready` (ready зависит от
   Postgres), `GET /api/v1/demo/links`, `GET /api/v1/requests/{accessSecret}`
 - `apps/web`: Nuxt 4.5.2 на `:3000`, Tailwind v4 `@theme`, IBM Plex, документный layout;
-  индекс `/` из `GET /demo/links`
-- Playwright: `pnpm test:e2e` / `make e2e` (smoke шапки и индекс ссылок на `:3000`)
+  индекс `/` из `GET /demo/links`; кабинет `/r/{secret}` и тупик 404
+- Playwright: `pnpm test:e2e` / `make e2e` (smoke шапки, индекс, кабинет, битая ссылка на
+  `:3000`)
 - PostgreSQL в Docker на хосте `5433`, Prisma 7 в `apps/api`
 - план и промпты: `docs/README.md`, `docs/implementation-plan.md`
 
-## Ещё нет (заводят фичи 7–8)
+## Ещё нет (заводит фича 8)
 
-Кабинет `/r/{secret}`, compose-smoke, CI e2e. mock-api нет и не появится.
+compose-smoke, CI e2e. mock-api нет и не появится.
 
 ## Запуск
 
@@ -40,9 +41,9 @@ client, затем корневые gates). Сырой `pnpm test` без жив
 
 E2E: один раз `pnpm exec playwright install chromium`, затем против живого стенда
 `make dev` (db+api+web) + seed — `make e2e` / `pnpm test:e2e`. `baseURL` —
-`http://localhost:3000`. Индексный spec ходит в `GET /demo/links`; Nuxt без API
-недостаточен. Если `:3000` уже занят `make dev`, Playwright его переиспользует
-(`reuseExistingServer: true`, D-021) и не стартует второй Nuxt. Сценарий кабинета —
-фича 7; CI e2e — фича 8.
+`http://localhost:3000`. Индексный spec ходит в `GET /demo/links`; кабинетный — в
+`GET /requests/{accessSecret}` и в API `:3001`. Nuxt без API недостаточен. Если `:3000`
+уже занят `make dev`, Playwright его переиспользует (`reuseExistingServer: true`, D-021)
+и не стартует второй Nuxt. CI e2e — фича 8.
 
 Пакеты private, `0.0.0`. Публикация в registry не входит.

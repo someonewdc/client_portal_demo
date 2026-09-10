@@ -3,6 +3,7 @@ import { describe, it } from 'node:test';
 
 import {
   asyncDataProblemPayload,
+  statusCodeFromAsyncDataError,
   statusCodeFromThrown,
   traceIdFromAsyncDataError,
 } from '../app/utils/async-data-problem.ts';
@@ -39,5 +40,18 @@ describe('async-data-problem payload', () => {
     assert.equal(traceIdFromAsyncDataError(serialized), TRACE_ID);
     assert.equal(traceIdFromAsyncDataError({ cause: problemError }), TRACE_ID);
     assert.equal(traceIdFromAsyncDataError(new Error('network')), undefined);
+  });
+
+  it('reads statusCode 404 from the createError shape after the API problem is mapped', () => {
+    assert.equal(
+      statusCodeFromAsyncDataError({
+        data: { traceId: TRACE_ID },
+        message: 'Не удалось загрузить заявку.',
+        statusCode: 404,
+      }),
+      404,
+    );
+    assert.equal(statusCodeFromAsyncDataError(problemError), 503);
+    assert.equal(statusCodeFromAsyncDataError(new Error('network')), 502);
   });
 });
