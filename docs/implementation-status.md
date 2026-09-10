@@ -2,8 +2,9 @@
 
 ## Текущее состояние
 
-Фича 14 (docs нарезки дефектов, D-030…D-035) в поставке этого PR. Код фич 15–27 не
-начинать, пока соответствующая фича не в `main`. Оператор: `выполни задачу N` →
+Фича 14 (docs нарезки дефектов, D-030…D-035) в поставке этого PR; правки по ревью
+#18: путь оператора, D-034, TDD F18, per-IP F24. Код фич 15–27 не начинать, пока
+соответствующая фича не в `main`. Оператор: `выполни задачу N` →
 `docs/remediation-plan.md`. Фича 13 на `main` проверена (D-029).
 
 ## Правила обновления
@@ -294,3 +295,4 @@
 | 2026-09-10 | Ревью #17 format       | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
 | 2026-09-10 | Merge main #16         | `git merge origin/main`                                                                                                                                                                                                                                                                   | D-028 уже `make restart` в `main`; HTML-лист перенумерован в D-029                                                                                                 |
 | 2026-09-10 | Фича 14 docs           | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0; docs-only (D-030…D-035, промпты 15–27)                                                                                                                     |
+| 2026-09-11 | Ревью #18 docs         | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0; путь `remediation-plan.md`, D-034 до F25, TDD F18 переписать happy, F24 per-IP                                                                             |

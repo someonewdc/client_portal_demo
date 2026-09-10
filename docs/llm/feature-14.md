@@ -59,7 +59,8 @@
 - Then каждый `docs/llm/feature-15.md`…`feature-27.md` самодостаточен: read set, TDD red,
   AC, ветка, стоп.
 - Then D-030 запрещает CSPRNG-сиды, логин на `/demo/links`, Redis, SWR на `/r/**`.
-- Then D-034 запрещает NuxtLink до фичи 16.
+- Then D-034 запрещает `NuxtLink` до фичи 25 и запрещает фиче 16 менять `<a href>`;
+  `NuxtLink` только после F16 в `main`.
 - Then `docs/source-brief.md` не изменён.
 
 ## Проверки

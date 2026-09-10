@@ -50,12 +50,20 @@
 
 1. Unit
    `pnpm --filter @client-portal/api exec vitest run src/requests/application/get-demo-links.use-case.spec.ts`:
-   - один валидный хеш каталога (как в текущем «happy» тесте, но **без** остальных
-     четырёх номеров) → `RequestFixtureMismatchError`;
+   - **перепиши** существующий it `builds portalPath from the fixture secret…`
+     (сейчас один ряд З-10041): либо полный `REQUEST_CATALOG` из пяти `publicNumber`
+     с теми же assert на `portalPath` / отсутствие hash, либо этот it ждёт
+     `RequestFixtureMismatchError`. Не оставляй однорядный happy и не ослабляй
+     новый check, чтобы старый it остался green.
+   - один валидный хеш каталога (как в текущем однорядном фикстуре, **без** остальных
+     четырёх номеров) → `RequestFixtureMismatchError` (новый it или бывший happy, если
+     его перевёл на mismatch);
    - пустой `listRequestSummaries()` → тот же error;
-   - полный набор пяти номеров каталога → 200-логика как сейчас;
+   - полный набор пяти номеров каталога → 200-логика (portalPath из секрета, hash не
+     утекает) — это и есть переписанный happy, если его оставил 200-кейсом;
    - extra unknown hash → error (уже есть).
-     Текущий main: один валидный row проходит — этот новый кейс **red**.
+     Текущий main: один валидный row проходит — однорядный happy **red** после
+     инварианта, пока его не перепишешь.
 2. HTTP (предназначенная dev-БД): после `deleteMany` одной каталожной заявки
    `GET /api/v1/demo/links` → 500 problem+json, `detail` без SQL/stack. Затем
    `applyRequestSeed` лечит. Добавь it в `requests.http.spec.ts`. **red** до кода.

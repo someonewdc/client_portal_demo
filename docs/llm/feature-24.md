@@ -38,7 +38,10 @@ Fixture-секреты угадываемые (D-008 — не менять). Л�
 ## Стек и границы
 
 - `@nestjs/throttler` в `apps/api` (версия совместимая с Nest 11 / lockfile).
-- Default: **60 запросов / 60 секунд** на `GET :accessSecret`.
+- Default: **60 запросов / 60 секунд на IP клиента** (`ThrottlerGuard` tracker = IP,
+  не path и не `accessSecret`) на `GET :accessSecret` контроллера портала.
+  Перебор разных секретов с одного IP должен упираться в тот же лимит.
+- In-memory storage модуля. Не Redis и не `@ThrottlerStorageRedis` / Redis-гайд Nest.
 - `@SkipThrottle()` на health и `DemoLinksController`.
 - Guard только на `RequestPortalController` (или global + skip остальных).
 - 429 → уже существующий Problem Details filter (`Too many requests`).
@@ -49,8 +52,10 @@ Fixture-секреты угадываемые (D-008 — не менять). Л�
 ## TDD (red до guard)
 
 1. Новый it: поднять app с `ttl` 60_000 и `limit` 1 на portal; первый
-   `GET /api/v1/requests/unknown-secret-not-in-seed` → 404; второй тот же URL →
-   **429** `application/problem+json`, `detail` без секрета и SQL.
+   `GET /api/v1/requests/unknown-secret-a` → 404; второй
+   `GET /api/v1/requests/unknown-secret-b` (тот же тестовый IP, другой path) →
+   **429** `application/problem+json`, `detail` без секрета и SQL. Ключ — IP, не
+   path: два разных unknown secret с одного IP должны делить лимит.
    `pnpm --filter @client-portal/api exec vitest run src/requests/requests.http.spec.ts`
    — **red**.
 2. Существующие it того же файла при default 60/min остаются green (мало inject).
@@ -68,7 +73,8 @@ Fixture-секреты угадываемые (D-008 — не менять). Л�
 
 ## Критерии приёмки
 
-- Given limit=1 в тесте, Then второй GET того же path — 429 Problem Details.
+- Given limit=1 в тесте, Then второй GET того же IP (другой unknown secret) —
+  429 Problem Details.
 - Given default 60/min, Then текущие HTTP и e2e наборы не упираются в лимит.
 - Given health/demo links, Then без 429 от этого лимита.
 - Red evidence есть до green.
