@@ -52,7 +52,8 @@
   плавал. Значения в каталоге ниже.
 - Path, логи и `instance` — `docs/decisions.md` D-014.
 
-Кабинет: `http://localhost:3000/r/{accessSecret}`.
+Кабинет: `http://localhost:3000/r/{accessSecret}`. HTML-лист файла:
+`http://localhost:3000/r/{accessSecret}/d/{fileName}` (D-028).
 
 ## Сиды (5 заявок)
 

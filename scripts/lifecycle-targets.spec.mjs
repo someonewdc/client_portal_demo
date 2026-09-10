@@ -654,6 +654,32 @@ describe('feature 7 request cabinet', () => {
   });
 });
 
+describe('feature 13 HTML file sheet playbook', () => {
+  it('documents the file sheet route in the stand playbook', () => {
+    const readme = readFileSync(resolve(rootDirectory, 'README.md'), 'utf8');
+    const domainModel = readFileSync(resolve(rootDirectory, 'docs/domain-model.md'), 'utf8');
+
+    assert.match(readme, /\/r\/\{secret\}\/d\/\{fileName\}/);
+    assert.match(domainModel, /localhost:3000\/r\/\{accessSecret\}\/d\/\{fileName\}/);
+  });
+
+  it('scans the file sheet page for a reactive file name and no download CTA', () => {
+    const sheetPage = readFileSync(
+      resolve(webRoot, 'app/pages/r/[accessSecret]/d/[fileName].vue'),
+      'utf8',
+    );
+
+    assert.match(
+      sheetPage,
+      /fileName = computed\(\(\) =>\s*routeParamValue\(route\.params\.fileName\)\)/,
+    );
+    assert.match(sheetPage, /item\.fileName === fileName\.value/);
+    assert.doesNotMatch(sheetPage, /скачать/);
+    assert.doesNotMatch(sheetPage, /\bdownload\b/);
+    assert.doesNotMatch(sheetPage, /href=["']#["']/);
+  });
+});
+
 describe('feature 8 compose-smoke and CI e2e', () => {
   function composeSource() {
     return readFileSync(resolve(rootDirectory, 'compose.yaml'), 'utf8');

@@ -13,9 +13,9 @@ import {
 const route = useRoute();
 const { accessSecret, error, errorTraceId, isNotFound, request, status } = await useRequestPortal();
 
-const fileName = routeParamValue(route.params.fileName);
+const fileName = computed(() => routeParamValue(route.params.fileName));
 
-const file = computed(() => request.value?.files.find((item) => item.fileName === fileName));
+const file = computed(() => request.value?.files.find((item) => item.fileName === fileName.value));
 const isMissingFile = computed(
   () =>
     status.value !== 'pending' &&

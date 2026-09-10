@@ -11,7 +11,8 @@
 - `apps/api`: `GET /api/v1/health/live`, `GET /api/v1/health/ready` (ready зависит от
   Postgres), `GET /api/v1/demo/links`, `GET /api/v1/requests/{accessSecret}`
 - `apps/web`: Nuxt 4.5.2 на `:3000`, Tailwind v4 `@theme`, IBM Plex, документный layout;
-  индекс `/` из `GET /demo/links`; кабинет `/r/{secret}` и тупик 404
+  индекс `/` из `GET /demo/links`; кабинет `/r/{secret}`, HTML-лист `/r/{secret}/d/{fileName}`
+  (D-028) и тупик 404
 - Playwright: `pnpm test:e2e` / `make e2e` (smoke шапки, индекс, кабинет, битая ссылка на
   `:3000`)
 - PostgreSQL в Docker на хосте `5433`, Prisma 7 в `apps/api`
