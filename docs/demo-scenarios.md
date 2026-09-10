@@ -1,8 +1,9 @@
 # Сценарии демо
 
 Ведущий поднимает показ через Makefile, когда цели есть: `make up` — полный стенд
-web+api+postgres (D-016); `make dev` — Postgres из compose и api/web на хосте. Канонический
-origin: `http://localhost:3000`. Один стенд на машине для `:3000`/`:3001`.
+web+api+postgres (D-016); `make dev` — Postgres из compose и api/web на хосте; `make restart`
+— гасит контейнеры и leftover `node` на портах стенда (не Docker Desktop), затем снова `dev` (D-028). Канонический origin:
+`http://localhost:3000`. Один стенд на машине для `:3000`/`:3001`.
 
 ## Счастливый путь (30 секунд)
 

@@ -54,6 +54,7 @@ workspace нет и в production API не добавляй. Новый skill «
   из `GET /demo/links`; кабинет `/r/{secret}` (процесс с датами и файлы-записи, D-027) и
   тупик 404 (`useAsyncData`, без cookie / `credentials: 'include'`); `make up` =
   web+api+postgres `:3000`/`:3001`/host `5433`; `make dev` = db на хосте + api+web;
+  `make restart` = `down` + leftover `node` на портах стенда + `dev` (D-028, без kill Docker Desktop);
 - Playwright: `pnpm test:e2e` / `make e2e` (smoke шапки, индекс, кабинет З-10043, битая
   ссылка, D-021); CI job `e2e` против `make up`;
 - PostgreSQL в Docker (хост 5433), Prisma 7 в `apps/api`.
@@ -125,7 +126,8 @@ generate-only артефактов после того, как контракт�
 
 Не угадывай контракт. Версии сверяй с lockfile и официальной документацией. Lifecycle
 стенда — цели корневого `Makefile` по факту файла (`bootstrap` / `dev` / `up` / `down` /
-`verify` / `e2e`). Не пиши агентам сырой `pnpm dev` / `docker compose`, кроме skill.
+`restart` / `verify` / `e2e`). Не пиши агентам сырой `pnpm dev` / `docker compose`, кроме
+skill.
 
 ## Проверка и честность отчета
 

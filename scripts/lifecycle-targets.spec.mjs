@@ -22,10 +22,11 @@ describe('feature 1 lifecycle targets', () => {
     assert.equal(typeof packageJson.scripts['db:seed'], 'string');
   });
 
-  it('declares Makefile targets up, down, dev and verify', () => {
+  it('declares Makefile targets up, down, dev, restart and verify', () => {
     assert.match(makefile, /^up:/m);
     assert.match(makefile, /^down:/m);
     assert.match(makefile, /^dev:/m);
+    assert.match(makefile, /^restart:/m);
     assert.match(makefile, /^verify:/m);
   });
 
@@ -830,6 +831,69 @@ describe('feature 8 compose-smoke and CI e2e', () => {
     assert.match(readme, /make e2e/);
     assert.match(readme, /make verify/);
     assert.match(readme, /playwright install --with-deps chromium/);
+  });
+});
+
+describe('stand restart and leftover ports', () => {
+  it('reclaims D-006 ports through a script and Makefile variables', () => {
+    const scriptPath = resolve(rootDirectory, 'scripts/free-stand-ports.mjs');
+    assert.equal(existsSync(scriptPath), true, 'scripts/free-stand-ports.mjs must exist');
+
+    assert.match(makefile, /^APP_PORTS \?= 3000 3001$/m);
+    assert.match(makefile, /^STAND_PORTS \?= 3000 3001 5433$/m);
+    assert.match(makefile, /^free-ports:/m);
+
+    const freePorts = makefileTarget('free-ports');
+    assert.match(freePorts.recipe, /scripts\/free-stand-ports\.mjs \$\(STAND_PORTS\)/);
+  });
+
+  it('down stops compose then frees leftover listeners on stand ports', () => {
+    const down = makefileTarget('down');
+    assert.match(down.recipe, /\$\(compose\) down/);
+    assert.match(down.recipe, /scripts\/free-stand-ports\.mjs \$\(STAND_PORTS\)/);
+    assert.ok(
+      down.recipe.indexOf('$(compose) down') < down.recipe.indexOf('free-stand-ports.mjs'),
+      'compose down must release published ports before leftover host listeners are killed',
+    );
+  });
+
+  it('dev frees host :3000 and :3001 before pnpm dev so leftover nest/nuxt do not EADDRINUSE', () => {
+    const dev = makefileTarget('dev');
+    const freeLine = dev.recipe.split('\n').find((line) => line.includes('free-stand-ports.mjs'));
+
+    assert.ok(freeLine, 'make dev must call free-stand-ports.mjs');
+    assert.match(freeLine, /\$\(APP_PORTS\)/);
+    assert.doesNotMatch(freeLine, /STAND_PORTS|5433/);
+    assert.ok(
+      dev.recipe.indexOf('stop api web') < dev.recipe.indexOf('free-stand-ports.mjs'),
+      'compose api/web must stop before host listeners are killed',
+    );
+    assert.ok(
+      dev.recipe.indexOf('free-stand-ports.mjs') < dev.recipe.indexOf('pnpm dev'),
+      'leftover :3000/:3001 must be free before pnpm dev binds them',
+    );
+  });
+
+  it('restart downs the stand then starts make dev', () => {
+    const restart = makefileTarget('restart');
+    assert.equal(restart.prerequisites, 'down');
+    assert.match(restart.recipe, /\$\(MAKE\)\s+dev/);
+
+    const readme = readFileSync(resolve(rootDirectory, 'README.md'), 'utf8');
+    assert.match(readme, /make restart/);
+  });
+
+  it('does not treat Docker Desktop helpers as reclaimable leftover listeners', () => {
+    const script = readFileSync(resolve(rootDirectory, 'scripts/free-stand-ports.mjs'), 'utf8');
+    assert.match(script, /com\.dock/);
+    assert.match(script, /vpnkit/);
+    assert.match(script, /docker-pr/);
+    assert.match(script, /classifyListener/);
+    assert.match(script, /mainthread/);
+
+    const decisions = readFileSync(resolve(rootDirectory, 'docs/decisions.md'), 'utf8');
+    assert.match(decisions, /D-028/);
+    assert.match(decisions, /com\.docker/);
   });
 });
 

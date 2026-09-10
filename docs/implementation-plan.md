@@ -17,9 +17,11 @@
   `db:migrate`, `db:seed`, `generate:api`, `build`, `lint`, `check:boundaries`, `typecheck`,
   `test`, `test:e2e`, `test:packages`, `format`, `format:check`
 - Makefile: `bootstrap`, `doctor`, `up` (web+api+postgres :3000/:3001/host :5433), `down`,
-  `dev` (только Postgres из compose + api/web на хосте), `e2e` (`playwright install --with-deps
-chromium` + `pnpm test:e2e`), `verify` (`up` + migrate + `generate:api` + diff generated
-  client + корневые gates + compose-smoke + Chromium + e2e, D-018)
+  `free-ports`, `restart` (`down` + `dev`, D-028), `dev` (только Postgres из compose +
+  api/web на хосте; leftover `node` на `:3000`/`:3001` освобождает до `pnpm dev`), `e2e`
+  (`playwright install --with-deps chromium` + `pnpm test:e2e`), `verify` (`up` + migrate +
+  `generate:api` + diff generated client + корневые gates + compose-smoke + Chromium + e2e,
+  D-018)
 - CI: job `verify` — Postgres service + `DATABASE_URL` на 5432, generate/migrate,
   `generate:api`, `git diff --exit-code` на `openapi.json` / `schema.d.ts`, корневые gates;
   job `e2e` — `make up` (хост 5433) + `pnpm test:e2e`

@@ -23,7 +23,7 @@
     "pretypecheck": "pnpm build:core",
     "typecheck": "pnpm -r --workspace-concurrency=1 --if-present typecheck",
     "pretest": "pnpm build:core",
-    "test": "pnpm -r --workspace-concurrency=1 --if-present test && node --test scripts/check-boundaries.spec.mjs scripts/test-packages.spec.mjs scripts/lifecycle-targets.spec.mjs",
+    "test": "pnpm -r --workspace-concurrency=1 --if-present test && node --test scripts/check-boundaries.spec.mjs scripts/test-packages.spec.mjs scripts/lifecycle-targets.spec.mjs scripts/free-stand-ports.spec.mjs",
     "test:e2e": "playwright test",
     "test:packages": "node --test scripts/test-packages.spec.mjs && node scripts/test-packages.mjs",
     "format": "prettier . --write",
