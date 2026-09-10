@@ -43,11 +43,53 @@ test('quote cabinet shows Z-10043 seed payload from GET /requests/{accessSecret}
   await expect(page.getByText('IP54, навесной')).toBeVisible();
   await expect(page.getByText(quoteCabinet.questionnaireFileName, { exact: true })).toBeVisible();
   await expect(page.getByText(quoteCabinet.quoteFileName, { exact: true })).toBeVisible();
-  await expect(page.locator(`time[datetime="${quoteCabinet.updatedAt}"]`)).toBeVisible();
+  await expect(page.locator(`p > time[datetime="${quoteCabinet.updatedAt}"]`)).toBeVisible();
 
   await expect(page.getByRole('button')).toHaveCount(0);
   await expect(page.getByRole('link', { name: /скачать/i })).toHaveCount(0);
   await expect(page.locator('[download]')).toHaveCount(0);
+  await expect(page.locator('a[href="#"]')).toHaveCount(0);
+});
+
+test('quote cabinet reads as a status document with a dated process list', async ({ page }) => {
+  const response = await page.goto(`/r/${quoteCabinet.accessSecret}`);
+
+  expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expect(page.getByText('Статус заявки', { exact: true })).toBeVisible();
+  await expect(
+    page.getByText('Менеджер отправил вам эту ссылку. Вход не нужен.', { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole('heading', { name: quoteCabinet.publicNumber })).toBeVisible();
+
+  const stageRibbon = page.getByRole('list', { name: 'Этапы заявки' });
+  const stageItems = stageRibbon.getByRole('listitem');
+  await expect(stageItems).toHaveCount(4);
+
+  const accepted = stageItems.filter({ hasText: 'Принят' });
+  const inCalculation = stageItems.filter({ hasText: 'В расчёте' });
+  const quoteReady = stageItems.filter({ hasText: 'КП готово' });
+  const invoiceIssued = stageItems.filter({ hasText: 'Счёт выставлен' });
+
+  await expect(accepted.getByText('1', { exact: true })).toBeVisible();
+  await expect(inCalculation.getByText('2', { exact: true })).toBeVisible();
+  await expect(quoteReady.getByText('3', { exact: true })).toBeVisible();
+  await expect(invoiceIssued.getByText('4', { exact: true })).toBeVisible();
+
+  await expect(accepted.locator('time')).toHaveAttribute('datetime', '2026-09-01T09:00:00.000Z');
+  await expect(inCalculation.locator('time')).toHaveAttribute(
+    'datetime',
+    '2026-09-02T11:00:00.000Z',
+  );
+  await expect(quoteReady.locator('time')).toHaveAttribute('datetime', '2026-09-04T12:00:00.000Z');
+
+  await expect(invoiceIssued.getByText('ещё нет', { exact: true })).toBeVisible();
+  await expect(invoiceIssued.locator('time')).toHaveCount(0);
+
+  await expect(page.getByText('КП готово', { exact: true })).toHaveCount(1);
+  await expect(page.locator(`p > time[datetime="${quoteCabinet.updatedAt}"]`)).toBeVisible();
+  await expect(page.getByRole('button')).toHaveCount(0);
   await expect(page.locator('a[href="#"]')).toHaveCount(0);
 });
 
