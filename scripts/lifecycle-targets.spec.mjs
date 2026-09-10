@@ -882,6 +882,18 @@ describe('stand restart and leftover ports', () => {
     const readme = readFileSync(resolve(rootDirectory, 'README.md'), 'utf8');
     assert.match(readme, /make restart/);
   });
+
+  it('does not treat Docker Desktop helpers as reclaimable leftover listeners', () => {
+    const script = readFileSync(resolve(rootDirectory, 'scripts/free-stand-ports.mjs'), 'utf8');
+    assert.match(script, /com\.dock/);
+    assert.match(script, /vpnkit/);
+    assert.match(script, /docker-pr/);
+    assert.match(script, /classifyListener/);
+
+    const decisions = readFileSync(resolve(rootDirectory, 'docs/decisions.md'), 'utf8');
+    assert.match(decisions, /D-028/);
+    assert.match(decisions, /com\.docker/);
+  });
 });
 
 function dockerfileStage(source, name) {

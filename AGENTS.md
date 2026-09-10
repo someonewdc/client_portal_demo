@@ -54,7 +54,7 @@ workspace нет и в production API не добавляй. Новый skill «
   из `GET /demo/links`; кабинет `/r/{secret}` (процесс с датами и файлы-записи, D-027) и
   тупик 404 (`useAsyncData`, без cookie / `credentials: 'include'`); `make up` =
   web+api+postgres `:3000`/`:3001`/host `5433`; `make dev` = db на хосте + api+web;
-  `make restart` = `down` + свободные порты стенда + `dev` (D-028);
+  `make restart` = `down` + leftover `node` на портах стенда + `dev` (D-028, без kill Docker Desktop);
 - Playwright: `pnpm test:e2e` / `make e2e` (smoke шапки, индекс, кабинет З-10043, битая
   ссылка, D-021); CI job `e2e` против `make up`;
 - PostgreSQL в Docker (хост 5433), Prisma 7 в `apps/api`.

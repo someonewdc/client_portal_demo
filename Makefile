@@ -27,7 +27,8 @@ up:
 	pnpm db:seed
 	$(compose) up -d --wait --build
 
-# Compose down, then leftover host listeners on D-006 ports (D-028).
+# Compose down, then leftover host node on D-006 ports (D-028).
+# Docker helpers on :5433 are skipped; compose owns that bind.
 down:
 	$(compose) down
 	node scripts/free-stand-ports.mjs $(STAND_PORTS)
@@ -37,7 +38,7 @@ free-ports:
 
 # db + api + @client-portal/web on :3000 (root `pnpm dev`).
 # Stop compose api/web first so host processes can bind :3000/:3001 after make up.
-# Reclaim leftover nest/nuxt on APP_PORTS; do not free 5433 (postgres stays).
+# Reclaim leftover nest/nuxt (node) on APP_PORTS; do not free 5433 (postgres stays).
 dev:
 	$(compose) stop api web
 	node scripts/free-stand-ports.mjs $(APP_PORTS)
@@ -47,7 +48,7 @@ dev:
 	pnpm db:seed
 	pnpm dev
 
-# Tear down compose + leftover listeners, then make dev (D-028).
+# Tear down compose + leftover host node, then make dev (D-028).
 restart: down
 	$(MAKE) dev
 

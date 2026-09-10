@@ -4,7 +4,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import net from 'node:net';
 import { dirname, resolve } from 'node:path';
 import { describe, it } from 'node:test';
-import { fileURLToPath } from 'node:url';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const rootDirectory = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const scriptPath = resolve(rootDirectory, 'scripts/free-stand-ports.mjs');
@@ -194,5 +194,112 @@ describe('free-stand-ports script', () => {
     } finally {
       await stopListener(listener);
     }
+  });
+});
+
+describe('free-stand-ports listener classification', () => {
+  it('parses lsof -F pc records and ignores file-descriptor lines', async () => {
+    const { parseLsofPc } = await import(pathToFileURL(scriptPath).href);
+    assert.deepEqual(parseLsofPc('p12558\nccom.docker.backend\nf157\np77794\ncnode\nf16\n'), [
+      { pid: 12558, command: 'com.docker.backend' },
+      { pid: 77794, command: 'node' },
+    ]);
+  });
+
+  it('protects Docker Desktop and docker-proxy helpers; reclaims leftover node', async () => {
+    const { classifyListener } = await import(pathToFileURL(scriptPath).href);
+    assert.equal(classifyListener('com.docker.backend'), 'protected');
+    assert.equal(classifyListener('com.docker.vmnetd'), 'protected');
+    assert.equal(classifyListener('com.docke'), 'protected');
+    assert.equal(classifyListener('vpnkit'), 'protected');
+    assert.equal(classifyListener('docker-proxy'), 'protected');
+    assert.equal(classifyListener('docker-pr'), 'protected');
+    assert.equal(classifyListener('node'), 'reclaim');
+    assert.equal(classifyListener('nodejs'), 'reclaim');
+    assert.equal(classifyListener('postgres'), 'other');
+  });
+
+  it('does not send SIGTERM or SIGKILL to a docker helper listener', async () => {
+    const { reclaimPort } = await import(pathToFileURL(scriptPath).href);
+    const killed = [];
+    const logs = [];
+    const outcome = reclaimPort(5433, {
+      listListeners: () => [{ pid: 12558, command: 'com.docker.backend' }],
+      kill: (pid, signal) => {
+        killed.push({ pid, signal });
+      },
+      sleep: () => {},
+      write: (text) => {
+        logs.push(text);
+      },
+      termWaitMs: 0,
+    });
+
+    assert.equal(outcome, 'ok');
+    assert.deepEqual(killed, []);
+    assert.match(logs.join(''), /skipping :5433/);
+    assert.match(logs.join(''), /com\.docker\.backend/);
+  });
+
+  it('exits failed when a node listener survives SIGKILL', async () => {
+    const { reclaimPort } = await import(pathToFileURL(scriptPath).href);
+    const killed = [];
+    const outcome = reclaimPort(3000, {
+      listListeners: () => [{ pid: 7, command: 'node' }],
+      kill: (pid, signal) => {
+        killed.push({ pid, signal });
+      },
+      sleep: () => {},
+      write: () => {},
+      termWaitMs: 0,
+    });
+
+    assert.equal(outcome, 'failed');
+    assert.deepEqual(killed, [
+      { pid: 7, signal: 'SIGTERM' },
+      { pid: 7, signal: 'SIGKILL' },
+    ]);
+  });
+
+  it('fails closed on EPERM instead of swallowing the kill error', async () => {
+    const { reclaimPort } = await import(pathToFileURL(scriptPath).href);
+    const permission = new Error('kill EPERM');
+    permission.code = 'EPERM';
+
+    assert.throws(
+      () =>
+        reclaimPort(3000, {
+          listListeners: () => [{ pid: 9, command: 'node' }],
+          kill: () => {
+            throw permission;
+          },
+          sleep: () => {},
+          write: () => {},
+          termWaitMs: 0,
+        }),
+      (error) => error && error.code === 'EPERM',
+    );
+  });
+
+  it('ignores ESRCH when the listener is already gone', async () => {
+    const { reclaimPort } = await import(pathToFileURL(scriptPath).href);
+    const gone = new Error('kill ESRCH');
+    gone.code = 'ESRCH';
+    let calls = 0;
+
+    const outcome = reclaimPort(3001, {
+      listListeners: () => {
+        calls += 1;
+        return calls === 1 ? [{ pid: 11, command: 'node' }] : [];
+      },
+      kill: () => {
+        throw gone;
+      },
+      sleep: () => {},
+      write: () => {},
+      termWaitMs: 0,
+    });
+
+    assert.equal(outcome, 'ok');
   });
 });

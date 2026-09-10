@@ -18,7 +18,7 @@
   `test`, `test:e2e`, `test:packages`, `format`, `format:check`
 - Makefile: `bootstrap`, `doctor`, `up` (web+api+postgres :3000/:3001/host :5433), `down`,
   `free-ports`, `restart` (`down` + `dev`, D-028), `dev` (только Postgres из compose +
-  api/web на хосте; leftover `:3000`/`:3001` освобождает до `pnpm dev`), `e2e`
+  api/web на хосте; leftover `node` на `:3000`/`:3001` освобождает до `pnpm dev`), `e2e`
   (`playwright install --with-deps chromium` + `pnpm test:e2e`), `verify` (`up` + migrate +
   `generate:api` + diff generated client + корневые gates + compose-smoke + Chromium + e2e,
   D-018)
