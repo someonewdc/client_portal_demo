@@ -71,3 +71,32 @@ test('demo links index lists seed requests and opens the quote cabinet URL', asy
   await page.getByRole('link', { name: /З-10043/ }).click();
   await expect(page).toHaveURL(/\/r\/seed-z10043-quote-kuznetsov$/);
 });
+
+test('demo links index names itself and tells the conductor to click a row', async ({ page }) => {
+  const response = await page.goto('/');
+
+  expect(response, 'GET / must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expect(page.getByRole('heading', { name: 'Ссылки для показа' })).toBeVisible();
+  await expect(
+    page.getByText('Нажмите строку — откроется экран заказчика по ссылке.', { exact: true }),
+  ).toBeVisible();
+  await expect(page.getByText('Этот список не показывается заказчику.')).toBeVisible();
+  await expect(
+    page.getByText('Так выглядит то, что вы отправили бы заказчику в мессенджер.'),
+  ).toBeVisible();
+
+  for (const item of catalog) {
+    await expect(page.getByRole('link', { name: new RegExp(item.publicNumber) })).toHaveAttribute(
+      'href',
+      item.portalPath,
+    );
+  }
+
+  await expect(page.getByRole('button')).toHaveCount(0);
+  await expect(page.locator('a[href="#"]')).toHaveCount(0);
+
+  await page.getByRole('link', { name: /З-10043/ }).click();
+  await expect(page).toHaveURL(/\/r\/seed-z10043-quote-kuznetsov$/);
+});

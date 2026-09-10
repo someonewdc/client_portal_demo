@@ -46,8 +46,10 @@ function formatUpdatedAt(iso: string): string {
 
 <template>
   <main>
-    <p class="text-ink">Этот список не показывается заказчику.</p>
+    <h2 class="text-xl font-semibold text-ink">Ссылки для показа</h2>
+    <p class="mt-3 text-ink">Этот список не показывается заказчику.</p>
     <p class="mt-2 text-ink-muted">Так выглядит то, что вы отправили бы заказчику в мессенджер.</p>
+    <p class="mt-2 text-ink">Нажмите строку — откроется экран заказчика по ссылке.</p>
 
     <p v-if="status === 'pending'" class="mt-8 text-ink-muted" role="status">
       Загрузка списка заявок…
@@ -66,7 +68,9 @@ function formatUpdatedAt(iso: string): string {
             {{ item.publicNumber }}
           </span>
           <span class="text-ink-muted"> · {{ item.counterpartyName }}</span>
-          <span class="mt-1 block">{{ item.title }}</span>
+          <span class="mt-1 block underline decoration-rule underline-offset-2">{{
+            item.title
+          }}</span>
           <span class="mt-2 flex flex-wrap items-center gap-3">
             <span class="inline-block bg-accent/15 px-2 py-0.5 text-sm font-semibold text-accent">
               {{ item.statusLabel }}
