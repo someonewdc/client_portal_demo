@@ -12,7 +12,7 @@
     "build": "nuxt build",
     "pretypecheck": "nuxt prepare",
     "typecheck": "nuxt typecheck",
-    "test": "node --experimental-strip-types --test tests/async-data-problem.spec.ts"
+    "test": "node --experimental-strip-types --test tests/*.spec.ts"
   },
   "dependencies": {
     "@client-portal/api-client": "workspace:*",
