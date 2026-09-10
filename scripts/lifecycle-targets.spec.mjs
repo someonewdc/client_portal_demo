@@ -627,6 +627,26 @@ describe('feature 7 request cabinet', () => {
     assert.doesNotMatch(cabinetPage, /OTP|логин|телефон|парол/);
   });
 
+  it('refetches useRequestPortal when accessSecret changes on the same page', () => {
+    const portalComposable = readFileSync(
+      resolve(webRoot, 'app/composables/useRequestPortal.ts'),
+      'utf8',
+    );
+    const sources = listWebSourceFiles(webRoot).map((absolutePath) =>
+      readFileSync(absolutePath, 'utf8'),
+    );
+    const combined = sources.join('\n');
+
+    assert.match(portalComposable, /\bwatch\b/);
+    assert.match(portalComposable, /requestPortalCacheKey/);
+    assert.match(
+      portalComposable,
+      /accessSecret = computed\(\(\) =>\s*routeParamValue\(route\.params\.accessSecret\)\)/,
+    );
+    assert.doesNotMatch(portalComposable, /`request-portal:\$\{accessSecret\}`/);
+    assert.doesNotMatch(combined, /NuxtLink/);
+  });
+
   it('covers cabinet and unknown-secret e2e against seed without mock-api', () => {
     const spec = readFileSync(resolve(rootDirectory, 'e2e/request-cabinet.spec.ts'), 'utf8');
     const readme = readFileSync(resolve(rootDirectory, 'README.md'), 'utf8');

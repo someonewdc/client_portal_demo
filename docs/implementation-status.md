@@ -2,10 +2,10 @@
 
 ## Текущее состояние
 
-Фича 15 (decode route param один раз) в поставке этого PR. Код фич 16–27 не
+Фича 16 (реактивный ключ кабинета) в поставке этого PR. Код фич 17–27 не
 начинать, пока соответствующая фича не в `main`. Оператор дефектов кода:
-`выполни задачу N` → `docs/remediation-plan.md`. Фича 14 на `main` (#18,
-D-030…D-035).
+`выполни задачу N` → `docs/remediation-plan.md`. Фича 15 на `main` (#20).
+Фича 14 на `main` (#18, D-030…D-035).
 
 UX/UI понятности (D-036…D-040) — docs-only нарезка на `main` (#19): оператор
 `выполни ux задачу N` → `docs/ux/README.md`. Без `ux` фраза `выполни задачу N`
@@ -21,29 +21,30 @@ UX-промпты в `docs/llm/feature-NN.md`.
 
 ## Этапы
 
-| Этап                            | Состояние                         |
-| ------------------------------- | --------------------------------- |
-| Boilerplate workspace           | проверен                          |
-| Документы плана и промпты фич   | выполнен (main `cad60b4`, без PR) |
-| Правки контракта по ревью       | выполнен (main `95767dc`, PR #1)  |
-| Фича 1 Postgres/Prisma/ready    | проверен                          |
-| Фича 2 заявка + OpenAPI         | проверен                          |
-| Фича 3 Nuxt + make dev          | проверен                          |
-| Фича 4 токены + layout          | проверен                          |
-| Фича 5 Playwright harness       | проверен                          |
-| Фича 6 индекс ссылок            | проверен                          |
-| Фича 7 кабинет + 404            | проверен                          |
-| Фича 8 compose-smoke / CI e2e   | проверен                          |
-| Фича 9 docs статусный документ  | выполнен                          |
-| Фича 10 кабинет рамка + процесс | проверен                          |
-| Фича 11 кабинет файлы-записи    | проверен                          |
-| Фича 12 индекс заголовок и жест | проверен                          |
-| Фича 13 кабинет HTML-лист файла | проверен                          |
-| Фича 14 docs нарезка дефектов   | выполнен                          |
-| Фича 15 decode param один раз   | проверен                          |
-| Фичи 16–27 задачи 2–13          | не начаты                         |
-| UX docs нарезка (D-036…D-040)   | выполнен                          |
-| UX задачи 1–12                  | не начаты                         |
+| Этап                              | Состояние                         |
+| --------------------------------- | --------------------------------- |
+| Boilerplate workspace             | проверен                          |
+| Документы плана и промпты фич     | выполнен (main `cad60b4`, без PR) |
+| Правки контракта по ревью         | выполнен (main `95767dc`, PR #1)  |
+| Фича 1 Postgres/Prisma/ready      | проверен                          |
+| Фича 2 заявка + OpenAPI           | проверен                          |
+| Фича 3 Nuxt + make dev            | проверен                          |
+| Фича 4 токены + layout            | проверен                          |
+| Фича 5 Playwright harness         | проверен                          |
+| Фича 6 индекс ссылок              | проверен                          |
+| Фича 7 кабинет + 404              | проверен                          |
+| Фича 8 compose-smoke / CI e2e     | проверен                          |
+| Фича 9 docs статусный документ    | выполнен                          |
+| Фича 10 кабинет рамка + процесс   | проверен                          |
+| Фича 11 кабинет файлы-записи      | проверен                          |
+| Фича 12 индекс заголовок и жест   | проверен                          |
+| Фича 13 кабинет HTML-лист файла   | проверен                          |
+| Фича 14 docs нарезка дефектов     | выполнен                          |
+| Фича 15 decode param один раз     | проверен                          |
+| Фича 16 reactive useRequestPortal | проверен                          |
+| Фичи 17–27 задачи 3–13            | не начаты                         |
+| UX docs нарезка (D-036…D-040)     | выполнен                          |
+| UX задачи 1–12                    | не начаты                         |
 
 ## Журнал проверки
 
@@ -310,3 +311,8 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | 2026-09-11 | Фича 15 TDD green      | `pnpm --filter @client-portal/web test`                                                                                                                                                                                                                                                   | exit 0: 12 tests, включая `file%2Fname.pdf` без превращения в `/` и `КП-З-10043.pdf` без изменений                                                                 |
 | 2026-09-11 | Фича 15 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: web 12, scripts 75, 5 tarballs; Nuxt 4.5.2 production build                                                                                                |
 | 2026-09-11 | Merge main #19         | `git merge origin/main`                                                                                                                                                                                                                                                                   | конфликт только `docs/implementation-status.md`; UX-нарезка #19 и журнал F15 сохранены                                                                             |
+| 2026-09-11 | Фича 16 TDD red        | `pnpm --filter @client-portal/web test`                                                                                                                                                                                                                                                   | exit 1: нет модуля `request-portal-cache-key.ts`, экспорта `requestPortalCacheKey` нет                                                                             |
+| 2026-09-11 | Фича 16 TDD red        | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                                                                                                                                                          | exit 1: в `useRequestPortal.ts` нет `watch`; ключ — одноразовая интерполяция `` `request-portal:${accessSecret}` ``                                                |
+| 2026-09-11 | Фича 16 TDD green      | `pnpm --filter @client-portal/web test`                                                                                                                                                                                                                                                   | exit 0: 13 tests, включая `requestPortalCacheKey('seed-z10043-quote-kuznetsov')`                                                                                   |
+| 2026-09-11 | Фича 16 TDD green      | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                                                                                                                                                          | exit 0: 41 passed, включая `watch` / `requestPortalCacheKey` и отсутствие `NuxtLink`                                                                               |
+| 2026-09-11 | Фича 16 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: web 13, scripts 76, 5 tarballs; Nuxt 4.5.2 production build                                                                                                |
