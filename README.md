@@ -37,15 +37,15 @@ make up
 (`docs/decisions.md` D-006).
 
 Проверки: `make verify` (D-018: полный `up` + migrate + `generate:api` + diff generated
-client, корневые gates, compose-smoke, e2e). Сырой `pnpm test` без живой БД падает на HTTP
-ready=200 — это не полный аналог CI.
+client, корневые gates, compose-smoke, `playwright install --with-deps chromium`, e2e).
+Сырой `pnpm test` без живой БД падает на HTTP ready=200 — это не полный аналог CI.
 
-E2E: один раз `pnpm exec playwright install chromium`, затем против полного стенда
-`make up` или против `make dev` + seed — `make e2e` / `pnpm test:e2e`. `baseURL` —
-`http://localhost:3000`. Индексный spec ходит в `GET /demo/links`; кабинетный — в
-`GET /requests/{accessSecret}` и в API `:3001`. Nuxt без API недостаточен. Если `:3000`
-уже занят стендом, локальный Playwright его переиспользует (`reuseExistingServer: true`,
-D-021) и не стартует второй Nuxt. В CI `webServer` выключен: job поднимает `make up` и
-гоняет `pnpm test:e2e`.
+E2E: `make e2e` и `make verify` ставят Chromium (`pnpm exec playwright install --with-deps
+chromium`) и гоняют спеки против полного стенда `make up` или против `make dev` + seed.
+Сырой `pnpm test:e2e` браузер не ставит. `baseURL` — `http://localhost:3000`. Индексный
+spec ходит в `GET /demo/links`; кабинетный — в `GET /requests/{accessSecret}` и в API
+`:3001`. Nuxt без API недостаточен. Если `:3000` уже занят стендом, локальный Playwright
+его переиспользует (`reuseExistingServer: true`, D-021) и не стартует второй Nuxt. В CI
+`webServer` выключен: job поднимает `make up` и гоняет `pnpm test:e2e`.
 
 Пакеты private, `0.0.0`. Публикация в registry не входит.

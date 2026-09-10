@@ -18,15 +18,24 @@ RUN pnpm build:core \
   && pnpm --filter @client-portal/api build \
   && pnpm --filter @client-portal/web build
 
-FROM base AS api
-ENV NODE_ENV=production
-COPY --from=build /workspace /workspace
-EXPOSE 3001
-CMD ["node", "apps/api/dist/main.js"]
+FROM build AS api-pack
+RUN pnpm --filter @client-portal/api deploy --prod /out/api
 
-FROM base AS web
+FROM node:24.18.0-bookworm-slim AS runtime
+RUN apt-get update \
+  && apt-get install -y --no-install-recommends ca-certificates openssl \
+  && rm -rf /var/lib/apt/lists/*
+
+FROM runtime AS api
 ENV NODE_ENV=production
-WORKDIR /workspace/apps/web
-COPY --from=build /workspace /workspace
+WORKDIR /app
+COPY --from=api-pack /out/api ./
+EXPOSE 3001
+CMD ["node", "dist/main.js"]
+
+FROM runtime AS web
+ENV NODE_ENV=production
+WORKDIR /app
+COPY --from=build /workspace/apps/web/.output ./.output
 EXPOSE 3000
 CMD ["node", ".output/server/index.mjs"]

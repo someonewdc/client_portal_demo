@@ -53,6 +53,6 @@ Skill `nestjs-hexagonal-boundaries`:
 Lifecycle — корневой Makefile (цели заводит фича 1 и расширяют 3/8): `bootstrap`, `dev`,
 `up`, `down`, `verify` по факту файла. Смысл `up`/`dev` — D-016: сначала только Postgres,
 потом `dev`+web, с фичи 8 тот же `up` = полный стенд. `verify` — D-018: `up` + migrate +
-`generate:api` + diff generated client + gates + compose-smoke + e2e.
+`generate:api` + diff generated client + gates + compose-smoke + Chromium + e2e.
 
 Порты — `docs/decisions.md`. Один стенд на машине для `:3000`/`:3001`.

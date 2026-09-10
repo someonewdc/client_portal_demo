@@ -45,6 +45,8 @@ LLM часто пишет код, затем тесты «под него». Т�
 
 - `baseURL` `http://localhost:3000`. Сценарии индекса и кабинета гоняют против `make dev`
   (db+api+web) + seed, не против mock-api и не против фиктивного server (D-021).
+- `make e2e` и `make verify` ставят Chromium (`playwright install --with-deps chromium`);
+  сырой `pnpm test:e2e` браузер не ставит.
 - F3 не проверяет HTTP `:3000` (только workspace / Makefile). HTML на порту — smoke F5.
 - F5 — harness и smoke шапки layout; `reuseExistingServer: true`.
 - F6 пишет сценарий индекса **до** страницы: дисклеймер, список из API, клик → `/r/…`.

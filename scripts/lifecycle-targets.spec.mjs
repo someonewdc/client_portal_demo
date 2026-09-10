@@ -461,7 +461,12 @@ describe('feature 5 playwright harness', () => {
     assert.equal(packageJson.devDependencies?.['@playwright/test'], '1.63.0');
 
     const e2e = makefileTarget('e2e');
+    assert.match(e2e.recipe, /playwright install --with-deps chromium/);
     assert.match(e2e.recipe, /^\tpnpm test:e2e$/m);
+    assert.ok(
+      e2e.recipe.indexOf('playwright install') < e2e.recipe.indexOf('pnpm test:e2e'),
+      'make e2e must install Chromium before pnpm test:e2e',
+    );
 
     for (const { path, json } of workspaceManifests()) {
       if (path === 'package.json') {
@@ -717,6 +722,35 @@ describe('feature 8 compose-smoke and CI e2e', () => {
     assert.doesNotMatch(apiPlugin, /credentials:\s*['"]include['"]/);
   });
 
+  it('copies only api dist with prod deps and Nuxt output into runtime images', () => {
+    const dockerfilePath = resolve(rootDirectory, 'Dockerfile');
+    assert.equal(existsSync(dockerfilePath), true, 'root Dockerfile must exist');
+    const dockerfile = readFileSync(dockerfilePath, 'utf8');
+    const api = dockerfileStage(dockerfile, 'api');
+    const web = dockerfileStage(dockerfile, 'web');
+
+    assert.doesNotMatch(
+      api,
+      /COPY --from=\S+ \/workspace \/workspace/,
+      'api runtime must not copy the whole workspace tree',
+    );
+    assert.doesNotMatch(
+      web,
+      /COPY --from=\S+ \/workspace \/workspace/,
+      'web runtime must not copy the whole workspace tree',
+    );
+    assert.match(dockerfile, /deploy --prod/);
+    assert.doesNotMatch(
+      dockerfile,
+      /deploy --prod --legacy/,
+      'legacy deploy leaves workspace package symlinks pointing at /workspace',
+    );
+    assert.match(api, /dist\/main\.js/);
+    assert.match(web, /\.output/);
+    assert.doesNotMatch(web, /apps\/api\/src/);
+    assert.doesNotMatch(api, /apps\/web\/app/);
+  });
+
   it('probes ready 200, Postgres 5433 and the index disclaimer after make up', () => {
     const smokePath = resolve(rootDirectory, 'scripts/compose-smoke.mjs');
     assert.equal(existsSync(smokePath), true, 'scripts/compose-smoke.mjs must exist');
@@ -740,11 +774,17 @@ describe('feature 8 compose-smoke and CI e2e', () => {
     assert.match(verify.recipe, /^\tpnpm check:boundaries$/m);
     assert.match(verify.recipe, /^\tpnpm build$/m);
     assert.match(verify.recipe, /scripts\/compose-smoke\.mjs/);
+    assert.match(verify.recipe, /playwright install --with-deps chromium/);
     assert.match(verify.recipe, /^\tpnpm test:e2e$/m);
     const smokeIndex = verify.recipe.indexOf('scripts/compose-smoke.mjs');
     const e2eIndex = verify.recipe.indexOf('pnpm test:e2e');
     const buildIndex = verify.recipe.indexOf('pnpm build');
+    const installIndex = verify.recipe.indexOf('playwright install');
     assert.ok(buildIndex !== -1 && smokeIndex > buildIndex && e2eIndex > smokeIndex);
+    assert.ok(
+      installIndex !== -1 && installIndex < e2eIndex,
+      'make verify must install Chromium before pnpm test:e2e',
+    );
   });
 
   it('CI e2e job runs Playwright against make up without a second Nuxt webServer', () => {
@@ -787,5 +827,16 @@ describe('feature 8 compose-smoke and CI e2e', () => {
     assert.doesNotMatch(readme, /make up` поднимает только Postgres/);
     assert.doesNotMatch(readme, /CI e2e — фича 8/);
     assert.doesNotMatch(readme, /Ещё нет \(заводит фича 8\)/);
+    assert.match(readme, /make e2e/);
+    assert.match(readme, /make verify/);
+    assert.match(readme, /playwright install --with-deps chromium/);
   });
 });
+
+function dockerfileStage(source, name) {
+  const start = source.search(new RegExp(`^FROM .+ AS ${name}$`, 'm'));
+  assert.ok(start !== -1, `missing Dockerfile stage ${name}`);
+  const fromStage = source.slice(start);
+  const next = fromStage.slice(1).search(/^FROM /m);
+  return next === -1 ? fromStage : fromStage.slice(0, next + 1);
+}
