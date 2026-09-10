@@ -31,8 +31,8 @@ make up
 ```
 
 `make up` поднимает Postgres на `:5433`, API на `:3001` и web на `:3000`, применяет
-миграции и seed. Индекс: `http://localhost:3000`. `make dev` стартует из compose только
-Postgres и гоняет API/web на хосте (hot reload). Агентам — только цели Makefile, не сырой
+миграции и seed. Индекс: `http://localhost:3000`. `make dev` останавливает compose `api`/`web`
+(если их поднял `up`) и гоняет API/web на хосте (hot reload), Postgres остаётся в Docker. Агентам — только цели Makefile, не сырой
 `docker compose` / `pnpm dev` (D-013). Один стенд на машине для `:3000`/`:3001`
 (`docs/decisions.md` D-006).
 

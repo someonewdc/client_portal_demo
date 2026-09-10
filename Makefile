@@ -29,8 +29,9 @@ down:
 	$(compose) down
 
 # db + api + @client-portal/web on :3000 (root `pnpm dev`).
-# Compose starts only postgres so host processes keep :3000/:3001.
+# Stop compose api/web first so host processes can bind :3000/:3001 after make up.
 dev:
+	$(compose) stop api web
 	$(compose) up -d --wait postgres
 	pnpm db:generate
 	pnpm db:migrate

@@ -4,11 +4,13 @@ import { defineNuxtPlugin, useRuntimeConfig } from 'nuxt/app';
 export default defineNuxtPlugin(() => {
   const config = useRuntimeConfig();
   const publicBaseUrl = config.public.apiBaseUrl;
-  const serverBaseUrl = config.apiBaseUrl;
-  const baseUrl =
-    import.meta.server && typeof serverBaseUrl === 'string' && serverBaseUrl.length > 0
-      ? serverBaseUrl
-      : publicBaseUrl;
+  let baseUrl = publicBaseUrl;
+  if (import.meta.server) {
+    const serverBaseUrl = config.apiBaseUrl;
+    if (typeof serverBaseUrl === 'string' && serverBaseUrl.length > 0) {
+      baseUrl = serverBaseUrl;
+    }
+  }
   if (typeof baseUrl !== 'string' || baseUrl.length === 0) {
     throw new TypeError('runtimeConfig.public.apiBaseUrl must be the API origin with /api/v1');
   }

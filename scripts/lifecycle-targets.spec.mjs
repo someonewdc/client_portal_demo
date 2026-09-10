@@ -246,6 +246,7 @@ describe('feature 3 nuxt workspace', () => {
     assert.equal(existsSync(webPackagePath), true, 'apps/web/package.json must exist');
     const webPackage = JSON.parse(readFileSync(webPackagePath, 'utf8'));
 
+    assert.match(dev.recipe, /stop api web/);
     assert.match(dev.recipe, /up -d --wait postgres/);
     assert.doesNotMatch(dev.recipe, /--build/);
     assert.match(dev.recipe, /^\tpnpm db:generate$/m);
@@ -706,6 +707,13 @@ describe('feature 8 compose-smoke and CI e2e', () => {
     );
     assert.match(nuxtConfig, /apiBaseUrl:/);
     assert.match(apiPlugin, /import\.meta\.server/);
+    const [clientPath, ...serverPath] = apiPlugin.split('import.meta.server');
+    assert.doesNotMatch(
+      clientPath,
+      /config\.apiBaseUrl/,
+      'private apiBaseUrl must not be read before the import.meta.server branch',
+    );
+    assert.match(serverPath.join('import.meta.server'), /config\.apiBaseUrl/);
     assert.doesNotMatch(apiPlugin, /credentials:\s*['"]include['"]/);
   });
 
