@@ -16,7 +16,8 @@
   источник правды: не выдумывать другие title/строки.
 - `files` — метаданные вложений: `fileName`, `kind` (`questionnaire` / `quote` / `invoice`),
   `byteSize` (integer), `uploadedAt`. Бинарников и загрузки с диска нет. В UI имя открывает
-  HTML-лист `/r/{accessSecret}/d/{fileName}` (D-029), не download.
+  HTML-лист `/r/{accessSecret}/d/{fileName}` (D-029), не download. В одной заявке
+  `fileName` уникален (D-035; код — фича 19).
 - `stageHistory` — когда заявка достигла каждого пройденного статуса (для ленты штампов).
 
 Внутренние поля (не в кабинете как «логин»):

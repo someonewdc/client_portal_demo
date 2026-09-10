@@ -57,6 +57,21 @@ LLM часто пишет код, затем тесты «под него». Т�
 - F11 пишет unit formatters и e2e файлов-записей / колонки комментария **до** UI.
 - F12 пишет e2e заголовка индекса и инструкции клика **до** правки `index.vue`.
 - F13 пишет unit `requestFileHref` / зачина листа и e2e клика имени файла **до** Vue.
+- F14 — docs-only (D-030, промпты 15–27, `docs/remediation-plan.md`): отдельного red
+  продукта нет.
+- F15 пишет unit `routeParamValue('file%2Fname.pdf')` **до** правки decode.
+- F16 пишет unit ключа портала и source-контракт `watch` **до** composable.
+- F17 пишет unit document status и source-контракт `setResponseStatus` **до** страниц.
+- F18 пишет unit/HTTP неполного каталога **до** use-case.
+- F19 пишет information_schema unique `(requestId, fileName)` **до** migration.
+- F20 пишет e2e заголовков HTML **до** `routeRules`.
+- F21 пишет HTTP `Cache-Control` capability JSON **до** interceptor/header.
+- F22 пишет unit twin-origin и source-контракт CORS **до** `enableCors`.
+- F23 пишет package test timeout **до** fetch wrapper.
+- F24 пишет HTTP 429 при limit=1 **до** ThrottlerGuard.
+- F25 пишет source-контракт `NuxtLink` **до** Vue (F16 уже в `main`).
+- F26 пишет source-контракт `USER node` **до** Dockerfile.
+- F27 пишет source-контракт `127.0.0.1:` в compose **до** правки портов.
 - Селекторы: role / label / осмысленный `data-testid`, не CSS-хрупкость. Без
   `waitForTimeout` как синхронизации (`verification-honesty`).
 - Scenario-mutating e2e — serial. Этот демо read-only, мутаций нет.

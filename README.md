@@ -17,7 +17,8 @@
   `:3000`)
 - PostgreSQL в Docker на хосте `5433`, Prisma 7 в `apps/api`
 - `make up` — полный стенд web+api+postgres; CI e2e гоняет те же спеки против него
-- план и промпты: `docs/README.md`, `docs/implementation-plan.md`
+- план и промпты: `docs/README.md`, `docs/implementation-plan.md`; дефекты после
+  F13 — `docs/remediation-plan.md` (`выполни задачу N`)
 
 mock-api нет и не появится.
 

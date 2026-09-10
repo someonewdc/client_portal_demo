@@ -14,6 +14,7 @@
   `GET /demo/links` (`createApiClient`, `useAsyncData`); кабинет `/r/{secret}` и тупик 404;
   HTML-лист файла `/r/{secret}/d/{fileName}` (D-029); `NUXT_PUBLIC_API_BASE_URL` с `/api/v1`.
   IA статусного документа (D-027) — фичи 9–12; клик по файлу — фича 13.
+  Нарезка дефектов (D-030) — фича 14 docs; задачи 1–13 = фичи 15–27.
 - Root scripts (копировать буквально): `build:core`, `dev` (api+web), `db:generate`,
   `db:migrate`, `db:seed`, `generate:api`, `build`, `lint`, `check:boundaries`, `typecheck`,
   `test`, `test:e2e`, `test:packages`, `format`, `format:check`
@@ -34,8 +35,9 @@
 ## Чего ещё нет (фича должна завести; AC проверяет имя script)
 
 Предметный HTTP/MVP закрыт фичей 8. IA статусного документа — фичи 9–12 (D-027).
-HTML-лист файла — фича 13 (D-029). Не выдумывай другие имена. Если нужен новый script —
-заведи его в той фиче, чей AC это требует, и запиши в `package.json`.
+HTML-лист файла — фича 13 (D-029). Нарезка дефектов — фича 14 (D-030); имена задач
+1–13 = фичи 15–27. Не выдумывай другие имена. Если нужен новый script — заведи его
+в той фиче, чей AC это требует, и запиши в `package.json`.
 
 ## Порядок
 
@@ -53,10 +55,24 @@ docs → 1 Postgres/Prisma/ready
      → 11 кабинет: файлы-записи + колонка комментария (unit+e2e red, затем код)
      → 12 индекс: заголовок и жест клика (e2e red, затем страница)
      → 13 кабинет: HTML-лист файла по клику на имя (unit+e2e red, затем страницы)
+     → 14 docs нарезки дефектов (D-030…D-035, промпты 15–27)
+     → 15 decode route param один раз
+     → 16 reactive useRequestPortal (без NuxtLink)
+     → 17 HTTP-статус HTML при ошибке API
+     → 18 demo/links fail-closed на неполный каталог
+     → 19 unique (requestId, fileName)
+     → 20 заголовки Nuxt capability
+     → 21 Cache-Control capability JSON
+     → 22 CORS read-only + localhost/127.0.0.1
+     → 23 timeout OpenAPI-клиента
+     → 24 throttle GET /requests/{secret}
+     → 25 NuxtLink (только после 16)
+     → 26 Dockerfile USER node
+     → 27 compose bind 127.0.0.1
 ```
 
-Фичи 1–12 уже в поставке. Нарезка 9–12 — D-027. Фича 13 — D-029: имена файлов кликабельны,
-бинарников нет.
+Фичи 1–13 уже в поставке. Нарезка 9–12 — D-027. Фича 13 — D-029. Фича 14 — D-030:
+оператор пишет `выполни задачу N` → `docs/llm/feature-1M.md`. NuxtLink — D-034.
 
 Зависимость: фича N в `main` до старта N+1.
 

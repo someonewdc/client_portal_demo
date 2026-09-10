@@ -44,6 +44,10 @@ Prefix живёт на server URL, path keys относительные. Пос�
 
 Порядок: стабильный, по `publicNumber` по возрастанию.
 
+500 Problem Details (`RequestFixtureMismatchError`, не 4xx): неизвестный хеш (D-019)
+или в БД нет всех пяти `publicNumber` каталога, включая пустую таблицу (D-031; код —
+фича 18). Успех — ровно каталог 1:1, не усечённый список.
+
 ## `GET /requests/{accessSecret}`
 
 Кабинет одной заявки. `{accessSecret}` — plaintext fixture/CSPRNG token, не хеш.

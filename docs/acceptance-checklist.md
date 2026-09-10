@@ -33,7 +33,8 @@
 ## Техника
 
 - [ ] `GET /api/v1/health/ready` 200 только с живой БД
-- [ ] `GET /api/v1/demo/links` отдаёт 5 items
+- [ ] `GET /api/v1/demo/links` отдаёт 5 items; неполный каталог — 500, не короткий список
+      (D-031, после фичи 18)
 - [ ] `GET /api/v1/requests/seed-z10043-quote-kuznetsov` 200
 - [ ] Неизвестный секрет — 404 Problem Details
 - [ ] `pnpm check:boundaries`, `lint`, `typecheck`, `test`, `test:packages`, `build` зелёные
