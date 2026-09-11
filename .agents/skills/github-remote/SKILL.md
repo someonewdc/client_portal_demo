@@ -91,8 +91,8 @@ GitHub app. После skip/fail не предлагай снова.
 `someonewdc:docs/github-remote-mcp`. Голое имя ветки даёт пустой список → второй
 PR. Перед `create_pull_request` ищи существующий PR в этом формате.
 
-Обязательное доказательство CI — check run job из `.github/workflows/ci.yml`
-этого репозитория на текущем head SHA (сейчас `verify`). `get_status` — classic
+Обязательное доказательство CI — check run jobs из `.github/workflows/ci.yml`
+этого репозитория на текущем head SHA (сейчас `verify` и `e2e`). `get_status` — classic
 commit statuses; в этом репозитории их нет. Пустой / `pending` `get_status` ≠
 «CI ещё идёт» и не блокирует approve. `mergeable_state: clean` — не evidence.
 
