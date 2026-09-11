@@ -149,11 +149,13 @@ async function expectStatusStampLooksLikeTag(target: Locator, label: string) {
     return {
       backgroundColor: computed.backgroundColor,
       color: computed.color,
+      cursor: computed.cursor,
       fontWeight,
       textDecorationLine: computed.textDecorationLine,
     };
   });
 
+  expect(style.cursor, `${label} must look unpressable`).toBe('default');
   expect(style.color, `${label} must use ink, not accent link color`).toBe(statusStampInkRgb);
   expect(style.backgroundColor, `${label} must sit on the rule plate, not the link wash`).toBe(
     statusStampPlateRgb,

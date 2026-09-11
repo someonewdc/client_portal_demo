@@ -358,11 +358,13 @@ async function expectStatusStampLooksLikeTag(target: Locator, label: string) {
     return {
       backgroundColor: computed.backgroundColor,
       color: computed.color,
+      cursor: computed.cursor,
       fontWeight,
       textDecorationLine: computed.textDecorationLine,
     };
   });
 
+  expect(style.cursor, `${label} must look unpressable`).toBe('default');
   expect(style.color, `${label} must use ink, not accent link color`).toBe(statusStampInkRgb);
   expect(style.backgroundColor, `${label} must sit on the rule plate, not the link wash`).toBe(
     statusStampPlateRgb,
@@ -523,7 +525,7 @@ async function expectQuoteFileSheetExtract(page: Page) {
   await expect(page).toHaveTitle('КП — З-10043 — ПК «Нордщит»');
 
   await expect(
-    page.getByRole('link', { name: `К заявке ${quoteCabinet.publicNumber}` }),
+    page.getByRole('link', { name: `К заявке ${quoteCabinet.publicNumber}`, exact: true }),
   ).toBeVisible();
   await expect(page.getByRole('link', { name: /скачать/i })).toHaveCount(0);
   await expect(page.getByText('скачать', { exact: true })).toHaveCount(0);
@@ -897,7 +899,11 @@ test('quote cabinet and file sheet rest-state links use accent color', async ({ 
     page.getByRole('heading', { level: 1, name: quoteCabinet.quoteFileName }),
   ).toBeVisible();
 
-  const sheetBack = page.getByRole('link', { name: `К заявке ${quoteCabinet.publicNumber}` });
+  const sheetBack = page.getByRole('link', {
+    exact: true,
+    name: `К заявке ${quoteCabinet.publicNumber}`,
+  });
+  await expect(sheetBack).toHaveAccessibleName(`К заявке ${quoteCabinet.publicNumber}`);
   await expectDocumentLinkRestStyle(sheetBack);
   await expect(page.getByRole('link', { name: /скачать/i })).toHaveCount(0);
   await expect(page.locator('[download]')).toHaveCount(0);
@@ -916,7 +922,11 @@ test('quote cabinet and file sheet rest-state links use accent color', async ({ 
   ).toBeTruthy();
   expect(missingResponse?.status()).toBe(404);
 
-  const missingBack = page.getByRole('link', { name: `К заявке ${quoteCabinet.publicNumber}` });
+  const missingBack = page.getByRole('link', {
+    exact: true,
+    name: `К заявке ${quoteCabinet.publicNumber}`,
+  });
+  await expect(missingBack).toHaveAccessibleName(`К заявке ${quoteCabinet.publicNumber}`);
   await expectDocumentLinkRestStyle(missingBack);
   await expect(page.getByRole('link', { name: /скачать/i })).toHaveCount(0);
   await expect(page.locator('[download]')).toHaveCount(0);
@@ -949,7 +959,7 @@ test('quote cabinet file name opens an HTML document sheet', async ({ page }) =>
   await expect(page.getByText(quoteCabinet.specLine)).toBeVisible();
   await expect(page.getByText(quoteCabinet.specLineSecondary)).toBeVisible();
   await expect(
-    page.getByRole('link', { name: `К заявке ${quoteCabinet.publicNumber}` }),
+    page.getByRole('link', { name: `К заявке ${quoteCabinet.publicNumber}`, exact: true }),
   ).toBeVisible();
   await expect(page.locator('[download]')).toHaveCount(0);
   await expect(page.getByRole('link', { name: /скачать/i })).toHaveCount(0);
@@ -975,7 +985,9 @@ test('quote cabinet file sheet returns to the request', async ({ page }) => {
   expect(response, 'GET /r/{secret}/d/{fileName} must receive a response from :3000').toBeTruthy();
   expect(response?.ok()).toBe(true);
 
-  await page.getByRole('link', { name: `К заявке ${quoteCabinet.publicNumber}` }).click();
+  await page
+    .getByRole('link', { name: `К заявке ${quoteCabinet.publicNumber}`, exact: true })
+    .click();
   await expect(page).toHaveURL(new RegExp(`/r/${quoteCabinet.accessSecret}$`));
   await expectCabinetStatusHeader(page, quoteCabinet.publicNumber, quoteCabinet.statusLabel);
 });
@@ -1001,7 +1013,11 @@ test('unknown file name on a live secret is a Russian dead-end', async ({ page }
   await expect(deadEnd.getByText(/Заявки по этой ссылке нет/)).toHaveCount(0);
   await expect(page.getByText(/Код ошибки:/)).toHaveCount(0);
 
-  const backLink = page.getByRole('link', { name: `К заявке ${quoteCabinet.publicNumber}` });
+  const backLink = page.getByRole('link', {
+    exact: true,
+    name: `К заявке ${quoteCabinet.publicNumber}`,
+  });
+  await expect(backLink).toHaveAccessibleName(`К заявке ${quoteCabinet.publicNumber}`);
   await expect(backLink).toBeVisible();
   await expect(backLink).toHaveAttribute('href', `/r/${quoteCabinet.accessSecret}`);
   await expect(page.locator('main a[href="/"]')).toHaveCount(0);

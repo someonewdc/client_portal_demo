@@ -4,8 +4,9 @@
 
 Начертание ссылки в покое (D-044): `.document-link` — типографика, не рамка.
 Линия 2px / offset 3px, лёгкая плашка акцента 10% с `box-decoration-break: clone`.
-«К заявке» с декоративной `←`. Штамп статуса (D-045) — `.status-stamp`: чернила
-на `--color-rule`, не акцент ссылки.
+«К заявке» с декоративной `←`. Штамп статуса (D-045, D-040 уточнён) — `.status-stamp`: чернила
+на `--color-rule`, `cursor: default`, не акцент ссылки; тот же класс на
+текущем шаге ленты.
 Ссылки индекса в покое (UX задача 14): номер `З-10043` и title `ВРУ 400 А`
 на `/` — класс `.document-link`, цвет и линия акцента `rgb(61, 90, 115)`.
 Штамп `КП готово` остаётся tag задачи 12 (не underline, weight ≤ 400).
@@ -577,3 +578,4 @@ UX/UI понятности (D-036…D-043): docs-only нарезка на `main`
 | 2026-09-12 | D-045 TDD green        | та же команда `--workers=2` против `make dev` + seed                                                                                                                                                                                                                                      | exit 0: 3 passed; штамп ink + plate `rgb(214, 208, 196)`; ссылки остаются акцентом                                                                                 |
 | 2026-09-12 | D-044/045 gates        | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
 | 2026-09-12 | D-044/045 e2e          | `pnpm exec playwright test --workers=2` против `make dev` + seed                                                                                                                                                                                                                          | exit 0: 30 passed                                                                                                                                                  |
+| 2026-09-12 | PR #51 review canon    | `pnpm exec playwright test --workers=2` против `make dev` + seed                                                                                                                                                                                                                          | exit 0: 30 passed; D-040 снят запрет переноса штампа; `cursor: default` закреплён; «К заявке» `exact: true`                                                        |
