@@ -25,7 +25,7 @@
 | Копируемый промпт фичи N      | [`llm/feature-01.md`](llm/feature-01.md) … [`feature-27.md`](llm/feature-27.md) |
 | Дефекты кода: задача N        | [`remediation-plan.md`](remediation-plan.md) (`выполни задачу N`)               |
 | UX/UI понятности: задача N    | [`ux/README.md`](ux/README.md) (`выполни ux задачу N` → `ux/task-NN.md`)        |
-| Цикл implement→review         | skill `implement-review-cycle` (`через implement → review`; не писать самому)  |
+| Цикл implement→review         | skill `implement-review-cycle` (`через implement → review`; не писать самому)   |
 
 Предметный код (фичи 1–27) пишут отдельные чаты по `docs/llm/feature-NN.md`
 (`выполни задачу N`). Доработки UX/UI понятности — по `docs/ux/task-NN.md`

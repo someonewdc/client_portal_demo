@@ -2,6 +2,8 @@
 
 Каждая фича — отдельный чат, feature-ветка, один PR в `main`. Промпт:
 `docs/llm/feature-NN.md`. TDD: тесты до кода (`AGENTS.md`, `docs/testing.md`).
+Без `через implement → review` агент пишет сам. Цикл — только по явной
+просьбе, skill `implement-review-cycle`.
 
 ## Что уже есть в заготовке
 

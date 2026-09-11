@@ -55,10 +55,10 @@ linter already owns.
 ## CI is evidence, not decoration
 
 Required CI jobs are those in `.github/workflows/ci.yml` **этого** репозитория для данного
-event (сейчас один job `verify`). Сверь список workflow с `get_check_runs`. Не тащи
+event (сейчас `verify` и `e2e`). Сверь список workflow с `get_check_runs`. Не тащи
 матрицу профилей Вольтариса, если её нет в новом CI.
 
-Обязательное доказательство — check run `verify` на текущем head SHA
+Обязательное доказательство — check runs `verify` и `e2e` на текущем head SHA
 (`pull_request_read` `get` + `get_check_runs`). `get_status` — classic commit
 statuses; в этом репозитории их нет. Пустой / `pending` `get_status` ≠ «CI ещё
 идёт» и не запрещает approve. `mergeable_state: clean` и старый
@@ -88,7 +88,7 @@ A check is a **false positive** (report as a blocker) if any of:
 - `if:` / path filters / matrix exclusions dropped a required job.
 - Author claimed CI passed without a run URL and SHA.
 
-If the required check run (`verify`) is still `queued` / `in_progress` /
+If a required check run (`verify` или `e2e`) is still `queued` / `in_progress` /
 `pending`, say so. Do not approve on a pending **check run**. Empty `get_status`
 is not pending CI. If logs are inaccessible, record that CI evidence is
 **не проверено** and do not invent a pass.

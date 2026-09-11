@@ -2,10 +2,11 @@
 name: implement-review-cycle
 description: >-
   Dispatches one plan item through plan-item-implementer, then
-  plan-diff-reviewer, then resume-implementer on must-fix. Use when the user
-  asks for implement→review, суперагент, следующий пункт из плана, or names
-  this skill. The parent does not write or review code. Do not use for /review,
-  /review-bugbot, /review-security, or GitHub PR review (pr-review).
+  plan-diff-reviewer, then resume-implementer on must-fix. Use only when the
+  user writes implement→review / через implement → review, or names this
+  skill. Do not use for a bare «следующий пункт», «суперагент»,
+  выполни задачу N, /review, /review-bugbot, /review-security, or GitHub PR
+  review (pr-review).
 ---
 
 # Implement → review cycle
@@ -13,6 +14,14 @@ description: >-
 Родитель в этом чате — только диспетчер. Код пишет `plan-item-implementer`.
 Ревью делает `plan-diff-reviewer` в чистом контексте. Это не `/review`, не
 Bugbot, не `pr-review` и не хуки `stop` / `subagentStop`.
+
+## Opt-in
+
+Цикл включается только если пользователь явно написал `через implement → review`
+/ `implement→review` или назвал этот skill. Голые «суперагент», «следующий
+пункт», `выполни задачу N`, `выполни ux задачу N` — не этот skill: один чат по
+промпту пункта. Если skill открыли без фразы цикла — не диспатчь, скажи
+человеку и остановись.
 
 ## Планы (не выдумывай формат)
 
@@ -30,8 +39,11 @@ UX (`выполни ux задачу N`): [`docs/ux/README.md`](../../../docs/ux/
 
 Если пользователь дал текст пункта сам — это spec; новый файл плана не создавай.
 
-«Следующий пункт» из названного плана: первый ещё не `проверен` / не в `main` по
-status. Если все закрыты — стоп, скажи человеку.
+«Следующий пункт» — только из явно названного плана (путь или имя:
+`docs/ux/README.md`, `docs/implementation-plan.md`, `docs/remediation-plan.md`).
+Первый ещё не `проверен` / не в `main` по status. Если все закрыты — стоп,
+скажи человеку. План не назван и нет текста пункта / номера задачи — стоп,
+спроси какой план. Не угадывай UX vs remediation.
 
 ## Запреты родителю
 
@@ -39,8 +51,8 @@ status. Если все закрыты — стоп, скажи человеку
    для исходников. Можно: читать план и status, `git status` / `git diff` /
    `git log`. Status пункта пишет implementer в `docs/implementation-status.md`
    (так принято), не родитель.
-2. Всегда явно запускать `plan-item-implementer`, дождаться завершения, затем
-   `plan-diff-reviewer`.
+2. Если цикл включён: всегда явно запускать `plan-item-implementer`, дождаться
+   завершения, затем `plan-diff-reviewer`.
 3. Промпт reviewer = формулировка пункта из плана (или путь к `feature-NN.md` /
    `task-NN.md` + цитата цели/AC) + фактический diff / список файлов. Запрещено
    пересылать rationale реализатора, «он уже учёл X», пересказ решения, статус-эссе.
@@ -57,19 +69,24 @@ status. Если все закрыты — стоп, скажи человеку
 
 ## Последовательность
 
-1. Прочитай названный план и `docs/implementation-status.md`. Возьми один пункт
-   (или spec текстом от пользователя). Соседние пункты не открывай.
-2. Task `plan-item-implementer`, дождись. В prompt: путь промпта / текст пункта,
+1. Нет фразы цикла и skill не назван — стоп (раздел Opt-in). Иначе прочитай
+   **названный** план и `docs/implementation-status.md`. Возьми один пункт
+   (или spec текстом от пользователя). Соседние пункты не открывай. План не
+   назван и нет spec — стоп, спроси человека.
+2. `git status --short`. Если дерево грязное до старта этого пункта (чужой
+   unstaged/uncommitted diff) — стоп, скажи человеку. Не запускай implementer
+   поверх чужой работы. После implementer грязное дерево ожидаемо.
+3. Task `plan-item-implementer`, дождись. В prompt: путь промпта / текст пункта,
    «один пункт, без соседних заодно», TDD и skills из `AGENTS.md` по поверхности.
    Сохрани agent id для resume.
-3. Сам сними `git diff` / список путей относительно merge-base с `main` (или
+4. Сам сними `git diff` / список путей относительно merge-base с `main` (или
    working tree). Не пересказывай, что сделал implementer.
-4. Task `plan-diff-reviewer`, дождись. В prompt только spec + diff/пути.
-5. Нет must-fix → стоп. Ответ человеку: пункт, таблица ревью, как проверить.
+5. Task `plan-diff-reviewer`, дождись. В prompt только spec + diff/пути.
+6. Нет must-fix → стоп. Ответ человеку: пункт, таблица ревью, как проверить.
    Nits можно не чинить.
-6. Есть must-fix и кругов < 3 → resume того же implementer (запрет 4),
-   дождись, снова шаги 3–4 с новым diff. Reviewer каждый раз новый, не resume.
-7. После третьего ревью must-fix остались → стоп. Не начинай четвёртый круг.
+7. Есть must-fix и кругов < 3 → resume того же implementer (запрет 4),
+   дождись, снова шаги 4–5 с новым diff. Reviewer каждый раз новый, не resume.
+8. После третьего ревью must-fix остались → стоп. Не начинай четвёртый круг.
    В ответе человеку: что не сошлось и какие must-fix открыты.
 
 ## Промпт implementer (первый запуск)
