@@ -2,7 +2,10 @@
 
 ## Текущее состояние
 
-Спецификация на 390px (ветка `fix/ux-spec-narrow`): на `< 40rem` каждая
+Файлы кабинета (ветка `fix/ux-files-sheet-hint`): сразу под `Файлы` фраза
+`Имя открывает выписку на экране.`; кликабельно только имя на HTML-лист;
+тип, размер и дата в одной сетке на `li` (D-039, UX задача 9).
+Спецификация на 390px на `main` (#42): на `< 40rem` каждая
 `specLine` — блок с подписями `Наименование` / `Кол-во` / `Ед.` / `Комментарий`;
 `thead` скрыт; от `40rem` таблица фичи 11; страница без горизонтального скролла
 (D-038, UX задача 8).
@@ -34,7 +37,7 @@
 UX/UI понятности (D-036…D-040): docs-only нарезка на `main` (#19); задача 1 на
 `main` (#35); задача 2 на `main` (#36); задача 3 на `main` (#37); задача 4 на
 `main` (#38); задача 5 на `main` (#39); задача 6 на `main` (#40); задача 7 на
-`main` (#41); задача 8 — этот PR. Оператор
+`main` (#41); задача 8 на `main` (#42); задача 9 — этот PR. Оператор
 `выполни ux задачу N` → `docs/ux/README.md`. Без `ux` фраза
 `выполни задачу N` не ведёт в
 `docs/ux/`. Не класть UX-промпты в `docs/llm/feature-NN.md`.
@@ -91,7 +94,8 @@ UX/UI понятности (D-036…D-040): docs-only нарезка на `main`
 | UX задача 6 process current step      | проверен                          |
 | UX задача 7 process list 390px        | проверен                          |
 | UX задача 8 spec table 390px          | проверен                          |
-| UX задачи 9–12                        | не начаты                         |
+| UX задача 9 files sheet hint          | проверен                          |
+| UX задачи 10–12                       | не начаты                         |
 
 ## Журнал проверки
 
@@ -483,3 +487,8 @@ UX/UI понятности (D-036…D-040): docs-only нарезка на `main`
 | 2026-09-11 | UX-8 TDD green         | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 24 passed; спека блоками на 390px, desktop thead фичи 11 зелёный                                                                                           |
 | 2026-09-11 | UX-8 gates             | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
 | 2026-09-11 | UX-8 format            | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
+| 2026-09-11 | Merge main #42         | `git fetch origin` / `git pull --ff-only origin main`                                                                                                                                                                                                                                     | `main` `52ba66b` UX задача 8 (#42)                                                                                                                                 |
+| 2026-09-11 | UX-9 TDD red           | `pnpm test:e2e`                                                                                                                                                                                                                                                                           | exit 1: 24 passed, 2 failed; нет `Имя открывает выписку на экране.`                                                                                                |
+| 2026-09-11 | UX-9 TDD green         | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 26 passed; фраза под «Файлы», клик имени фичи 13 жив                                                                                                       |
+| 2026-09-11 | UX-9 gates             | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-11 | UX-9 format            | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
