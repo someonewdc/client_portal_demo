@@ -2,12 +2,13 @@
 
 ## Текущее состояние
 
-Вендорные Prisma agent skills (D-041) в поставке этого PR; код продукта не
-менять. Фича 24 на `main` (#29). Код фич 25–27 не начинать, пока соответствующая
-фича не в `main`. Фича 23 на `main` (#28). Фича 22 на `main` (#27).
+Фича 25 (`NuxtLink` внутренних переходов, D-034) в поставке этого PR.
+Фича 16 на `main` (#21) — зависимость соблюдена. Фичи 26–27 не начинать.
+Фича 24 на `main` (#29). Фича 23 на `main` (#28). Фича 22 на `main` (#27).
 Оператор дефектов кода: `выполни задачу N` → `docs/remediation-plan.md`.
 Фича 19 на `main` (#24). Фича 18 на `main` (#23). Фича 17 на `main` (#22).
-Фича 16 на `main` (#21). Фича 15 на `main` (#20). Фича 14 на `main` (#18, D-030…D-035).
+Фича 15 на `main` (#20). Фича 14 на `main` (#18, D-030…D-035).
+Вендорные Prisma agent skills (D-041) на `main` (#30).
 
 UX/UI понятности (D-036…D-040) — docs-only нарезка на `main` (#19): оператор
 `выполни ux задачу N` → `docs/ux/README.md`. Без `ux` фраза `выполни задачу N`
@@ -23,39 +24,40 @@ UX-промпты в `docs/llm/feature-NN.md`.
 
 ## Этапы
 
-| Этап                              | Состояние                         |
-| --------------------------------- | --------------------------------- |
-| Boilerplate workspace             | проверен                          |
-| Документы плана и промпты фич     | выполнен (main `cad60b4`, без PR) |
-| Правки контракта по ревью         | выполнен (main `95767dc`, PR #1)  |
-| Фича 1 Postgres/Prisma/ready      | проверен                          |
-| Фича 2 заявка + OpenAPI           | проверен                          |
-| Фича 3 Nuxt + make dev            | проверен                          |
-| Фича 4 токены + layout            | проверен                          |
-| Фича 5 Playwright harness         | проверен                          |
-| Фича 6 индекс ссылок              | проверен                          |
-| Фича 7 кабинет + 404              | проверен                          |
-| Фича 8 compose-smoke / CI e2e     | проверен                          |
-| Фича 9 docs статусный документ    | выполнен                          |
-| Фича 10 кабинет рамка + процесс   | проверен                          |
-| Фича 11 кабинет файлы-записи      | проверен                          |
-| Фича 12 индекс заголовок и жест   | проверен                          |
-| Фича 13 кабинет HTML-лист файла   | проверен                          |
-| Фича 14 docs нарезка дефектов     | выполнен                          |
-| Фича 15 decode param один раз     | проверен                          |
-| Фича 16 reactive useRequestPortal | проверен                          |
-| Фича 17 HTTP-статус HTML ошибки   | проверен                          |
-| Фича 18 неполный каталог → 500    | проверен                          |
-| Фича 19 уникальное fileName       | проверен                          |
-| Фича 20 заголовки capability HTML | проверен                          |
-| Фича 21 Cache-Control JSON        | проверен                          |
-| Фича 22 CORS read-only            | проверен                          |
-| Фича 23 timeout OpenAPI-клиента   | проверен                          |
-| Фича 24 throttle GET по секрету   | проверен                          |
-| Prisma vendor skills (D-041)      | выполнен                          |
-| Фичи 25–27 задачи 11–13           | не начаты                         |
-| UX docs нарезка (D-036…D-040)     | выполнен                          |
-| UX задачи 1–12                    | не начаты                         |
+| Этап                                  | Состояние                         |
+| ------------------------------------- | --------------------------------- |
+| Boilerplate workspace                 | проверен                          |
+| Документы плана и промпты фич         | выполнен (main `cad60b4`, без PR) |
+| Правки контракта по ревью             | выполнен (main `95767dc`, PR #1)  |
+| Фича 1 Postgres/Prisma/ready          | проверен                          |
+| Фича 2 заявка + OpenAPI               | проверен                          |
+| Фича 3 Nuxt + make dev                | проверен                          |
+| Фича 4 токены + layout                | проверен                          |
+| Фича 5 Playwright harness             | проверен                          |
+| Фича 6 индекс ссылок                  | проверен                          |
+| Фича 7 кабинет + 404                  | проверен                          |
+| Фича 8 compose-smoke / CI e2e         | проверен                          |
+| Фича 9 docs статусный документ        | выполнен                          |
+| Фича 10 кабинет рамка + процесс       | проверен                          |
+| Фича 11 кабинет файлы-записи          | проверен                          |
+| Фича 12 индекс заголовок и жест       | проверен                          |
+| Фича 13 кабинет HTML-лист файла       | проверен                          |
+| Фича 14 docs нарезка дефектов         | выполнен                          |
+| Фича 15 decode param один раз         | проверен                          |
+| Фича 16 reactive useRequestPortal     | проверен                          |
+| Фича 17 HTTP-статус HTML ошибки       | проверен                          |
+| Фича 18 неполный каталог → 500        | проверен                          |
+| Фича 19 уникальное fileName           | проверен                          |
+| Фича 20 заголовки capability HTML     | проверен                          |
+| Фича 21 Cache-Control JSON            | проверен                          |
+| Фича 22 CORS read-only                | проверен                          |
+| Фича 23 timeout OpenAPI-клиента       | проверен                          |
+| Фича 24 throttle GET по секрету       | проверен                          |
+| Prisma vendor skills (D-041)          | выполнен                          |
+| Фича 25 NuxtLink внутренних переходов | проверен                          |
+| Фичи 26–27 задачи 12–13               | не начаты                         |
+| UX docs нарезка (D-036…D-040)         | выполнен                          |
+| UX задачи 1–12                        | не начаты                         |
 
 ## Журнал проверки
 
@@ -377,3 +379,9 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | 2026-09-11 | Merge main #29         | `git fetch origin` затем `git merge origin/main`                                                                                                                                                                                                                                          | `main` `380fbed` Фича 24 (#29); конфликт только `docs/implementation-status.md`                                                                                    |
 | 2026-09-11 | Prisma vendor skills   | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0; вендор `apps/api/.agents` не в прогоне Prettier                                                                                                            |
 | 2026-09-11 | Prisma vendor skills   | `pnpm lint` / `pnpm test`                                                                                                                                                                                                                                                                 | не запускались: docs + vendor markdown (`change-impact-gates`)                                                                                                     |
+| 2026-09-11 | Merge main #30         | `git fetch origin` / `git pull --ff-only origin main`                                                                                                                                                                                                                                     | `main` `2b9047e` Prisma vendor skills (#30); локальный `main` был на F23 `f88cc41`                                                                                 |
+| 2026-09-11 | Фича 25 TDD red        | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                                                                                                                                                          | exit 1: `apps/web/app/pages/index.vue must use NuxtLink`; 42 passed, 1 failed                                                                                      |
+| 2026-09-11 | Фича 25 TDD green      | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                                                                                                                                                          | exit 0: 43 passed, включая `NuxtLink` на индексе, кабинете и листе                                                                                                 |
+| 2026-09-11 | Фича 25 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 35, web 14, scripts 78, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-11 | Фича 25 e2e            | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 14 passed, включая клик З-10043, имени `КП-З-10043.pdf` и «К заявке»                                                                                       |
+| 2026-09-11 | Фича 25 format         | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |

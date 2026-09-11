@@ -71,12 +71,12 @@ if (documentStatus !== 200) {
         </li>
       </ul>
       <p class="mt-8">
-        <a
+        <NuxtLink
           class="underline decoration-rule underline-offset-2 hover:text-accent"
-          :href="`/r/${accessSecret}`"
+          :to="`/r/${accessSecret}`"
         >
           К заявке {{ request.publicNumber }}
-        </a>
+        </NuxtLink>
       </p>
     </template>
   </main>

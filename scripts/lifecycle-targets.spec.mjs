@@ -632,10 +632,6 @@ describe('feature 7 request cabinet', () => {
       resolve(webRoot, 'app/composables/useRequestPortal.ts'),
       'utf8',
     );
-    const sources = listWebSourceFiles(webRoot).map((absolutePath) =>
-      readFileSync(absolutePath, 'utf8'),
-    );
-    const combined = sources.join('\n');
 
     assert.match(portalComposable, /\bwatch\b/);
     assert.match(portalComposable, /requestPortalCacheKey/);
@@ -644,7 +640,6 @@ describe('feature 7 request cabinet', () => {
       /accessSecret = computed\(\(\) =>\s*routeParamValue\(route\.params\.accessSecret\)\)/,
     );
     assert.doesNotMatch(portalComposable, /`request-portal:\$\{accessSecret\}`/);
-    assert.doesNotMatch(combined, /NuxtLink/);
   });
 
   it('covers cabinet and unknown-secret e2e against seed without mock-api', () => {
@@ -711,6 +706,50 @@ describe('feature 17 document error status', () => {
         `${label} must not gate setResponseStatus only on isNotFound`,
       );
     }
+  });
+});
+
+describe('feature 25 NuxtLink internal navigation', () => {
+  it('uses NuxtLink for index, file name and back-to-request transitions', () => {
+    const portalComposable = readFileSync(
+      resolve(webRoot, 'app/composables/useRequestPortal.ts'),
+      'utf8',
+    );
+    assert.match(portalComposable, /\bwatch\b/);
+    assert.match(portalComposable, /requestPortalCacheKey/);
+
+    const indexPage = readFileSync(resolve(webRoot, 'app/pages/index.vue'), 'utf8');
+    const cabinetPage = readFileSync(
+      resolve(webRoot, 'app/pages/r/[accessSecret]/index.vue'),
+      'utf8',
+    );
+    const sheetPage = readFileSync(
+      resolve(webRoot, 'app/pages/r/[accessSecret]/d/[fileName].vue'),
+      'utf8',
+    );
+
+    for (const [label, source] of [
+      ['apps/web/app/pages/index.vue', indexPage],
+      ['apps/web/app/pages/r/[accessSecret]/index.vue', cabinetPage],
+      ['apps/web/app/pages/r/[accessSecret]/d/[fileName].vue', sheetPage],
+    ]) {
+      assert.match(source, /<NuxtLink[\s>]/, `${label} must use NuxtLink`);
+      assert.doesNotMatch(
+        source,
+        /<a[\s>/]/,
+        `${label} must not use a raw <a> for internal navigation`,
+      );
+    }
+
+    assert.match(indexPage, /<NuxtLink[\s\S]*?:to="item\.portalPath"/);
+    assert.match(
+      cabinetPage,
+      /<NuxtLink[\s\S]*?:to="requestFileHref\(accessSecret,\s*file\.fileName\)"/,
+    );
+    assert.match(sheetPage, /<NuxtLink[\s\S]*?:to="`\/r\/\$\{accessSecret\}`"/);
+    assert.doesNotMatch(sheetPage, /encodeURIComponent\(\s*accessSecret/);
+    assert.doesNotMatch(cabinetPage, /to=["']\/["']/);
+    assert.doesNotMatch(`${indexPage}\n${cabinetPage}\n${sheetPage}`, /href=["']#["']/);
   });
 });
 
