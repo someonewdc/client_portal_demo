@@ -32,11 +32,19 @@ if (documentStatus !== 200) {
 }
 
 useSeoMeta({
-  title: computed(() =>
-    isNotFound.value || isMissingFile.value
-      ? 'Ссылка недействительна — ПК «Нордщит»'
-      : 'ПК «Нордщит»',
-  ),
+  title: computed(() => {
+    if (isNotFound.value || isMissingFile.value) {
+      return 'Ссылка недействительна — ПК «Нордщит»';
+    }
+
+    const payload = request.value;
+    const currentFile = file.value;
+    if (payload == null || currentFile == null) {
+      return 'ПК «Нордщит»';
+    }
+
+    return `${fileKindLabel(currentFile.kind)} — ${payload.publicNumber} — ПК «Нордщит»`;
+  }),
 });
 </script>
 
@@ -62,20 +70,30 @@ useSeoMeta({
       <p class="text-sm font-semibold text-ink-muted">{{ fileKindLabel(file.kind) }}</p>
       <h1 class="mt-2 text-xl font-semibold text-ink">{{ file.fileName }}</h1>
       <p class="mt-4 tabular-nums text-ink">{{ request.publicNumber }}</p>
-      <p class="mt-1 text-ink">{{ request.counterpartyName }}</p>
-      <p class="mt-1 text-ink-muted">{{ request.title }}</p>
-      <p class="mt-4">
-        <time class="text-sm tabular-nums text-ink-muted" :datetime="file.uploadedAt">
-          {{ formatRequestUpdatedAt(file.uploadedAt) }}
-        </time>
-        <span class="ml-3 tabular-nums text-sm text-ink-muted">{{
-          formatByteSize(file.byteSize)
-        }}</span>
-      </p>
+      <dl class="mt-4">
+        <dt class="text-sm text-ink-muted">Заказчик</dt>
+        <dd class="mt-1 text-ink">{{ request.counterpartyName }}</dd>
+        <dt class="mt-2 text-sm text-ink-muted">Изделие</dt>
+        <dd class="mt-1 text-ink-muted">{{ request.title }}</dd>
+        <dt class="mt-4 text-sm text-ink-muted">Загружено</dt>
+        <dd class="mt-1">
+          <time class="text-sm tabular-nums text-ink-muted" :datetime="file.uploadedAt">
+            {{ formatRequestUpdatedAt(file.uploadedAt) }}
+          </time>
+        </dd>
+        <dt class="mt-2 text-sm text-ink-muted">Размер</dt>
+        <dd class="mt-1 tabular-nums text-sm text-ink-muted">
+          {{ formatByteSize(file.byteSize) }}
+        </dd>
+      </dl>
+      <p class="mt-4 text-ink">Это выписка на экране, не файл для скачивания.</p>
       <p class="mt-8 text-ink">{{ fileSheetLead(file.kind) }}</p>
       <ul class="mt-4 space-y-2">
         <li v-for="line in request.specLines" :key="line.name" class="text-ink">
-          {{ line.name }}
+          <span>{{ line.name }}</span>
+          <span class="ml-3 tabular-nums">{{ line.quantity }}</span>
+          <span class="ml-2">{{ line.unit }}</span>
+          <span v-if="line.comment" class="ml-3 text-ink-muted">{{ line.comment }}</span>
         </li>
       </ul>
       <p class="mt-8">
