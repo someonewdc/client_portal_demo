@@ -120,6 +120,20 @@ Prefix живёт на server URL, path keys относительные. Пос�
 
 Несуществующий path API — тот же Problem Details filter, не HTML login.
 
+## 429
+
+Перебор `GET /requests/{accessSecret}` с одного IP: 60 запросов / 60 секунд
+(in-memory, без Redis). Ключ — IP пира API, не path и не секрет.
+
+- HTTP 429, `application/problem+json`
+- `title` «Too many requests»; `detail` без SQL, stack, plaintext секрета и без имени
+  библиотеки throttler
+- `Retry-After` — секунды до повтора
+- `GET /demo/links` и health (`/health/live`, `/health/ready`) этот лимит не применяют
+- Tracker — `request.ip` процесса API (`trustProxy` выключен, D-026): браузерный GET на
+  `:3001` считается по IP клиента; SSR из контейнера `web` на `http://api:3001` делит
+  один бакет на first-load стенда
+
 ## Вне контракта MVP
 
 Нет POST/PATCH статусов, upload файлов, auth headers, OTP, списка «всех заявок» кроме

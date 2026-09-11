@@ -1,4 +1,5 @@
 import { Controller, Get, Inject, Req, UseInterceptors } from '@nestjs/common';
+import { SkipThrottle } from '@nestjs/throttler';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { FastifyRequest } from 'fastify';
 
@@ -8,6 +9,7 @@ import { CapabilityCacheControlInterceptor } from './capability-cache-control.in
 import { DemoLinksResponseDto } from './request.dto.js';
 
 @ApiTags('demo')
+@SkipThrottle()
 @Controller('demo')
 @UseInterceptors(CapabilityCacheControlInterceptor)
 export class DemoLinksController {
