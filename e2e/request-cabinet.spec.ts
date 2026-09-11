@@ -31,6 +31,41 @@ async function expectCabinetStatusHeader(page: Page, publicNumber: string, statu
   await expect(page.getByRole('heading', { name: publicNumber })).toHaveCount(0);
 }
 
+async function expectCabinetFieldLabels(
+  page: Page,
+  fields: {
+    counterpartyName: string;
+    statusLabel: string;
+    title: string;
+    updatedAt: string;
+  },
+) {
+  const customerLabel = page.locator('dt', { hasText: /^Заказчик$/ });
+  await expect(customerLabel).toBeVisible();
+  await expect(page.getByText('Заказчик', { exact: true })).toBeVisible();
+  await expect(page.getByText(fields.counterpartyName, { exact: true })).toBeVisible();
+  await expect(
+    customerLabel.locator('xpath=following-sibling::dd[1]').getByText(fields.counterpartyName, {
+      exact: true,
+    }),
+  ).toBeVisible();
+
+  const productLabel = page.locator('dt', { hasText: /^Изделие$/ });
+  await expect(productLabel).toBeVisible();
+  await expect(page.getByText('Изделие', { exact: true })).toBeVisible();
+  await expect(page.getByText(fields.title, { exact: true })).toBeVisible();
+  await expect(
+    productLabel.locator('xpath=following-sibling::dd[1]').getByText(fields.title, { exact: true }),
+  ).toBeVisible();
+
+  const updatedLabel = page.locator('dt', { hasText: /^Обновлено$/ });
+  await expect(updatedLabel).toBeVisible();
+  await expect(page.getByText('Обновлено', { exact: true })).toBeVisible();
+  const updatedValue = updatedLabel.locator('xpath=following-sibling::dd[1]');
+  await expect(updatedValue.locator(`time[datetime="${fields.updatedAt}"]`)).toBeVisible();
+  await expect(updatedValue.getByText(fields.statusLabel, { exact: true })).toHaveCount(0);
+}
+
 const unknownSecret = 'this-secret-does-not-exist';
 
 test('quote cabinet shows Z-10043 seed payload from GET /requests/{accessSecret}', async ({
@@ -46,8 +81,7 @@ test('quote cabinet shows Z-10043 seed payload from GET /requests/{accessSecret}
   await expect(banner.getByRole('heading', { name: quoteCabinet.plantName })).toHaveCount(0);
   await expectCabinetStatusHeader(page, quoteCabinet.publicNumber, quoteCabinet.statusLabel);
   expect(await page.title()).toContain('КП готово — З-10043 — ПК «Нордщит»');
-  await expect(page.getByText(quoteCabinet.counterpartyName)).toBeVisible();
-  await expect(page.getByText(quoteCabinet.title, { exact: true })).toBeVisible();
+  await expectCabinetFieldLabels(page, quoteCabinet);
 
   const stageRibbon = page.getByRole('list', { name: 'Этапы заявки' });
   await expect(stageRibbon.getByRole('listitem')).toHaveCount(4);
@@ -60,7 +94,7 @@ test('quote cabinet shows Z-10043 seed payload from GET /requests/{accessSecret}
   await expect(page.getByText('IP54, навесной')).toBeVisible();
   await expect(page.getByText(quoteCabinet.questionnaireFileName, { exact: true })).toBeVisible();
   await expect(page.getByText(quoteCabinet.quoteFileName, { exact: true })).toBeVisible();
-  await expect(page.locator(`p > time[datetime="${quoteCabinet.updatedAt}"]`)).toBeVisible();
+  await expect(page.locator(`dd > time[datetime="${quoteCabinet.updatedAt}"]`)).toBeVisible();
 
   await expect(page.getByRole('button')).toHaveCount(0);
   await expect(page.getByRole('link', { name: /скачать/i })).toHaveCount(0);
@@ -80,6 +114,7 @@ test('quote cabinet reads as a status document with a dated process list', async
   ).toBeVisible();
   await expectCabinetStatusHeader(page, quoteCabinet.publicNumber, quoteCabinet.statusLabel);
   expect(await page.title()).toContain('КП готово — З-10043 — ПК «Нордщит»');
+  await expectCabinetFieldLabels(page, quoteCabinet);
   expect(await page.getByText('КП готово', { exact: true }).count()).toBeGreaterThanOrEqual(2);
 
   const stageRibbon = page.getByRole('list', { name: 'Этапы заявки' });
@@ -106,13 +141,23 @@ test('quote cabinet reads as a status document with a dated process list', async
   await expect(invoiceIssued.getByText('ещё нет', { exact: true })).toBeVisible();
   await expect(invoiceIssued.locator('time')).toHaveCount(0);
 
-  const updatedAt = page.locator(`p > time[datetime="${quoteCabinet.updatedAt}"]`);
+  const updatedAt = page.locator(`dd > time[datetime="${quoteCabinet.updatedAt}"]`);
   await expect(updatedAt).toBeVisible();
   await expect(
-    updatedAt.locator('xpath=ancestor::p[1]').getByText(quoteCabinet.statusLabel, { exact: true }),
+    updatedAt.locator('xpath=ancestor::dd[1]').getByText(quoteCabinet.statusLabel, { exact: true }),
   ).toHaveCount(0);
   await expect(page.getByRole('button')).toHaveCount(0);
   await expect(page.locator('a[href="#"]')).toHaveCount(0);
+});
+
+test('quote cabinet labels customer, product, and updated date', async ({ page }) => {
+  const response = await page.goto(`/r/${quoteCabinet.accessSecret}`);
+
+  expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expectCabinetStatusHeader(page, quoteCabinet.publicNumber, quoteCabinet.statusLabel);
+  await expectCabinetFieldLabels(page, quoteCabinet);
 });
 
 test('quote cabinet lists files as records and keeps the comment column', async ({ page }) => {
