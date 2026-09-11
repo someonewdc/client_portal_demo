@@ -73,13 +73,11 @@ function formatUpdatedAt(iso: string): string {
     <ul v-else class="mt-8 divide-y divide-rule">
       <li v-for="item in items" :key="item.publicNumber">
         <NuxtLink class="block py-4 text-ink hover:text-accent" :to="item.portalPath">
-          <span class="font-semibold tabular-nums underline decoration-rule underline-offset-2">
+          <span class="document-link font-semibold tabular-nums">
             {{ item.publicNumber }}
           </span>
           <span class="text-ink-muted"> · {{ item.counterpartyName }}</span>
-          <span class="mt-1 block underline decoration-rule underline-offset-2">{{
-            item.title
-          }}</span>
+          <span class="document-link mt-1 block">{{ item.title }}</span>
           <span class="mt-2 flex flex-wrap items-center gap-3">
             <span class="inline-block bg-accent/15 px-2 py-0.5 text-sm font-normal text-accent">
               {{ item.statusLabel }}

@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test, type Locator } from '@playwright/test';
 
 const catalog = [
   {
@@ -147,5 +147,90 @@ test('demo links index status stamp is a regular-weight tag, not a button', asyn
   ).toBeLessThanOrEqual(400);
 
   await stamp.click();
+  await expect(page).toHaveURL(/\/r\/seed-z10043-quote-kuznetsov$/);
+});
+
+const documentLinkAccentRgb = 'rgb(61, 90, 115)';
+
+async function restLinkStyle(target: Locator) {
+  return target.evaluate((node) => {
+    const computed = getComputedStyle(node);
+    return {
+      color: computed.color,
+      textDecorationColor: computed.textDecorationColor,
+    };
+  });
+}
+
+test('demo links index number and title are accent document links at rest', async ({ page }) => {
+  const response = await page.goto('/');
+
+  expect(response, 'GET / must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Ссылки для показа', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText('Этот список не показывается заказчику.', { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText('Так выглядит то, что вы отправили бы заказчику в мессенджер.', {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByText('Нажмите строку — откроется экран заказчика по ссылке.', { exact: true }),
+  ).toBeVisible();
+
+  const quoteRow = page.getByRole('link', { name: /З-10043/ });
+  await expect(quoteRow).toHaveAttribute('href', '/r/seed-z10043-quote-kuznetsov');
+  await expect(page.getByRole('button')).toHaveCount(0);
+
+  const publicNumber = quoteRow.getByText('З-10043', { exact: true });
+  const title = quoteRow.getByText('ВРУ 400 А', { exact: true });
+  await expect(publicNumber).toBeVisible();
+  await expect(title).toBeVisible();
+  await expect(publicNumber).toHaveClass(/document-link/);
+  await expect(title).toHaveClass(/document-link/);
+
+  const numberStyle = await restLinkStyle(publicNumber);
+  expect(numberStyle.color, 'index publicNumber rest color must be accent').toBe(
+    documentLinkAccentRgb,
+  );
+  expect(numberStyle.textDecorationColor, 'index publicNumber rest underline must be accent').toBe(
+    documentLinkAccentRgb,
+  );
+
+  const titleStyle = await restLinkStyle(title);
+  expect(titleStyle.color, 'index title rest color must be accent').toBe(documentLinkAccentRgb);
+  expect(titleStyle.textDecorationColor, 'index title rest underline must be accent').toBe(
+    documentLinkAccentRgb,
+  );
+
+  const stamp = quoteRow.getByText('КП готово', { exact: true });
+  await expect(stamp).toBeVisible();
+  await expect(stamp).not.toHaveClass(/document-link/);
+
+  const stampStyle = await stamp.evaluate((node) => {
+    const computed = getComputedStyle(node);
+    const raw = computed.fontWeight;
+    const fontWeight = raw === 'normal' ? 400 : raw === 'bold' ? 700 : Number.parseInt(raw, 10);
+    return {
+      fontWeight,
+      textDecorationLine: computed.textDecorationLine,
+    };
+  });
+
+  expect(
+    stampStyle.textDecorationLine,
+    'index status stamp must not look like a document link',
+  ).not.toBe('underline');
+  expect(
+    stampStyle.fontWeight,
+    'index status stamp must stay a regular-weight tag',
+  ).toBeLessThanOrEqual(400);
+
+  await quoteRow.click();
   await expect(page).toHaveURL(/\/r\/seed-z10043-quote-kuznetsov$/);
 });
