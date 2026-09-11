@@ -88,8 +88,9 @@ pnpm test:e2e
 
 ## После merge
 
-Skill `pr-review`. Трек `docs/ux/` на этом номере закрыт. Фичи 15–27 — отдельно:
-`выполни задачу N` → `docs/remediation-plan.md`.
+Skill `pr-review`. Дальше сетка и ссылки в покое: «реализуй ux задачу 13» →
+`docs/ux/task-13.md`. Фичи 15–27 — отдельно: `выполни задачу N` →
+`docs/remediation-plan.md`.
 
 ## Честность отчёта
 
