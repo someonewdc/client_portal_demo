@@ -2,20 +2,20 @@
 
 ## Текущее состояние
 
-Сняты избыточные btree-индексы заявки (ветка `chore/drop-redundant-request-indexes`):
-`Request_status_idx` и три `requestId` рядом с unique-композитами. Unique и PK оставлены.
-Фича 27 на `main` (#33). Фича 26 на `main` (#32). Фича 25 на `main` (#31).
-Фича 24 на `main` (#29). Фича 23 на `main` (#28). Фича 22 на `main` (#27).
-Нарезка дефектов кода D-030 закрыта.
+Клавиатурный фокус `:focus-visible` (ветка `fix/ux-focus-visible`): кольцо 2px
+solid `--color-accent`, offset 2px (D-040, UX задача 1). Сняты избыточные
+btree-индексы заявки на `main` (#34). Фича 27 на `main` (#33). Фича 26 на
+`main` (#32). Фича 25 на `main` (#31). Фича 24 на `main` (#29). Фича 23 на
+`main` (#28). Фича 22 на `main` (#27). Нарезка дефектов кода D-030 закрыта.
 Оператор дефектов кода: `выполни задачу N` → `docs/remediation-plan.md`.
 Фича 19 на `main` (#24). Фича 18 на `main` (#23). Фича 17 на `main` (#22).
 Фича 15 на `main` (#20). Фича 14 на `main` (#18, D-030…D-035).
 Вендорные Prisma agent skills (D-041) на `main` (#30).
 
-UX/UI понятности (D-036…D-040) — docs-only нарезка на `main` (#19): оператор
-`выполни ux задачу N` → `docs/ux/README.md`. Без `ux` фраза `выполни задачу N`
-не ведёт в `docs/ux/`. Код UX-задач 1–12 в этом PR не писать. Не класть
-UX-промпты в `docs/llm/feature-NN.md`.
+UX/UI понятности (D-036…D-040): docs-only нарезка на `main` (#19); задача 1 —
+этот PR. Оператор `выполни ux задачу N` → `docs/ux/README.md`. Без `ux` фраза
+`выполни задачу N` не ведёт в `docs/ux/`. Не класть UX-промпты в
+`docs/llm/feature-NN.md`.
 
 ## Правила обновления
 
@@ -61,7 +61,8 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | Фича 27 bind 127.0.0.1                | проверен                          |
 | Drop redundant request indexes        | проверен                          |
 | UX docs нарезка (D-036…D-040)         | выполнен                          |
-| UX задачи 1–12                        | не начаты                         |
+| UX задача 1 focus-visible             | проверен                          |
+| UX задачи 2–12                        | не начаты                         |
 
 ## Журнал проверки
 
@@ -408,3 +409,9 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | 2026-09-11 | Drop indexes TDD green | `pnpm --filter @client-portal/api exec vitest run src/requests/requests.http.spec.ts`                                                                                                                                                                                                     | exit 0: 12 passed; 10 индексов = PK + unique, без `status`/`requestId` btree                                                                                       |
 | 2026-09-11 | Drop indexes format    | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
 | 2026-09-11 | Drop indexes lint      | `pnpm lint`                                                                                                                                                                                                                                                                               | exit 0                                                                                                                                                             |
+| 2026-09-11 | UX-1 TDD red           | `pnpm test:e2e`                                                                                                                                                                                                                                                                           | exit 1: 14 passed, 1 failed; Tab на З-10041: `outlineWidth` 1px (UA), нужно ≥ 2px                                                                                  |
+| 2026-09-11 | UX-1 TDD green         | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 15 passed, включая `keyboard Tab on the first index request row shows a visible focus outline`                                                             |
+| 2026-09-11 | UX-1 spec path         | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                                                                                                                                                          | сначала exit 1: F5 запрещает `З-1004\d` в `layout-header.spec.ts`; после переноса в `e2e/focus-visible.spec.ts` — 45 passed                                        |
+| 2026-09-11 | UX-1 e2e after move    | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 15 passed, включая `e2e/focus-visible.spec.ts`                                                                                                             |
+| 2026-09-11 | UX-1 gates             | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 14, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-11 | UX-1 format            | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
