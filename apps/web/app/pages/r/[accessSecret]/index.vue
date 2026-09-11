@@ -163,16 +163,17 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
       </table>
 
       <h2 class="mt-8 font-semibold text-ink">Файлы</h2>
+      <p class="mt-3 text-ink">Имя открывает выписку на экране.</p>
       <ul class="mt-3 divide-y divide-rule" aria-label="Файлы" role="list">
         <li
           v-for="file in request.files"
           :key="file.fileName"
-          class="flex flex-wrap items-baseline gap-x-3 gap-y-1 py-3 text-ink"
+          class="grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-3 gap-y-1 py-3 text-ink sm:grid-cols-[auto_minmax(0,1fr)_auto_auto]"
           role="listitem"
         >
           <span class="text-sm font-semibold text-ink-muted">{{ fileKindLabel(file.kind) }}</span>
           <NuxtLink
-            class="underline decoration-rule underline-offset-2 hover:text-accent"
+            class="min-w-0 break-words underline decoration-rule underline-offset-2 hover:text-accent"
             :to="requestFileHref(accessSecret, file.fileName)"
           >
             {{ file.fileName }}

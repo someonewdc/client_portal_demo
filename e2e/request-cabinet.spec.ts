@@ -326,6 +326,129 @@ async function expectSpecTableDesktopColumns(page: Page) {
   await expect(firstRow.getByText('Наименование', { exact: true })).toBeHidden();
 }
 
+const filesSheetHint = 'Имя открывает выписку на экране.';
+
+async function expectFilesSheetHint(page: Page) {
+  await expect(page.getByRole('heading', { level: 2, name: 'Файлы', exact: true })).toBeVisible();
+  const hint = page.getByText(filesSheetHint, { exact: true });
+  await expect(hint).toBeVisible();
+  await expect(hint).toHaveCount(1);
+  await expect(hint).toHaveJSProperty('tagName', 'P');
+  await expect(page.locator('main h2 + p')).toHaveText(filesSheetHint);
+  await expect(page.locator('main h2 + p + ul[aria-label="Файлы"]')).toBeVisible();
+  await expect(page.getByRole('heading', { name: filesSheetHint })).toHaveCount(0);
+}
+
+async function expectFileNameIsTheOnlyRecordLink(
+  page: Page,
+  fields: { fileName: string; href: string; kindLabel: string; sizeLabel: string },
+) {
+  const item = page
+    .getByRole('list', { name: 'Файлы' })
+    .getByRole('listitem')
+    .filter({ hasText: fields.fileName });
+  const link = item.getByRole('link', { name: fields.fileName, exact: true });
+
+  await expect(link).toHaveAttribute('href', fields.href);
+  await expect(item.getByRole('link')).toHaveCount(1);
+  await expect(item.getByRole('link', { name: fields.kindLabel, exact: true })).toHaveCount(0);
+  await expect(item.getByRole('link', { name: fields.sizeLabel, exact: true })).toHaveCount(0);
+  await expect(item.locator('time').getByRole('link')).toHaveCount(0);
+}
+
+type FileRecordFieldYs = {
+  dateY: number;
+  kindY: number;
+  nameY: number;
+  sizeY: number;
+};
+
+function fieldRowIndex(ys: readonly number[], y: number): number {
+  const unique: number[] = [];
+  for (const value of [...ys].sort((left, right) => left - right)) {
+    if (unique.every((existing) => Math.abs(existing - value) > 4)) {
+      unique.push(value);
+    }
+  }
+
+  return unique.findIndex((existing) => Math.abs(existing - y) <= 4);
+}
+
+function fileRecordRowPattern(ys: FileRecordFieldYs): string {
+  const allYs = [ys.kindY, ys.nameY, ys.sizeY, ys.dateY];
+  return [
+    fieldRowIndex(allYs, ys.kindY),
+    fieldRowIndex(allYs, ys.nameY),
+    fieldRowIndex(allYs, ys.sizeY),
+    fieldRowIndex(allYs, ys.dateY),
+  ].join('-');
+}
+
+async function fileRecordFieldYs(
+  item: ReturnType<Page['locator']>,
+): Promise<FileRecordFieldYs | null> {
+  return item.evaluate((li) => {
+    const kind = li.querySelector(':scope > span:first-of-type');
+    const name = li.querySelector(':scope > a');
+    const size = [...li.querySelectorAll(':scope > span')].find((element) =>
+      /КБ$/u.test(element.textContent?.trim() ?? ''),
+    );
+    const date = li.querySelector(':scope > time');
+
+    if (kind == null || name == null || size == null || date == null) {
+      return null;
+    }
+
+    return {
+      dateY: date.getBoundingClientRect().y,
+      kindY: kind.getBoundingClientRect().y,
+      nameY: name.getBoundingClientRect().y,
+      sizeY: size.getBoundingClientRect().y,
+    };
+  });
+}
+
+async function expectFileRecordsShareOneRhythm(page: Page) {
+  const files = page.getByRole('list', { name: 'Файлы' });
+  const items = [
+    files.getByRole('listitem').filter({ hasText: quoteCabinet.questionnaireFileName }),
+    files.getByRole('listitem').filter({ hasText: quoteCabinet.quoteFileName }),
+  ];
+
+  const patterns: string[] = [];
+
+  for (const item of items) {
+    const ys = await fileRecordFieldYs(item);
+    expect(ys, 'file record keeps kind, name, size, and date').not.toBeNull();
+    if (ys == null) {
+      continue;
+    }
+
+    const pattern = fileRecordRowPattern(ys);
+    patterns.push(pattern);
+
+    expect(fieldRowIndex([ys.kindY, ys.nameY, ys.sizeY, ys.dateY], ys.kindY)).toBe(
+      fieldRowIndex([ys.kindY, ys.nameY, ys.sizeY, ys.dateY], ys.nameY),
+    );
+
+    if (Math.abs(ys.sizeY - ys.nameY) > 4) {
+      expect(ys.sizeY, 'wrap after the file name, not before size/date').toBeGreaterThan(
+        ys.nameY + 4,
+      );
+      expect(
+        Math.abs(ys.sizeY - ys.dateY),
+        'size and date stay on the same wrapped row',
+      ).toBeLessThanOrEqual(4);
+    }
+  }
+
+  expect(patterns).toHaveLength(2);
+  expect(
+    patterns[0],
+    `questionnaire wrap ${patterns[0]} must match quote wrap ${patterns[1]}`,
+  ).toBe(patterns[1]);
+}
+
 const unknownSecret = 'this-secret-does-not-exist';
 
 test('quote cabinet shows Z-10043 seed payload from GET /requests/{accessSecret}', async ({
@@ -533,6 +656,53 @@ test('quote cabinet lists files as records and keeps the comment column', async 
 
   await expect(page.getByRole('columnheader', { name: 'Комментарий' })).toBeVisible();
   await expect(page.getByText('IP54, навесной')).toBeVisible();
+});
+
+test('quote cabinet files hint that the name opens an on-screen sheet', async ({ page }) => {
+  const response = await page.goto(`/r/${quoteCabinet.accessSecret}`);
+
+  expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expectFilesSheetHint(page);
+
+  const quoteSheetHref = `/r/${quoteCabinet.accessSecret}/d/${encodeURIComponent(quoteCabinet.quoteFileName)}`;
+  const questionnaireSheetHref = `/r/${quoteCabinet.accessSecret}/d/${encodeURIComponent(quoteCabinet.questionnaireFileName)}`;
+
+  await expectFileNameIsTheOnlyRecordLink(page, {
+    fileName: quoteCabinet.quoteFileName,
+    href: quoteSheetHref,
+    kindLabel: 'КП',
+    sizeLabel: '240 КБ',
+  });
+  await expectFileNameIsTheOnlyRecordLink(page, {
+    fileName: quoteCabinet.questionnaireFileName,
+    href: questionnaireSheetHref,
+    kindLabel: 'Опросный лист',
+    sizeLabel: '120 КБ',
+  });
+
+  await expect(page.getByRole('link', { name: /скачать/i })).toHaveCount(0);
+  await expect(page.locator('[download]')).toHaveCount(0);
+  await expect(page.locator('a[href="#"]')).toHaveCount(0);
+  await expect(page.getByRole('button')).toHaveCount(0);
+
+  await expectFileRecordsShareOneRhythm(page);
+});
+
+test('quote cabinet file records keep one rhythm on a 390px messenger viewport', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const response = await page.goto(`/r/${quoteCabinet.accessSecret}`);
+
+  expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expectFilesSheetHint(page);
+  await expectFileRecordsShareOneRhythm(page);
+  await expect(page.getByRole('link', { name: /скачать/i })).toHaveCount(0);
+  await expect(page.locator('[download]')).toHaveCount(0);
 });
 
 test('quote cabinet file name opens an HTML document sheet', async ({ page }) => {
