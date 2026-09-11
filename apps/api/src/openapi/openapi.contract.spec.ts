@@ -67,6 +67,9 @@ describe('OpenAPI contract for generated client', () => {
     expect(responseContentTypes(document, '/requests/{accessSecret}', '404')).toEqual([
       'application/problem+json',
     ]);
+    expect(responseContentTypes(document, '/requests/{accessSecret}', '429')).toEqual([
+      'application/problem+json',
+    ]);
   });
 
   it('declares spec quantity and file byteSize as integers', () => {

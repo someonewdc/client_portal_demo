@@ -6,12 +6,14 @@ import {
   ApiServiceUnavailableResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { SkipThrottle } from '@nestjs/throttler';
 import type { FastifyRequest } from 'fastify';
 
 import { HealthResponseDto } from './health.dto.js';
 import { ReadinessService } from './readiness.service.js';
 
 @ApiTags('health')
+@SkipThrottle()
 @Controller('health')
 export class HealthController {
   constructor(@Inject(ReadinessService) private readonly readiness: ReadinessService) {}

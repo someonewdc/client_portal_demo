@@ -1,4 +1,4 @@
-import { PROBLEM_DETAILS_RESPONSE } from '@client-portal/nestjs-core/openapi';
+import { PROBLEM_DETAILS_RESPONSE, RATE_LIMIT_RESPONSE } from '@client-portal/nestjs-core/openapi';
 import { Controller, Get, Inject, Param, Req, UseInterceptors } from '@nestjs/common';
 import {
   ApiNotFoundResponse,
@@ -6,6 +6,7 @@ import {
   ApiOperation,
   ApiParam,
   ApiTags,
+  ApiTooManyRequestsResponse,
 } from '@nestjs/swagger';
 import type { FastifyRequest } from 'fastify';
 
@@ -31,6 +32,10 @@ export class RequestPortalController {
   @ApiNotFoundResponse({
     description: 'Заявка не найдена по секрету',
     ...PROBLEM_DETAILS_RESPONSE,
+  })
+  @ApiTooManyRequestsResponse({
+    description: 'Слишком много запросов с этого IP',
+    ...RATE_LIMIT_RESPONSE,
   })
   async show(
     @Param('accessSecret') accessSecret: string,

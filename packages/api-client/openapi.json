@@ -110,6 +110,25 @@
                 }
               }
             }
+          },
+          "429": {
+            "description": "Слишком много запросов с этого IP",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            },
+            "headers": {
+              "Retry-After": {
+                "description": "Seconds until the request may be retried",
+                "schema": {
+                  "minimum": 1,
+                  "type": "integer"
+                }
+              }
+            }
           }
         },
         "summary": "Кабинет одной заявки по секрету в URL",
