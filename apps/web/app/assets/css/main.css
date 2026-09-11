@@ -24,14 +24,33 @@
 
 @layer components {
   .document-link {
+    padding-inline: 0.28em;
+    border-radius: 0.15rem;
+    background-color: color-mix(in srgb, var(--color-accent) 10%, transparent);
     color: var(--color-accent);
     text-decoration-line: underline;
     text-decoration-color: var(--color-accent);
-    text-underline-offset: 2px;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+    -webkit-box-decoration-break: clone;
+    box-decoration-break: clone;
   }
 
   .document-link:hover {
     color: var(--color-ink);
     text-decoration-color: var(--color-ink);
+    text-decoration-thickness: 3px;
+  }
+
+  .status-stamp {
+    display: inline-block;
+    padding: 0.125rem 0.5rem;
+    border: 0;
+    border-radius: 0.15rem;
+    background-color: var(--color-rule);
+    color: var(--color-ink);
+    font-weight: 400;
+    text-decoration-line: none;
+    cursor: default;
   }
 }

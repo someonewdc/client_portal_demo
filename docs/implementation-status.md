@@ -2,10 +2,14 @@
 
 ## Текущее состояние
 
+Начертание ссылки в покое (D-044): `.document-link` — типографика, не рамка.
+Линия 2px / offset 3px, лёгкая плашка акцента 10% с `box-decoration-break: clone`.
+«К заявке» с декоративной `←`. Штамп статуса (D-045) — `.status-stamp`: чернила
+на `--color-rule`, не акцент ссылки.
 Ссылки индекса в покое (UX задача 14): номер `З-10043` и title `ВРУ 400 А`
 на `/` — класс `.document-link`, цвет и линия акцента `rgb(61, 90, 115)`.
 Штамп `КП готово` остаётся tag задачи 12 (не underline, weight ≤ 400).
-Четыре служебные фразы дословны. `main.css` и кабинет не меняли.
+Четыре служебные фразы дословны.
 Ссылки кабинета и листа в покое (UX задача 13): класс `.document-link` —
 цвет и линия акцента `rgb(61, 90, 115)` на имени `КП-З-10043.pdf` в кабинете
 и на «К заявке З-10043» на листе КП и 404 чужого файла. Hover может уходить
@@ -14,11 +18,11 @@
 `docs/ux/task-13.md` … `task-18.md`. Оператор `реализуй ux задачу N` — полный
 вход и цикл implement → review. Код 13–18 не писать в docs-PR нарезки. Задача
 12 уже на `main` (#47).
-Штамп статуса на индексе (UX задача 12) на `main` (#47): плашка `statusLabel` —
-`font-normal` (weight 400), светлая `bg-accent/15 text-accent`, не
-semibold-кнопка и не `uppercase`. Строка З-10043 остаётся ссылкой на
+Штамп статуса на индексе (UX задача 12, уточнён D-045): плашка `statusLabel` —
+`font-normal` (weight 400), чернила на `--color-rule`, не акцент ссылки и не
+`uppercase`. Строка З-10043 остаётся ссылкой на
 `/r/seed-z10043-quote-kuznetsov`; `getByRole('button')` = 0. Четыре служебные
-фразы дословны (D-027). Штамп ленты кабинета не меняли (задача 6).
+фразы дословны (D-027). Текущий штамп ленты кабинета — тот же `.status-stamp`.
 Тупики 404 на `main` (#46, UX задача 11): живая заявка и чужое имя — текст
 `Такого документа в заявке нет. Откройте заявку и выберите имя из списка.`
 и ссылка `К заявке {publicNumber}`; неизвестный секрет — текст
@@ -569,3 +573,7 @@ UX/UI понятности (D-036…D-043): docs-only нарезка на `main`
 | 2026-09-12 | UX-14 TDD green        | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 30 passed; номер и title color/decoration `rgb(61, 90, 115)`                                                                                               |
 | 2026-09-12 | UX-14 gates            | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
 | 2026-09-12 | UX-14 format           | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
+| 2026-09-12 | D-045 TDD red          | `pnpm exec playwright test e2e/demo-links.spec.ts e2e/request-cabinet.spec.ts --grep "status stamp is a regular-weight\|accent document links at rest\|marks the current process step"`                                                                                                   | exit 1: штамп `КП готово` color `rgb(61, 90, 115)`, нужно ink `rgb(28, 25, 23)`                                                                                    |
+| 2026-09-12 | D-045 TDD green        | та же команда `--workers=2` против `make dev` + seed                                                                                                                                                                                                                                      | exit 0: 3 passed; штамп ink + plate `rgb(214, 208, 196)`; ссылки остаются акцентом                                                                                 |
+| 2026-09-12 | D-044/045 gates        | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-12 | D-044/045 e2e          | `pnpm exec playwright test --workers=2` против `make dev` + seed                                                                                                                                                                                                                          | exit 0: 30 passed                                                                                                                                                  |

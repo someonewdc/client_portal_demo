@@ -130,6 +130,12 @@ async function expectCurrentProcessStep(
   await expect(nowLabel).toHaveCSS('height', '1px');
   await expect(nowLabel).toHaveCSS('overflow', 'hidden');
   await expect(nowLabel).not.toHaveClass(/bg-accent/);
+  await expect(nowLabel).not.toHaveClass(/status-stamp/);
+
+  const stamp = current.getByText(fields.currentLabel, { exact: true });
+  await expect(stamp).toBeVisible();
+  await expect(stamp).not.toHaveClass(/document-link/);
+  await expectStatusStampLooksLikeTag(stamp, `cabinet current stamp «${fields.currentLabel}»`);
 
   for (const label of fields.pastLabels) {
     const item = stageRibbon.getByRole('listitem').filter({ hasText: label });
@@ -340,6 +346,63 @@ async function expectFilesSheetHint(page: Page) {
 }
 
 const documentLinkAccentRgb = 'rgb(61, 90, 115)';
+const statusStampInkRgb = 'rgb(28, 25, 23)';
+const statusStampPlateRgb = 'rgb(214, 208, 196)';
+
+async function expectStatusStampLooksLikeTag(target: Locator, label: string) {
+  const style = await target.evaluate((node) => {
+    const stamp = node.closest('.status-stamp') ?? node;
+    const computed = getComputedStyle(stamp);
+    const raw = computed.fontWeight;
+    const fontWeight = raw === 'normal' ? 400 : raw === 'bold' ? 700 : Number.parseInt(raw, 10);
+    return {
+      backgroundColor: computed.backgroundColor,
+      color: computed.color,
+      fontWeight,
+      textDecorationLine: computed.textDecorationLine,
+    };
+  });
+
+  expect(style.color, `${label} must use ink, not accent link color`).toBe(statusStampInkRgb);
+  expect(style.backgroundColor, `${label} must sit on the rule plate, not the link wash`).toBe(
+    statusStampPlateRgb,
+  );
+  expect(style.textDecorationLine, `${label} must not look like a document link`).not.toBe(
+    'underline',
+  );
+  expect(style.fontWeight, `${label} must stay a regular-weight tag`).toBeLessThanOrEqual(400);
+}
+const documentLinkWashRgb = { alpha: 0.1, blue: 115, green: 90, red: 61 };
+
+function isAccentWash(backgroundColor: string): boolean {
+  const modern = backgroundColor.match(
+    /^color\(srgb\s+([\d.]+)\s+([\d.]+)\s+([\d.]+)\s*\/\s*([\d.]+)\)$/,
+  );
+  if (modern) {
+    const red = Number.parseFloat(modern[1] ?? '') * 255;
+    const green = Number.parseFloat(modern[2] ?? '') * 255;
+    const blue = Number.parseFloat(modern[3] ?? '') * 255;
+    const alpha = Number.parseFloat(modern[4] ?? '');
+    return (
+      Math.abs(red - documentLinkWashRgb.red) < 0.5 &&
+      Math.abs(green - documentLinkWashRgb.green) < 0.5 &&
+      Math.abs(blue - documentLinkWashRgb.blue) < 0.5 &&
+      Math.abs(alpha - documentLinkWashRgb.alpha) < 0.01
+    );
+  }
+
+  const legacy = backgroundColor.match(/^rgba\((\d+),\s*(\d+),\s*(\d+),\s*([\d.]+)\)$/);
+  if (!legacy) {
+    return false;
+  }
+
+  return (
+    Number.parseInt(legacy[1] ?? '', 10) === documentLinkWashRgb.red &&
+    Number.parseInt(legacy[2] ?? '', 10) === documentLinkWashRgb.green &&
+    Number.parseInt(legacy[3] ?? '', 10) === documentLinkWashRgb.blue &&
+    Math.abs(Number.parseFloat(legacy[4] ?? '') - documentLinkWashRgb.alpha) < 0.01
+  );
+}
 
 async function expectDocumentLinkRestStyle(link: Locator) {
   await expect(link).toBeVisible();
@@ -347,10 +410,16 @@ async function expectDocumentLinkRestStyle(link: Locator) {
   const style = await link.evaluate((node) => {
     const computed = getComputedStyle(node);
     return {
+      backgroundColor: computed.backgroundColor,
+      borderTopWidth: computed.borderTopWidth,
+      boxDecorationBreak: computed.boxDecorationBreak,
       color: computed.color,
+      display: computed.display,
       textDecorationColor: computed.textDecorationColor,
       textDecorationLine: computed.textDecorationLine,
+      textDecorationThickness: computed.textDecorationThickness,
       textUnderlineOffset: computed.textUnderlineOffset,
+      webkitBoxDecorationBreak: computed.getPropertyValue('-webkit-box-decoration-break'),
     };
   });
 
@@ -361,7 +430,20 @@ async function expectDocumentLinkRestStyle(link: Locator) {
   expect(style.textDecorationLine, 'document link rest decoration must be underline').toBe(
     'underline',
   );
-  expect(style.textUnderlineOffset, 'document link rest underline offset must be 2px').toBe('2px');
+  expect(style.textDecorationThickness, 'document link rest underline must be 2px').toBe('2px');
+  expect(style.textUnderlineOffset, 'document link rest underline offset must be 3px').toBe('3px');
+  expect(
+    isAccentWash(style.backgroundColor),
+    `document link rest wash must be a light accent tint, got ${style.backgroundColor}`,
+  ).toBe(true);
+  expect(style.borderTopWidth, 'document link must not use a form-field contour').toBe('0px');
+  expect(style.display, 'document link must stay inline so wrapping names are not boxed').toBe(
+    'inline',
+  );
+  expect(
+    style.boxDecorationBreak === 'clone' || style.webkitBoxDecorationBreak === 'clone',
+    'wrapping document-link wash must clone per line',
+  ).toBe(true);
   await expect(link).toHaveClass(/document-link/);
 }
 
@@ -482,7 +564,7 @@ async function fileRecordFieldYs(
 ): Promise<FileRecordFieldYs | null> {
   return item.evaluate((li) => {
     const kind = li.querySelector(':scope > span:first-of-type');
-    const name = li.querySelector(':scope > a');
+    const name = li.querySelector(':scope a');
     const size = [...li.querySelectorAll(':scope > span')].find((element) =>
       /КБ$/u.test(element.textContent?.trim() ?? ''),
     );

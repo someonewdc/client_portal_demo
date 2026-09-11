@@ -50,7 +50,7 @@ const hasSpecComments = computed(
 
 function stampClass(stage: { reachedAt: string | null; status: string }, currentStatus: string) {
   if (stage.status === currentStatus) {
-    return 'inline-block bg-accent/15 px-2 py-0.5 text-sm font-semibold text-accent';
+    return 'status-stamp text-sm';
   }
 
   if (stage.reachedAt !== null) {
@@ -169,12 +169,14 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
           role="listitem"
         >
           <span class="text-sm font-semibold text-ink-muted">{{ fileKindLabel(file.kind) }}</span>
-          <NuxtLink
-            class="document-link min-w-0 break-words"
-            :to="requestFileHref(accessSecret, file.fileName)"
-          >
-            {{ file.fileName }}
-          </NuxtLink>
+          <span class="min-w-0">
+            <NuxtLink
+              class="document-link break-words"
+              :to="requestFileHref(accessSecret, file.fileName)"
+            >
+              {{ file.fileName }}
+            </NuxtLink>
+          </span>
           <span class="tabular-nums text-sm text-ink-muted">{{
             formatByteSize(file.byteSize)
           }}</span>

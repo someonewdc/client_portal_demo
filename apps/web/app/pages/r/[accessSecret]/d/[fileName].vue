@@ -64,7 +64,7 @@ useSeoMeta({
       </p>
       <p class="mt-8">
         <NuxtLink class="document-link" :to="`/r/${accessSecret}`">
-          К заявке {{ request.publicNumber }}
+          <span aria-hidden="true">← </span>К заявке {{ request.publicNumber }}
         </NuxtLink>
       </p>
     </section>
@@ -106,7 +106,7 @@ useSeoMeta({
       </ul>
       <p class="mt-8">
         <NuxtLink class="document-link" :to="`/r/${accessSecret}`">
-          К заявке {{ request.publicNumber }}
+          <span aria-hidden="true">← </span>К заявке {{ request.publicNumber }}
         </NuxtLink>
       </p>
     </template>
