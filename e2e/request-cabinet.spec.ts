@@ -397,12 +397,22 @@ async function expectQuoteFileSheetExtract(page: Page) {
     sizeLabel.locator('xpath=following-sibling::dd[1]').getByText('240 КБ', { exact: true }),
   ).toBeVisible();
 
-  const firstLine = page.getByRole('listitem').filter({ hasText: quoteCabinet.specLine });
+  const specItems = page.getByRole('listitem');
+  await expect(specItems).toHaveCount(2);
+
+  const firstLine = specItems.filter({ hasText: quoteCabinet.specLine });
+  await expect(firstLine.getByText(quoteCabinet.specLine, { exact: true })).toBeVisible();
   await expect(firstLine.getByText('1', { exact: true })).toBeVisible();
   await expect(firstLine.getByText('шт', { exact: true })).toBeVisible();
   await expect(firstLine.getByText('IP54, навесной', { exact: true })).toBeVisible();
 
-  expect(await page.title()).toContain('КП — З-10043 — ПК «Нордщит»');
+  const secondLine = specItems.filter({ hasText: quoteCabinet.specLineSecondary });
+  await expect(secondLine.getByText(quoteCabinet.specLineSecondary, { exact: true })).toBeVisible();
+  await expect(secondLine.getByText('1', { exact: true })).toBeVisible();
+  await expect(secondLine.getByText('шт', { exact: true })).toBeVisible();
+  await expect(secondLine.getByText('IP54, навесной')).toHaveCount(0);
+
+  await expect(page).toHaveTitle('КП — З-10043 — ПК «Нордщит»');
 
   await expect(
     page.getByRole('link', { name: `К заявке ${quoteCabinet.publicNumber}` }),
