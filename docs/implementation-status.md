@@ -2,9 +2,10 @@
 
 ## Текущее состояние
 
-Фича 26 (не-root `USER node` в контейнерах api/web) в поставке этого PR.
-Фича 25 на `main` (#31). Фичу 27 не начинать.
+Фича 27 (опубликованные порты Compose только на `127.0.0.1`) в поставке этого PR.
+Фича 26 на `main` (#32). Фича 25 на `main` (#31).
 Фича 24 на `main` (#29). Фича 23 на `main` (#28). Фича 22 на `main` (#27).
+Это последняя задача нарезки D-030.
 Оператор дефектов кода: `выполни задачу N` → `docs/remediation-plan.md`.
 Фича 19 на `main` (#24). Фича 18 на `main` (#23). Фича 17 на `main` (#22).
 Фича 15 на `main` (#20). Фича 14 на `main` (#18, D-030…D-035).
@@ -56,7 +57,7 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | Prisma vendor skills (D-041)          | выполнен                          |
 | Фича 25 NuxtLink внутренних переходов | проверен                          |
 | Фича 26 Docker USER node              | проверен                          |
-| Фича 27 bind 127.0.0.1                | не начата                         |
+| Фича 27 bind 127.0.0.1                | проверен                          |
 | UX docs нарезка (D-036…D-040)         | выполнен                          |
 | UX задачи 1–12                        | не начаты                         |
 
@@ -392,3 +393,10 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | 2026-09-11 | Фича 26 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm format:check` / `git diff --check`                                                                                                                                                                                                          | exit 0; `pnpm test` продукта не запускался: менялись Dockerfile и lifecycle spec                                                                                   |
 | 2026-09-11 | Фича 26 compose-smoke  | `make down` затем `make up` затем `node scripts/compose-smoke.mjs`                                                                                                                                                                                                                        | exit 0; `docker exec` api/web: `uid=1000(node)`                                                                                                                    |
 | 2026-09-11 | Фича 26 format         | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
+| 2026-09-11 | Merge main #32         | `git fetch origin` / `git pull --ff-only origin main`                                                                                                                                                                                                                                     | `main` `9b36ac9` Фича 26 (#32); локальный `main` был на F25 `d922126`                                                                                              |
+| 2026-09-11 | Фича 27 TDD red        | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                                                                                                                                                          | exit 1: нет `127.0.0.1:3000:3000`; в compose короткие `'3000:3000'` / `'3001:3001'` / `'5433:5432'`; 44 passed, 1 failed                                           |
+| 2026-09-11 | Фича 27 TDD green      | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                                                                                                                                                          | exit 0: 45 passed, включая bind `127.0.0.1` на 3000, 3001, 5433                                                                                                    |
+| 2026-09-11 | Фича 27 compose-smoke  | `make down` затем `make up` затем `node scripts/compose-smoke.mjs`                                                                                                                                                                                                                        | exit 0; `docker ps`: `127.0.0.1:3000->3000`, `127.0.0.1:3001->3001`, `127.0.0.1:5433->5432`                                                                        |
+| 2026-09-11 | Фича 27 e2e            | `pnpm test:e2e` против `make up`                                                                                                                                                                                                                                                          | exit 0: 14 passed                                                                                                                                                  |
+| 2026-09-11 | Фича 27 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm format:check` / `git diff --check`                                                                                                                                                                                                          | exit 0; `pnpm test` продукта не запускался: менялись compose.yaml и lifecycle spec                                                                                 |
+| 2026-09-11 | Фича 27 format         | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |

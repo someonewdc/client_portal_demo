@@ -9,7 +9,7 @@ services:
       POSTGRES_PASSWORD: client_portal
       POSTGRES_USER: client_portal
     ports:
-      - '5433:5432'
+      - '127.0.0.1:5433:5432'
     volumes:
       - client-portal-postgres-data:/var/lib/postgresql/data
     healthcheck:
@@ -32,7 +32,7 @@ services:
       NODE_ENV: production
       WEB_ORIGIN: http://localhost:3000
     ports:
-      - '3001:3001'
+      - '127.0.0.1:3001:3001'
     depends_on:
       postgres:
         condition: service_healthy
@@ -63,7 +63,7 @@ services:
       NUXT_PUBLIC_API_BASE_URL: http://localhost:3001/api/v1
       PORT: 3000
     ports:
-      - '3000:3000'
+      - '127.0.0.1:3000:3000'
     depends_on:
       api:
         condition: service_healthy

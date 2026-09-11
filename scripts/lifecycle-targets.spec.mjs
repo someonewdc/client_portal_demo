@@ -753,6 +753,21 @@ describe('feature 25 NuxtLink internal navigation', () => {
   });
 });
 
+describe('feature 27 compose loopback bind', () => {
+  it('publishes stand ports only on 127.0.0.1, not the short hostless form', () => {
+    const compose = readFileSync(resolve(rootDirectory, 'compose.yaml'), 'utf8');
+
+    assert.match(compose, /127\.0\.0\.1:3000:3000/);
+    assert.match(compose, /127\.0\.0\.1:3001:3001/);
+    assert.match(compose, /127\.0\.0\.1:5433:5432/);
+
+    assert.doesNotMatch(compose, /['"]3000:3000['"]/);
+    assert.doesNotMatch(compose, /['"]3001:3001['"]/);
+    assert.doesNotMatch(compose, /['"]5433:5432['"]/);
+    assert.doesNotMatch(compose, /0\.0\.0\.0:\d+:\d+/);
+  });
+});
+
 describe('feature 26 docker non-root user', () => {
   it('switches api and web runtime stages to USER node after the last COPY', () => {
     const dockerfilePath = resolve(rootDirectory, 'Dockerfile');
