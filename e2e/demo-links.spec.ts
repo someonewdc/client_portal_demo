@@ -108,10 +108,16 @@ test('demo links index status stamp is a regular-weight tag, not a button', asyn
   expect(response, 'GET / must receive a response from :3000').toBeTruthy();
   expect(response?.ok()).toBe(true);
 
-  await expect(page.getByRole('heading', { level: 1, name: 'Ссылки для показа' })).toBeVisible();
-  await expect(page.getByText('Этот список не показывается заказчику.')).toBeVisible();
   await expect(
-    page.getByText('Так выглядит то, что вы отправили бы заказчику в мессенджер.'),
+    page.getByRole('heading', { level: 1, name: 'Ссылки для показа', exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText('Этот список не показывается заказчику.', { exact: true }),
+  ).toBeVisible();
+  await expect(
+    page.getByText('Так выглядит то, что вы отправили бы заказчику в мессенджер.', {
+      exact: true,
+    }),
   ).toBeVisible();
   await expect(
     page.getByText('Нажмите строку — откроется экран заказчика по ссылке.', { exact: true }),
