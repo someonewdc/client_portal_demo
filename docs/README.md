@@ -21,6 +21,7 @@
 | Решения (имя, порты, enum)    | [`decisions.md`](decisions.md)                                                  |
 | Ядро packages                 | [`shared-core.md`](shared-core.md)                                              |
 | Версии toolchain              | [`toolchain.md`](toolchain.md)                                                  |
+| Вендорные Prisma skills       | [`decisions.md`](decisions.md) D-041, `apps/api/.agents/skills/`                |
 | Копируемый промпт фичи N      | [`llm/feature-01.md`](llm/feature-01.md) … [`feature-27.md`](llm/feature-27.md) |
 | Дефекты кода: задача N        | [`remediation-plan.md`](remediation-plan.md) (`выполни задачу N`)               |
 | UX/UI понятности: задача N    | [`ux/README.md`](ux/README.md) (`выполни ux задачу N` → `ux/task-NN.md`)        |

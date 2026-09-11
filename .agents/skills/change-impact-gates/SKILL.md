@@ -22,6 +22,7 @@ description: >-
 | Compiled core (`platform-core`, `nestjs-core`, …) | код + package tests | `pnpm build:core` до consumer typecheck/dev/e2e |
 | Reusable packages packing | код | `pnpm test:packages` без project `api-client` |
 | Только docs | — | Prettier/`git diff --check`; не утверждай, что lint/test продукта прошли |
+| Вендорные Prisma skills | lock, не руками | Prettier/`git diff --check`; канон в `apps/api/.agents/skills/` (D-041) |
 
 OpenAPI: `servers[0].url` держит prefix (например `/api/v1`); path keys относительные
 (`/health/live`). Client base URL уже с prefix; method path prefix не повторяет.
@@ -34,5 +35,6 @@ Prisma: applied migration не редактируй. Destructive reset неиз�
 ## Do not
 
 - Править generated OpenAPI/client вручную, «чтобы check прошёл».
+- Править `apps/api/.agents/skills/prisma-*` вручную, «чтобы агент лучше понял».
 - Считать ESLint заменой `check:boundaries`.
 - Запускать consumer e2e до `build:core`, если core compiled.

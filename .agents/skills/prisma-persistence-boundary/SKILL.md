@@ -10,7 +10,10 @@ description: >-
 
 # Prisma persistence boundary
 
-Prisma CLI skills знают команды. Этот skill — **где** client живёт и куда типы не должны течь.
+Вендорные CLI/Client skills (`apps/api/.agents/skills/prisma-cli`,
+`prisma-client-api`, `prisma-upgrade-v7`, `prisma-database-setup`) знают команды.
+Этот skill — **где** client живёт и куда типы не должны течь. Вендор не
+перекрывает D-010 и product-scope (D-041).
 
 ## Граница
 

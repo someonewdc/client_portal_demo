@@ -46,6 +46,8 @@ Skill `nestjs-hexagonal-boundaries`:
 - HTTP map на границе → Nest exception → Problem Details.
 - Prisma только в infrastructure repository + mapper. Generated client:
   `apps/api/src/generated/prisma`. Ready проверяет БД через Prisma `$queryRaw` `SELECT 1`.
+  Вендорные Prisma CLI/API skills — `apps/api/.agents/skills/` (D-041); не Prisma
+  Postgres cloud и не Compute.
 
 ## OpenAPI и клиент
 

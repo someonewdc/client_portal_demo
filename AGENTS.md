@@ -27,19 +27,27 @@
 (`выполни задачу N`). Копируемый промпт UX — `docs/ux/task-NN.md` (`выполни ux
 задачу N`).
 
-Skills в `.agents/skills/` — повседневные процедуры. Открой нужный skill в том же изменении:
+Skills в `.agents/skills/` — повседневные процедуры репозитория. Открой нужный
+skill в том же изменении:
 
 - ядро и exports: `foundation-package-conventions`;
 - слои Nest: `nestjs-hexagonal-boundaries`;
 - ворота после изменения: `change-impact-gates`;
 - внешний HTTP (когда продукт зовёт внешние системы): `outbound-http-adapters`;
-- Prisma (когда появится схема): `prisma-persistence-boundary`;
+- Prisma (граница клиента и слоёв): `prisma-persistence-boundary`;
 - Nuxt (когда появится storefront): `nuxt-ssr-data-and-ui`;
 - отчёт о проверках: `verification-honesty`;
 - удалённый GitHub: `github-remote`;
 - ветка и PR: `git-delivery`;
 - ревью: `pr-review`;
 - Docker ENOSPC: `docker-reclaim-space`.
+
+Вендорные Prisma skills (D-041) лежат в `apps/api/.agents/skills/` и lock
+`apps/api/skills-lock.json`, не в корневом `.agents/skills/`. Для CLI, Client API
+и заметок v7 открывай их **вместе** с `prisma-persistence-boundary`. Не следуй
+`prisma-compute`, `prisma-postgres`, `prisma-postgres-setup`,
+`prisma-mongodb-upgrade`, `prisma-driver-adapter-implementation` как поставке
+этого демо. Вендорные файлы не править вручную.
 
 Отдельного mock-процесса нет: skill `mock-http-boundary` не копировали. `mock-core` в
 workspace нет и в production API не добавляй. Новый skill «tdd» не создавай: TDD описан
