@@ -165,7 +165,7 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
         <li
           v-for="file in request.files"
           :key="file.fileName"
-          class="grid grid-cols-[auto_minmax(0,1fr)] items-baseline gap-x-3 gap-y-1 py-3 text-ink sm:grid-cols-[auto_minmax(0,1fr)_auto_auto]"
+          class="grid grid-cols-[9rem_minmax(0,1fr)] items-baseline gap-x-3 gap-y-1 py-3 text-ink sm:grid-cols-[9rem_minmax(0,1fr)_4.5rem_12rem]"
           role="listitem"
         >
           <span class="text-sm font-semibold text-ink-muted">{{ fileKindLabel(file.kind) }}</span>

@@ -21,6 +21,12 @@ const calculationCabinet = {
   statusLabel: 'В расчёте',
 } as const;
 
+const invoiceCabinet = {
+  accessSecret: 'seed-z10044-invoice-teplitsy',
+  publicNumber: 'З-10044',
+  fileNames: ['Опросный-лист-З-10044.pdf', 'КП-З-10044.pdf', 'Счёт-З-10044.pdf'],
+} as const;
+
 const nextStepCabinets = [
   {
     accessSecret: 'seed-z10041-accepted-severenergo',
@@ -626,6 +632,62 @@ async function expectFileRecordsShareOneRhythm(page: Page) {
   ).toBe(patterns[1]);
 }
 
+function expectSharedXs(xs: readonly number[], label: string) {
+  expect(xs.length, `${label} needs at least two boxes`).toBeGreaterThanOrEqual(2);
+  const first = xs[0];
+  expect(first, `${label} first X`).toEqual(expect.any(Number));
+  for (const x of xs) {
+    expect(
+      Math.abs(x - first),
+      `${label} X ${x} must match ${first} within 2px`,
+    ).toBeLessThanOrEqual(2);
+  }
+}
+
+async function fileNameLinkXs(page: Page, fileNames: readonly string[]): Promise<number[]> {
+  const files = page.getByRole('list', { name: 'Файлы' });
+  for (const fileName of fileNames) {
+    await expect(files.getByRole('link', { name: fileName, exact: true })).toBeVisible();
+  }
+
+  return files.evaluate(
+    async (list, names) => {
+      await document.fonts.ready;
+      return names.map((name) => {
+        const link = [...list.querySelectorAll('a')].find(
+          (node) => node.textContent?.trim() === name,
+        );
+        if (link == null) {
+          throw new Error(`missing file name link ${name}`);
+        }
+
+        return link.getBoundingClientRect().x;
+      });
+    },
+    [...fileNames],
+  );
+}
+
+async function expectFileListItemsShareGridTemplate(page: Page) {
+  const templates = await page
+    .getByRole('list', { name: 'Файлы' })
+    .getByRole('listitem')
+    .evaluateAll((items) => items.map((item) => getComputedStyle(item).gridTemplateColumns));
+
+  expect(templates.length, 'files list has rows').toBeGreaterThanOrEqual(2);
+  expect(
+    new Set(templates).size,
+    `file rows must share one grid-template-columns, got ${templates.join(' | ')}`,
+  ).toBe(1);
+}
+
+async function fileRecordDateXs(page: Page): Promise<number[]> {
+  return page.getByRole('list', { name: 'Файлы' }).evaluate(async (list) => {
+    await document.fonts.ready;
+    return [...list.querySelectorAll('time')].map((time) => time.getBoundingClientRect().x);
+  });
+}
+
 const unknownSecret = 'this-secret-does-not-exist';
 
 test('quote cabinet shows Z-10043 seed payload from GET /requests/{accessSecret}', async ({
@@ -880,6 +942,67 @@ test('quote cabinet file records keep one rhythm on a 390px messenger viewport',
   await expectFileRecordsShareOneRhythm(page);
   await expect(page.getByRole('link', { name: /скачать/i })).toHaveCount(0);
   await expect(page.locator('[download]')).toHaveCount(0);
+});
+
+test('invoice cabinet file names share one desktop column at 1280px', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const response = await page.goto(`/r/${invoiceCabinet.accessSecret}`);
+
+  expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Счёт выставлен', exact: true }),
+  ).toBeVisible();
+  await expectFileListItemsShareGridTemplate(page);
+  expectSharedXs(await fileNameLinkXs(page, invoiceCabinet.fileNames), 'invoice file name');
+});
+
+test('invoice cabinet file names and dates share columns on a 390px messenger viewport', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const response = await page.goto(`/r/${invoiceCabinet.accessSecret}`);
+
+  expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Счёт выставлен', exact: true }),
+  ).toBeVisible();
+  expectSharedXs(await fileNameLinkXs(page, invoiceCabinet.fileNames), 'invoice file name');
+  expectSharedXs(await fileRecordDateXs(page), 'invoice file date');
+  const pageScrollWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+  expect(pageScrollWidth, '390px cabinet must not scroll horizontally').toBeLessThanOrEqual(390);
+});
+
+test('quote cabinet file sheet hint and name-only links stay after the shared grid', async ({
+  page,
+}) => {
+  const response = await page.goto(`/r/${quoteCabinet.accessSecret}`);
+
+  expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expectFilesSheetHint(page);
+
+  const quoteSheetHref = `/r/${quoteCabinet.accessSecret}/d/${encodeURIComponent(quoteCabinet.quoteFileName)}`;
+  const questionnaireSheetHref = `/r/${quoteCabinet.accessSecret}/d/${encodeURIComponent(quoteCabinet.questionnaireFileName)}`;
+
+  await expectFileNameIsTheOnlyRecordLink(page, {
+    fileName: quoteCabinet.quoteFileName,
+    href: quoteSheetHref,
+    kindLabel: 'КП',
+    sizeLabel: '240 КБ',
+  });
+  await expectFileNameIsTheOnlyRecordLink(page, {
+    fileName: quoteCabinet.questionnaireFileName,
+    href: questionnaireSheetHref,
+    kindLabel: 'Опросный лист',
+    sizeLabel: '120 КБ',
+  });
+
+  await expectFileRecordsShareOneRhythm(page);
 });
 
 test('quote cabinet and file sheet rest-state links use accent color', async ({ page }) => {
