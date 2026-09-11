@@ -2,8 +2,8 @@
 
 ## Текущее состояние
 
-Фича 22 (CORS только чтение + localhost/127.0.0.1) в поставке этого PR. Код фич
-23–27 не начинать, пока соответствующая фича не в `main`. Фича 21 на `main` (#26).
+Фича 23 (timeout OpenAPI-клиента, 5000 мс) в поставке этого PR. Код фич
+24–27 не начинать, пока соответствующая фича не в `main`. Фича 22 на `main` (#27).
 Оператор дефектов кода: `выполни задачу N` → `docs/remediation-plan.md`.
 Фича 19 на `main` (#24). Фича 18 на `main` (#23). Фича 17 на `main` (#22).
 Фича 16 на `main` (#21). Фича 15 на `main` (#20). Фича 14 на `main` (#18, D-030…D-035).
@@ -49,7 +49,8 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | Фича 20 заголовки capability HTML | проверен                          |
 | Фича 21 Cache-Control JSON        | проверен                          |
 | Фича 22 CORS read-only            | проверен                          |
-| Фичи 23–27 задачи 9–13            | не начаты                         |
+| Фича 23 timeout OpenAPI-клиента   | проверен                          |
+| Фичи 24–27 задачи 10–13           | не начаты                         |
 | UX docs нарезка (D-036…D-040)     | выполнен                          |
 | UX задачи 1–12                    | не начаты                         |
 
@@ -353,3 +354,8 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | 2026-09-11 | Фича 22 TDD green      | `pnpm --filter @client-portal/api exec vitest run src/core/config src/bootstrap`                                                                                                                                                                                                          | exit 0: 8 passed, включая twin localhost/127.0.0.1 и source-контракт GET/HEAD/OPTIONS                                                                              |
 | 2026-09-11 | Фича 22 TDD green      | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                                                                                                                                                          | exit 0: 42 passed                                                                                                                                                  |
 | 2026-09-11 | Фича 22 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 31, web 14, scripts 77, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-11 | Merge main #27         | `git fetch origin` / `git pull --ff-only origin main`                                                                                                                                                                                                                                     | `main` `f5dc20f` Фича 22 (#27); локальный `main` был на F21 `69db867`                                                                                              |
+| 2026-09-11 | Фича 23 TDD red        | `pnpm --filter @client-portal/openapi-client-core test`                                                                                                                                                                                                                                   | exit 1: hanging fetch на 120 мс резолвит 200 `{ status: 'ok' }`; `ApiNetworkError` нет                                                                            |
+| 2026-09-11 | Фича 23 TDD green      | `pnpm --filter @client-portal/openapi-client-core test`                                                                                                                                                                                                                                   | exit 0: 5 passed, включая `timeoutMs: 20` → `ApiNetworkError` и быстрый 200                                                                                       |
+| 2026-09-11 | Фича 23 build:core     | `pnpm build:core`                                                                                                                                                                                                                                                                         | exit 0, tsc platform-core → nestjs-core → openapi-client-core                                                                                                      |
+| 2026-09-11 | Фича 23 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: openapi-client-core 5, api 31, web 14, scripts 77, 5 tarballs; Nuxt 4.5.2 production build                                                                 |
