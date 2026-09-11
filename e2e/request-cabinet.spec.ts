@@ -25,10 +25,12 @@ test('quote cabinet shows Z-10043 seed payload from GET /requests/{accessSecret}
   expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
   expect(response?.ok()).toBe(true);
 
+  const banner = page.getByRole('banner');
+  await expect(banner.getByText(quoteCabinet.plantName, { exact: true })).toBeVisible();
+  await expect(banner.getByRole('heading', { name: quoteCabinet.plantName })).toHaveCount(0);
   await expect(
-    page.getByRole('banner').getByRole('heading', { name: quoteCabinet.plantName }),
+    page.getByRole('heading', { level: 1, name: quoteCabinet.publicNumber }),
   ).toBeVisible();
-  await expect(page.getByRole('heading', { name: quoteCabinet.publicNumber })).toBeVisible();
   await expect(page.getByText(quoteCabinet.counterpartyName)).toBeVisible();
   await expect(page.getByText(quoteCabinet.title, { exact: true })).toBeVisible();
 
@@ -61,7 +63,9 @@ test('quote cabinet reads as a status document with a dated process list', async
   await expect(
     page.getByText('Менеджер отправил вам эту ссылку. Вход не нужен.', { exact: true }),
   ).toBeVisible();
-  await expect(page.getByRole('heading', { name: quoteCabinet.publicNumber })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { level: 1, name: quoteCabinet.publicNumber }),
+  ).toBeVisible();
 
   const stageRibbon = page.getByRole('list', { name: 'Этапы заявки' });
   const stageItems = stageRibbon.getByRole('listitem');
@@ -148,7 +152,9 @@ test('quote cabinet file name opens an HTML document sheet', async ({ page }) =>
   await link.click();
 
   await expect(page).toHaveURL(new RegExp(`/r/${quoteCabinet.accessSecret}/d/`));
-  await expect(page.getByRole('heading', { name: quoteCabinet.quoteFileName })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { level: 1, name: quoteCabinet.quoteFileName }),
+  ).toBeVisible();
   await expect(page.getByText('КП', { exact: true })).toBeVisible();
   await expect(page.getByText('240 КБ', { exact: true })).toBeVisible();
   await expect(page.locator('time')).toHaveAttribute('datetime', '2026-09-04T12:00:00.000Z');
@@ -172,7 +178,9 @@ test('quote cabinet file sheet returns to the request', async ({ page }) => {
 
   await page.getByRole('link', { name: `К заявке ${quoteCabinet.publicNumber}` }).click();
   await expect(page).toHaveURL(new RegExp(`/r/${quoteCabinet.accessSecret}$`));
-  await expect(page.getByRole('heading', { name: quoteCabinet.publicNumber })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { level: 1, name: quoteCabinet.publicNumber }),
+  ).toBeVisible();
 });
 
 test('unknown file name on a live secret is a Russian dead-end', async ({ page }) => {
@@ -184,7 +192,9 @@ test('unknown file name on a live secret is a Russian dead-end', async ({ page }
   expect(response?.status()).toBe(404);
 
   const deadEnd = page.getByRole('alert');
-  await expect(deadEnd.getByRole('heading', { name: 'Ссылка недействительна' })).toBeVisible();
+  await expect(
+    deadEnd.getByRole('heading', { level: 1, name: 'Ссылка недействительна' }),
+  ).toBeVisible();
   await expect(deadEnd.getByText(/заявки по этой ссылке нет/i)).toBeVisible();
   await expect(page.getByRole('heading', { name: quoteCabinet.publicNumber })).toHaveCount(0);
   await expect(page.getByRole('heading', { name: quoteCabinet.quoteFileName })).toHaveCount(0);
@@ -200,7 +210,7 @@ test('calculation cabinet hides an empty specification comment column', async ({
   expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
   expect(response?.ok()).toBe(true);
 
-  await expect(page.getByRole('heading', { name: 'З-10042' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'З-10042' })).toBeVisible();
   await expect(page.getByRole('columnheader', { name: 'Комментарий' })).toHaveCount(0);
   await expect(page.getByRole('cell', { name: 'НКУ освещения причала' })).toBeVisible();
 });
@@ -214,7 +224,9 @@ test('index click opens the filled quote cabinet, not an empty shell', async ({ 
   await page.getByRole('link', { name: new RegExp(quoteCabinet.publicNumber) }).click();
   await expect(page).toHaveURL(new RegExp(`/r/${quoteCabinet.accessSecret}$`));
 
-  await expect(page.getByRole('heading', { name: quoteCabinet.publicNumber })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { level: 1, name: quoteCabinet.publicNumber }),
+  ).toBeVisible();
   await expect(
     page.getByRole('list', { name: 'Этапы заявки' }).getByText(quoteCabinet.statusLabel, {
       exact: true,
@@ -235,7 +247,10 @@ test('unknown secret is a Russian dead-end without login and API 404', async ({
   expect(documentResponse?.status()).toBe(404);
 
   const deadEnd = page.getByRole('alert');
-  await expect(deadEnd.getByRole('heading', { name: 'Ссылка недействительна' })).toBeVisible();
+  await expect(
+    deadEnd.getByRole('heading', { level: 1, name: 'Ссылка недействительна' }),
+  ).toBeVisible();
+  expect(await page.title()).toContain('Ссылка недействительна — ПК «Нордщит»');
   await expect(deadEnd.getByText(/заявки по этой ссылке нет/i)).toBeVisible();
   await expect(deadEnd.getByText(/Код ошибки:/)).toBeVisible();
   await expect(page.getByText(unknownSecret)).toHaveCount(0);
