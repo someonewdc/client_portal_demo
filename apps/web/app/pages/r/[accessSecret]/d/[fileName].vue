@@ -63,10 +63,7 @@ useSeoMeta({
         Такого документа в заявке нет. Откройте заявку и выберите имя из списка.
       </p>
       <p class="mt-8">
-        <NuxtLink
-          class="underline decoration-rule underline-offset-2 hover:text-accent"
-          :to="`/r/${accessSecret}`"
-        >
+        <NuxtLink class="document-link" :to="`/r/${accessSecret}`">
           К заявке {{ request.publicNumber }}
         </NuxtLink>
       </p>
@@ -108,10 +105,7 @@ useSeoMeta({
         </li>
       </ul>
       <p class="mt-8">
-        <NuxtLink
-          class="underline decoration-rule underline-offset-2 hover:text-accent"
-          :to="`/r/${accessSecret}`"
-        >
+        <NuxtLink class="document-link" :to="`/r/${accessSecret}`">
           К заявке {{ request.publicNumber }}
         </NuxtLink>
       </p>

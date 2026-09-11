@@ -170,7 +170,7 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
         >
           <span class="text-sm font-semibold text-ink-muted">{{ fileKindLabel(file.kind) }}</span>
           <NuxtLink
-            class="min-w-0 break-words underline decoration-rule underline-offset-2 hover:text-accent"
+            class="document-link min-w-0 break-words"
             :to="requestFileHref(accessSecret, file.fileName)"
           >
             {{ file.fileName }}

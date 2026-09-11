@@ -21,3 +21,17 @@
     outline-offset: 2px;
   }
 }
+
+@layer components {
+  .document-link {
+    color: var(--color-accent);
+    text-decoration-line: underline;
+    text-decoration-color: var(--color-accent);
+    text-underline-offset: 2px;
+  }
+
+  .document-link:hover {
+    color: var(--color-ink);
+    text-decoration-color: var(--color-ink);
+  }
+}
