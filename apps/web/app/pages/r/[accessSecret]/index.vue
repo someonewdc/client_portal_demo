@@ -104,9 +104,13 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
           :key="stage.status"
           class="flex flex-wrap items-baseline gap-3"
           role="listitem"
+          :aria-current="stage.status === request.status ? 'step' : undefined"
         >
           <span class="tabular-nums text-sm text-ink-muted">{{ index + 1 }}</span>
-          <span :class="stampClass(stage, request.status)">{{ stage.label }}</span>
+          <span :class="stampClass(stage, request.status)">
+            <span>{{ stage.label }}</span>
+            <span v-if="stage.status === request.status" class="sr-only">сейчас</span>
+          </span>
           <time
             v-if="stage.reachedAt !== null"
             class="text-sm tabular-nums text-ink-muted"

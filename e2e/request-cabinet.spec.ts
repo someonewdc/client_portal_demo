@@ -109,6 +109,41 @@ async function expectCabinetNextStepPhrase(page: Page, phrase: string) {
   await expect(page.getByText(/оплатить/i)).toHaveCount(0);
 }
 
+async function expectCurrentProcessStep(
+  page: Page,
+  fields: {
+    currentLabel: string;
+    pastLabels: readonly string[];
+    futureLabel: string;
+  },
+) {
+  const stageRibbon = page.getByRole('list', { name: 'Этапы заявки' });
+  const current = stageRibbon.locator('[aria-current="step"]');
+  await expect(current).toHaveCount(1);
+  await expect(current).toHaveJSProperty('tagName', 'LI');
+  await expect(current.getByText(fields.currentLabel, { exact: true })).toBeVisible();
+
+  const nowLabel = current.locator('span.sr-only');
+  await expect(nowLabel).toHaveText('сейчас');
+  await expect(nowLabel).toHaveCSS('position', 'absolute');
+  await expect(nowLabel).toHaveCSS('width', '1px');
+  await expect(nowLabel).toHaveCSS('height', '1px');
+  await expect(nowLabel).toHaveCSS('overflow', 'hidden');
+  await expect(nowLabel).not.toHaveClass(/bg-accent/);
+
+  for (const label of fields.pastLabels) {
+    const item = stageRibbon.getByRole('listitem').filter({ hasText: label });
+    await expect(item).not.toHaveAttribute('aria-current');
+    await expect(item.locator('span.sr-only')).toHaveCount(0);
+  }
+
+  const future = stageRibbon.getByRole('listitem').filter({ hasText: fields.futureLabel });
+  await expect(future).not.toHaveAttribute('aria-current');
+  await expect(future.getByText('ещё нет', { exact: true })).toBeVisible();
+  await expect(future.locator('time')).toHaveCount(0);
+  await expect(future.locator('span.sr-only')).toHaveCount(0);
+}
+
 const unknownSecret = 'this-secret-does-not-exist';
 
 test('quote cabinet shows Z-10043 seed payload from GET /requests/{accessSecret}', async ({
@@ -201,6 +236,25 @@ test('quote cabinet labels customer, product, and updated date', async ({ page }
 
   await expectCabinetStatusHeader(page, quoteCabinet.publicNumber, quoteCabinet.statusLabel);
   await expectCabinetFieldLabels(page, quoteCabinet);
+});
+
+test('quote cabinet marks the current process step for assistive tech', async ({ page }) => {
+  const response = await page.goto(`/r/${quoteCabinet.accessSecret}`);
+
+  expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expectCabinetStatusHeader(page, quoteCabinet.publicNumber, quoteCabinet.statusLabel);
+  await expectCabinetFieldLabels(page, quoteCabinet);
+  await expectCabinetNextStepPhrase(
+    page,
+    'Коммерческое предложение готово. Счёт ещё не выставлен.',
+  );
+  await expectCurrentProcessStep(page, {
+    currentLabel: quoteCabinet.statusLabel,
+    pastLabels: ['Принят', 'В расчёте'],
+    futureLabel: 'Счёт выставлен',
+  });
 });
 
 for (const cabinet of nextStepCabinets) {
