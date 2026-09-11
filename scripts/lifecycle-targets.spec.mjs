@@ -413,7 +413,7 @@ describe('feature 4 tokens and document layout', () => {
     }
   });
 
-  it('declares Russian document lang, a public title and a layout heading', () => {
+  it('declares Russian document lang, a public title and a layout brand line', () => {
     assert.match(
       nuxtConfigSource(),
       /htmlAttrs:[\s\S]*?lang:\s*['"]ru['"]/,
@@ -421,13 +421,11 @@ describe('feature 4 tokens and document layout', () => {
     );
 
     const layouts = layoutSources();
-    const headingLayout = layouts.find(
-      (file) => /<h1[\s>]/.test(file.source) && /ПК «Нордщит»/.test(file.source),
+    const brandLayout = layouts.find(
+      (file) => /<p[\s>]/.test(file.source) && /ПК «Нордщит»/.test(file.source),
     );
-    assert.ok(
-      headingLayout,
-      'layout must render heading ПК «Нордщит», not only a <p> in the header',
-    );
+    assert.ok(brandLayout, 'layout must render brand ПК «Нордщит» as a paragraph, not a heading');
+    assert.doesNotMatch(brandLayout.source, /<h[1-6][\s>]/, 'layout brand must not be a heading');
 
     const seoHost = [
       ...layouts,
@@ -614,7 +612,7 @@ describe('feature 7 request cabinet', () => {
     assert.match(cabinetPage, /Код ошибки:/);
     assert.match(cabinetPage, /role=["']alert["']/);
     assert.match(cabinetSources, /setResponseStatus/);
-    assert.match(cabinetPage, /<h2[^>]*>\{\{\s*request\.publicNumber\s*\}\}<\/h2>/);
+    assert.match(cabinetPage, /<h1[^>]*>\{\{\s*request\.publicNumber\s*\}\}<\/h1>/);
     assert.match(cabinetPage, /tabular-nums/);
     assert.match(cabinetPage, /specLines/);
     assert.match(cabinetPage, /fileName/);

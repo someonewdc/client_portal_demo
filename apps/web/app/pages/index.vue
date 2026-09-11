@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { createError, setResponseStatus, useAsyncData, useNuxtApp } from 'nuxt/app';
+import { createError, setResponseStatus, useAsyncData, useNuxtApp, useSeoMeta } from 'nuxt/app';
 import { computed } from 'vue';
 
 import {
@@ -10,6 +10,10 @@ import {
 } from '~/utils/async-data-problem';
 
 const { $api } = useNuxtApp();
+
+useSeoMeta({
+  title: 'Ссылки для показа — ПК «Нордщит»',
+});
 
 const { data, error, status } = await useAsyncData('demo-links', async () => {
   try {
@@ -51,7 +55,7 @@ function formatUpdatedAt(iso: string): string {
 
 <template>
   <main>
-    <h2 class="text-xl font-semibold text-ink">Ссылки для показа</h2>
+    <h1 class="text-xl font-semibold text-ink">Ссылки для показа</h1>
     <p class="mt-3 text-ink">Этот список не показывается заказчику.</p>
     <p class="mt-2 text-ink-muted">Так выглядит то, что вы отправили бы заказчику в мессенджер.</p>
     <p class="mt-2 text-ink">Нажмите строку — откроется экран заказчика по ссылке.</p>

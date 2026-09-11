@@ -2,20 +2,22 @@
 
 ## Текущее состояние
 
-Клавиатурный фокус `:focus-visible` (ветка `fix/ux-focus-visible`): кольцо 2px
-solid `--color-accent`, offset 2px (D-040, UX задача 1). Сняты избыточные
-btree-индексы заявки на `main` (#34). Фича 27 на `main` (#33). Фича 26 на
-`main` (#32). Фича 25 на `main` (#31). Фича 24 на `main` (#29). Фича 23 на
-`main` (#28). Фича 22 на `main` (#27). Нарезка дефектов кода D-030 закрыта.
+Иерархия заголовков (ветка `fix/ux-heading-hierarchy`): бренд шапки — `<p>`,
+не heading; смысловой `h1` на индексе, кабинете, листе и 404; title индекса и
+тупика неизвестного секрета различаются (D-040, UX задача 2). Клавиатурный
+фокус `:focus-visible` на `main` (#35). Сняты избыточные btree-индексы заявки
+на `main` (#34). Фича 27 на `main` (#33). Фича 26 на `main` (#32). Фича 25 на
+`main` (#31). Фича 24 на `main` (#29). Фича 23 на `main` (#28). Фича 22 на
+`main` (#27). Нарезка дефектов кода D-030 закрыта.
 Оператор дефектов кода: `выполни задачу N` → `docs/remediation-plan.md`.
 Фича 19 на `main` (#24). Фича 18 на `main` (#23). Фича 17 на `main` (#22).
 Фича 15 на `main` (#20). Фича 14 на `main` (#18, D-030…D-035).
 Вендорные Prisma agent skills (D-041) на `main` (#30).
 
-UX/UI понятности (D-036…D-040): docs-only нарезка на `main` (#19); задача 1 —
-этот PR. Оператор `выполни ux задачу N` → `docs/ux/README.md`. Без `ux` фраза
-`выполни задачу N` не ведёт в `docs/ux/`. Не класть UX-промпты в
-`docs/llm/feature-NN.md`.
+UX/UI понятности (D-036…D-040): docs-only нарезка на `main` (#19); задача 1 на
+`main` (#35); задача 2 — этот PR. Оператор `выполни ux задачу N` →
+`docs/ux/README.md`. Без `ux` фраза `выполни задачу N` не ведёт в
+`docs/ux/`. Не класть UX-промпты в `docs/llm/feature-NN.md`.
 
 ## Правила обновления
 
@@ -62,7 +64,8 @@ UX/UI понятности (D-036…D-040): docs-only нарезка на `main`
 | Drop redundant request indexes        | проверен                          |
 | UX docs нарезка (D-036…D-040)         | выполнен                          |
 | UX задача 1 focus-visible             | проверен                          |
-| UX задачи 2–12                        | не начаты                         |
+| UX задача 2 heading hierarchy         | проверен                          |
+| UX задачи 3–12                        | не начаты                         |
 
 ## Журнал проверки
 
@@ -415,3 +418,9 @@ UX/UI понятности (D-036…D-040): docs-only нарезка на `main`
 | 2026-09-11 | UX-1 e2e after move    | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 15 passed, включая `e2e/focus-visible.spec.ts`                                                                                                             |
 | 2026-09-11 | UX-1 gates             | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 14, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
 | 2026-09-11 | UX-1 format            | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
+| 2026-09-11 | UX-2 TDD red           | `pnpm test:e2e`                                                                                                                                                                                                                                                                           | exit 1: 5 passed, 10 failed; banner brand still heading; no level-1 page h1                                                                                        |
+| 2026-09-11 | UX-2 contract red      | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                                                                                                                                                          | exit 1: 44 passed, 1 failed; layout brand ещё `<h1>`, нужен `<p>`                                                                                                  |
+| 2026-09-11 | UX-2 TDD green         | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 15 passed; бренд не heading, смысловой h1, title индекса/404 различаются                                                                                   |
+| 2026-09-11 | UX-2 lifecycle         | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                                                                                                                                                          | exit 0: 45 passed; brand `<p>`; кабинет `h1` = `request.publicNumber`                                                                                              |
+| 2026-09-11 | UX-2 gates             | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 14, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-11 | UX-2 format            | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |

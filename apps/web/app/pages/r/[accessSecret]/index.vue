@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { setResponseStatus } from 'nuxt/app';
+import { setResponseStatus, useSeoMeta } from 'nuxt/app';
 import { computed } from 'vue';
 
 import { useRequestPortal } from '~/composables/useRequestPortal';
@@ -12,6 +12,13 @@ import {
 } from '~/utils/request-file-display';
 
 const { accessSecret, error, errorTraceId, isNotFound, request, status } = await useRequestPortal();
+
+useSeoMeta({
+  title: computed(() =>
+    isNotFound.value ? 'Ссылка недействительна — ПК «Нордщит»' : 'ПК «Нордщит»',
+  ),
+});
+
 const documentStatus = documentStatusFromAsyncData(error.value);
 if (documentStatus !== 200) {
   setResponseStatus(documentStatus);
@@ -38,7 +45,7 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
   <main>
     <p v-if="status === 'pending'" class="text-ink-muted" role="status">Загрузка заявки…</p>
     <section v-else-if="isNotFound" role="alert">
-      <h2 class="text-xl font-semibold text-ink">Ссылка недействительна</h2>
+      <h1 class="text-xl font-semibold text-ink">Ссылка недействительна</h1>
       <p class="mt-3 text-ink-muted">
         Заявки по этой ссылке нет. Проверьте адрес или попросите новую ссылку у менеджера.
       </p>
@@ -54,7 +61,7 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
     </p>
     <template v-else-if="request">
       <p class="text-sm text-ink-muted">Статус заявки</p>
-      <h2 class="mt-2 text-xl font-semibold tabular-nums text-ink">{{ request.publicNumber }}</h2>
+      <h1 class="mt-2 text-xl font-semibold tabular-nums text-ink">{{ request.publicNumber }}</h1>
       <p class="mt-2 text-ink">Менеджер отправил вам эту ссылку. Вход не нужен.</p>
       <p class="mt-4 text-ink">{{ request.counterpartyName }}</p>
       <p class="mt-1 text-ink-muted">{{ request.title }}</p>

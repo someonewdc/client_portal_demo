@@ -78,7 +78,8 @@ test('demo links index names itself and tells the conductor to click a row', asy
   expect(response, 'GET / must receive a response from :3000').toBeTruthy();
   expect(response?.ok()).toBe(true);
 
-  await expect(page.getByRole('heading', { name: 'Ссылки для показа' })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1, name: 'Ссылки для показа' })).toBeVisible();
+  expect(await page.title()).toContain('Ссылки для показа — ПК «Нордщит»');
   await expect(
     page.getByText('Нажмите строку — откроется экран заказчика по ссылке.', { exact: true }),
   ).toBeVisible();
