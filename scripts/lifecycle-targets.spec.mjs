@@ -753,6 +753,29 @@ describe('feature 25 NuxtLink internal navigation', () => {
   });
 });
 
+describe('feature 26 docker non-root user', () => {
+  it('switches api and web runtime stages to USER node after the last COPY', () => {
+    const dockerfilePath = resolve(rootDirectory, 'Dockerfile');
+    assert.equal(existsSync(dockerfilePath), true, 'root Dockerfile must exist');
+    const dockerfile = readFileSync(dockerfilePath, 'utf8');
+
+    for (const stageName of ['api', 'web']) {
+      const stage = dockerfileStage(dockerfile, stageName);
+      const instructions = stage
+        .split('\n')
+        .map((line) => line.trim())
+        .filter((line) => line.length > 0 && !line.startsWith('#'));
+
+      const lastCopyIndex = instructions.findLastIndex((line) => /^COPY\b/.test(line));
+      assert.ok(lastCopyIndex !== -1, `${stageName} stage must COPY runtime files`);
+
+      const userIndex = instructions.findIndex((line) => /^USER\s+node\b/.test(line));
+      assert.ok(userIndex !== -1, `${stageName} stage must switch to USER node`);
+      assert.ok(userIndex > lastCopyIndex, `${stageName} USER node must come after the last COPY`);
+    }
+  });
+});
+
 describe('feature 13 HTML file sheet playbook', () => {
   it('documents the file sheet route in the stand playbook', () => {
     const readme = readFileSync(resolve(rootDirectory, 'README.md'), 'utf8');

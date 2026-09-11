@@ -2,8 +2,8 @@
 
 ## Текущее состояние
 
-Фича 25 (`NuxtLink` внутренних переходов, D-034) в поставке этого PR.
-Фича 16 на `main` (#21) — зависимость соблюдена. Фичи 26–27 не начинать.
+Фича 26 (не-root `USER node` в контейнерах api/web) в поставке этого PR.
+Фича 25 на `main` (#31). Фичу 27 не начинать.
 Фича 24 на `main` (#29). Фича 23 на `main` (#28). Фича 22 на `main` (#27).
 Оператор дефектов кода: `выполни задачу N` → `docs/remediation-plan.md`.
 Фича 19 на `main` (#24). Фича 18 на `main` (#23). Фича 17 на `main` (#22).
@@ -55,7 +55,8 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | Фича 24 throttle GET по секрету       | проверен                          |
 | Prisma vendor skills (D-041)          | выполнен                          |
 | Фича 25 NuxtLink внутренних переходов | проверен                          |
-| Фичи 26–27 задачи 12–13               | не начаты                         |
+| Фича 26 Docker USER node              | проверен                          |
+| Фича 27 bind 127.0.0.1                | не начата                         |
 | UX docs нарезка (D-036…D-040)         | выполнен                          |
 | UX задачи 1–12                        | не начаты                         |
 
@@ -385,3 +386,9 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | 2026-09-11 | Фича 25 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 35, web 14, scripts 78, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
 | 2026-09-11 | Фича 25 e2e            | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 14 passed, включая клик З-10043, имени `КП-З-10043.pdf` и «К заявке»                                                                                       |
 | 2026-09-11 | Фича 25 format         | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
+| 2026-09-11 | Merge main #31         | `git fetch origin` / `git pull --ff-only origin main`                                                                                                                                                                                                                                     | `main` `d922126` Фича 25 (#31); локальный `main` был на Prisma vendor skills `2b9047e`                                                                             |
+| 2026-09-11 | Фича 26 TDD red        | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                                                                                                                                                          | exit 1: `api stage must switch to USER node`; 43 passed, 1 failed                                                                                                  |
+| 2026-09-11 | Фича 26 TDD green      | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                                                                                                                                                          | exit 0: 44 passed, включая `USER node` после последнего COPY стадий api и web                                                                                      |
+| 2026-09-11 | Фича 26 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm format:check` / `git diff --check`                                                                                                                                                                                                          | exit 0; `pnpm test` продукта не запускался: менялись Dockerfile и lifecycle spec                                                                                   |
+| 2026-09-11 | Фича 26 compose-smoke  | `make down` затем `make up` затем `node scripts/compose-smoke.mjs`                                                                                                                                                                                                                        | exit 0; `docker exec` api/web: `uid=1000(node)`                                                                                                                    |
+| 2026-09-11 | Фича 26 format         | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
