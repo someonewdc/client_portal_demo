@@ -81,7 +81,7 @@ function formatUpdatedAt(iso: string): string {
             item.title
           }}</span>
           <span class="mt-2 flex flex-wrap items-center gap-3">
-            <span class="inline-block bg-accent/15 px-2 py-0.5 text-sm font-semibold text-accent">
+            <span class="inline-block bg-accent/15 px-2 py-0.5 text-sm font-normal text-accent">
               {{ item.statusLabel }}
             </span>
             <time class="text-sm tabular-nums text-ink-muted" :datetime="item.updatedAt">
