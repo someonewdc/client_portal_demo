@@ -1,5 +1,5 @@
 import { PROBLEM_DETAILS_RESPONSE } from '@client-portal/nestjs-core/openapi';
-import { Controller, Get, Inject, Param, Req } from '@nestjs/common';
+import { Controller, Get, Inject, Param, Req, UseInterceptors } from '@nestjs/common';
 import {
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -11,11 +11,13 @@ import type { FastifyRequest } from 'fastify';
 
 import { GetRequestByAccessSecretUseCase } from '../application/get-request-by-access-secret.use-case.js';
 import type { RequestPortalView } from '../domain/request.js';
+import { CapabilityCacheControlInterceptor } from './capability-cache-control.interceptor.js';
 import { mapApplicationError } from './map-application-error.js';
 import { RequestPortalResponseDto } from './request.dto.js';
 
 @ApiTags('requests')
 @Controller('requests')
+@UseInterceptors(CapabilityCacheControlInterceptor)
 export class RequestPortalController {
   constructor(
     @Inject(GetRequestByAccessSecretUseCase)

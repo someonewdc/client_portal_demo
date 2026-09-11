@@ -1,13 +1,15 @@
-import { Controller, Get, Inject, Req } from '@nestjs/common';
+import { Controller, Get, Inject, Req, UseInterceptors } from '@nestjs/common';
 import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import type { FastifyRequest } from 'fastify';
 
 import { GetDemoLinksUseCase } from '../application/get-demo-links.use-case.js';
 import type { DemoLink } from '../domain/request.js';
+import { CapabilityCacheControlInterceptor } from './capability-cache-control.interceptor.js';
 import { DemoLinksResponseDto } from './request.dto.js';
 
 @ApiTags('demo')
 @Controller('demo')
+@UseInterceptors(CapabilityCacheControlInterceptor)
 export class DemoLinksController {
   constructor(@Inject(GetDemoLinksUseCase) private readonly getDemoLinks: GetDemoLinksUseCase) {}
 

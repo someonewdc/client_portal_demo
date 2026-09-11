@@ -12,6 +12,13 @@ const intendedDatabaseUrl =
 const Z10043_SECRET = 'seed-z10043-quote-kuznetsov';
 const UNKNOWN_SECRET = 'unknown-secret-not-in-seed';
 
+function expectPrivateNoStore(headers: Record<string, unknown>): void {
+  const cacheControl = headers['cache-control'];
+  const value = typeof cacheControl === 'string' ? cacheControl : '';
+  expect(value).toMatch(/private/i);
+  expect(value).toMatch(/no-store/i);
+}
+
 const EXPECTED_DEMO_LINKS = [
   {
     publicNumber: 'З-10041',
@@ -159,6 +166,7 @@ describe('request HTTP', () => {
     const response = await app!.inject({ method: 'GET', url: '/api/v1/demo/links' });
 
     expect(response.statusCode).toBe(200);
+    expectPrivateNoStore(response.headers);
     expect(response.json()).toEqual({
       data: { items: [...EXPECTED_DEMO_LINKS] },
       meta: { traceId: expect.any(String) },
@@ -244,6 +252,7 @@ describe('request HTTP', () => {
     const hash = hashOpaqueToken(Z10043_SECRET);
 
     expect(response.statusCode).toBe(200);
+    expectPrivateNoStore(response.headers);
     expect(body).toEqual({
       data: EXPECTED_Z10043,
       meta: { traceId: expect.any(String) },
@@ -335,6 +344,7 @@ describe('request HTTP', () => {
         : '';
 
     expect(response.statusCode).toBe(404);
+    expectPrivateNoStore(response.headers);
     expect(response.headers['content-type']).toContain('application/problem+json');
     expect(isProblemDetails(body)).toBe(true);
     expect(body).toMatchObject({
