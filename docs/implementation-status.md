@@ -2,6 +2,12 @@
 
 ## Текущее состояние
 
+Колонки ленты на desktop (UX задача 16): от `40rem` пункт
+`<ol aria-label="Этапы заявки">` — три общие колонки
+счётчик / штамп / дата (`2rem | 1fr | 12rem`), `sm:contents` на обёртке
+счётчик+штамп. На З-10044 даты в одном X; штамп `w-fit`, текущий шаг
+`aria-current="step"` и `sr-only` «сейчас». Ниже `40rem` колонка задачи 7
+сохранена. Список файлов и спека не менялись.
 Общая сетка файлов (UX задача 15): в блоке «Файлы» у каждого `li` один
 `grid-template-columns` (не `auto` под тип). От `40rem` четыре колонки
 тип / имя / размер / дата (`9rem | 1fr | 4.5rem | 12rem`); ниже — две общие
@@ -82,8 +88,8 @@ UX/UI понятности (D-036…D-043): docs-only нарезка на `main`
 `main` (#38); задача 5 на `main` (#39); задача 6 на `main` (#40); задача 7 на
 `main` (#41); задача 8 на `main` (#42); задача 9 на `main` (#43); задача 10 на
 `main` (#45); задача 11 на `main` (#46); задача 12 на `main` (#47);
-задача 13 на `main` (#49); задача 14 на `main` (#50); задача 15 на ветке
-`fix/ux-files-shared-grid`.
+задача 13 на `main` (#49); задача 14 на `main` (#50); задача 15 на
+`main` (#52); задача 16 на ветке `fix/ux-process-shared-columns`.
 Оператор
 `выполни ux задачу N` → `docs/ux/README.md` (задачи 1–12, один чат).
 `реализуй ux задачу N` → тот же каталог + цикл (задачи 13–18, D-042).
@@ -152,7 +158,7 @@ UX/UI понятности (D-036…D-043): docs-only нарезка на `main`
 | UX задача 13 document-link cabinet    | проверен                          |
 | UX задача 14 document-link index      | проверен                          |
 | UX задача 15 files shared grid        | проверен                          |
-| UX задача 16 process shared columns   | не начата                         |
+| UX задача 16 process shared columns   | проверен                          |
 | UX задача 17 file sheet spec grid     | не начата                         |
 | UX задача 18 spec qty column          | не начата                         |
 
@@ -589,8 +595,13 @@ UX/UI понятности (D-036…D-043): docs-only нарезка на `main`
 | 2026-09-12 | PR #51 review canon    | `pnpm exec playwright test --workers=2` против `make dev` + seed                                                                                                                                                                                                                          | exit 0: 30 passed; D-040 снят запрет переноса штампа; `cursor: default` закреплён; «К заявке» `exact: true`                                                        |
 | 2026-09-12 | Merge main #50         | `git fetch origin` / `git merge origin/main`                                                                                                                                                                                                                                              | `main` `0e0dc42` UX задача 14 (#50); конфликт индекса/e2e/status — оставлены D-044/D-045                                                                           |
 | 2026-09-12 | Merge #50 e2e          | `pnpm exec playwright test --workers=2` против `make dev` + seed                                                                                                                                                                                                                          | exit 0: 30 passed                                                                                                                                                  |
-| 2026-09-12 | UX-15 TDD red          | `pnpm test:e2e`                                                                                                                                                                                                                                                                           | exit 1: 31 passed, 2 failed; шаблоны `103.828px 215.188px …` vs `19.25px 299.766px …`; имя X 106.69 vs 163.83 (Δ 57.14px)                                           |
+| 2026-09-12 | UX-15 TDD red          | `pnpm test:e2e`                                                                                                                                                                                                                                                                           | exit 1: 31 passed, 2 failed; шаблоны `103.828px 215.188px …` vs `19.25px 299.766px …`; имя X 106.69 vs 163.83 (Δ 57.14px)                                          |
 | 2026-09-12 | UX-15 TDD green        | `pnpm exec playwright test e2e/request-cabinet.spec.ts --workers=2` против `make dev` + seed                                                                                                                                                                                              | exit 0: 25 passed; З-10044 имена/даты в одном X; `grid-template-columns` идентичны; З-10043 hint + имя-ссылка + ритм                                               |
 | 2026-09-12 | UX-15 gates            | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
 | 2026-09-12 | UX-15 format           | `pnpm exec prettier --write e2e/request-cabinet.spec.ts apps/web/app/pages/r/[accessSecret]/index.vue` затем `prettier --check` и `git diff --check`                                                                                                                                      | exit 0                                                                                                                                                             |
 | 2026-09-12 | UX-15 TDD green full   | `pnpm exec playwright test --workers=1` против `make dev` + seed                                                                                                                                                                                                                          | exit 0: 33 passed (demo-links, focus-visible, layout-header, request-cabinet, security-headers)                                                                    |
+| 2026-09-12 | UX-16 TDD red          | `pnpm test:e2e`                                                                                                                                                                                                                                                                           | exit 1: 32 passed, 2 failed; даты ленты X 464.64 vs 448.80 (Δ 15.84px) из-за `flex-wrap`; второй fail — flake rest-color `rgb(0, 0, 238)` на файлах                |
+| 2026-09-12 | UX-16 TDD green        | `pnpm exec playwright test e2e/request-cabinet.spec.ts --grep "invoice cabinet process dates share one desktop column\|quote cabinet process list stays readable\|quote cabinet marks the current process step" --workers=1` против `make dev` + seed                                     | exit 0: 3 passed; З-10044 даты в одном X; 390px колонка задачи 7; `aria-current` + «сейчас»                                                                        |
+| 2026-09-12 | UX-16 gates            | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-12 | UX-16 format           | `pnpm exec prettier --write e2e/request-cabinet.spec.ts apps/web/app/pages/r/[accessSecret]/index.vue` затем `prettier --check` и `git diff --check`                                                                                                                                      | exit 0                                                                                                                                                             |
+| 2026-09-12 | UX-16 TDD green full   | `pnpm exec playwright test --workers=1` против `make dev` + seed                                                                                                                                                                                                                          | exit 0: 34 passed (demo-links, focus-visible, layout-header, request-cabinet, security-headers)                                                                    |
