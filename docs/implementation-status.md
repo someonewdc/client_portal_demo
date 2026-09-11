@@ -2,9 +2,12 @@
 
 ## Текущее состояние
 
-Иерархия заголовков (ветка `fix/ux-heading-hierarchy`): бренд шапки — `<p>`,
-не heading; смысловой `h1` на индексе, кабинете, листе и 404; title индекса и
-тупика неизвестного секрета различаются (D-040, UX задача 2). Клавиатурный
+Шапка кабинета (ветка `fix/ux-cabinet-status-header`): подпись `Статус заявки`
+стоит над текущим `stage.label` как единственным `h1`; номер tabular, не
+heading; title `{statusLabel} — {publicNumber} — ПК «Нордщит»` (D-037, UX
+задача 3). Иерархия заголовков на `main` (#36): бренд шапки — `<p>`, не heading;
+смысловой `h1` на индексе, кабинете, листе и 404; title индекса и тупика
+неизвестного секрета различаются (D-040, UX задача 2). Клавиатурный
 фокус `:focus-visible` на `main` (#35). Сняты избыточные btree-индексы заявки
 на `main` (#34). Фича 27 на `main` (#33). Фича 26 на `main` (#32). Фича 25 на
 `main` (#31). Фича 24 на `main` (#29). Фича 23 на `main` (#28). Фича 22 на
@@ -15,7 +18,7 @@
 Вендорные Prisma agent skills (D-041) на `main` (#30).
 
 UX/UI понятности (D-036…D-040): docs-only нарезка на `main` (#19); задача 1 на
-`main` (#35); задача 2 — этот PR. Оператор `выполни ux задачу N` →
+`main` (#35); задача 2 на `main` (#36); задача 3 — этот PR. Оператор `выполни ux задачу N` →
 `docs/ux/README.md`. Без `ux` фраза `выполни задачу N` не ведёт в
 `docs/ux/`. Не класть UX-промпты в `docs/llm/feature-NN.md`.
 
@@ -65,7 +68,8 @@ UX/UI понятности (D-036…D-040): docs-only нарезка на `main`
 | UX docs нарезка (D-036…D-040)         | выполнен                          |
 | UX задача 1 focus-visible             | проверен                          |
 | UX задача 2 heading hierarchy         | проверен                          |
-| UX задачи 3–12                        | не начаты                         |
+| UX задача 3 cabinet status header     | проверен                          |
+| UX задачи 4–12                        | не начаты                         |
 
 ## Журнал проверки
 
@@ -424,3 +428,9 @@ UX/UI понятности (D-036…D-040): docs-only нарезка на `main`
 | 2026-09-11 | UX-2 lifecycle         | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                                                                                                                                                          | exit 0: 45 passed; brand `<p>`; кабинет `h1` = `request.publicNumber`                                                                                              |
 | 2026-09-11 | UX-2 gates             | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 14, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
 | 2026-09-11 | UX-2 format            | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
+| 2026-09-11 | Merge main #36         | `git fetch origin` / `git pull --ff-only origin main`                                                                                                                                                                                                                                     | `main` `d3d73e6` UX задача 2 (#36)                                                                                                                                 |
+| 2026-09-11 | UX-3 TDD red           | `pnpm test:e2e`                                                                                                                                                                                                                                                                           | exit 1: 10 passed, 5 failed; h1 кабинета ещё `publicNumber`; нет heading «КП готово» / «В расчёте»; title без статуса                                              |
+| 2026-09-11 | UX-3 TDD green         | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 15 passed; h1 = текущий `stage.label`, номер tabular не heading, title со статусом                                                                         |
+| 2026-09-11 | UX-3 lifecycle         | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                                                                                                                                                          | exit 0: 45 passed; кабинет `h1` = `currentStatusLabel`, не `request.publicNumber`                                                                                  |
+| 2026-09-11 | UX-3 gates             | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 14, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-11 | UX-3 format            | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |

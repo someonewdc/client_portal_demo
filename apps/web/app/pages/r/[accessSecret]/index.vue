@@ -13,10 +13,29 @@ import {
 
 const { accessSecret, error, errorTraceId, isNotFound, request, status } = await useRequestPortal();
 
+const currentStatusLabel = computed(() => {
+  const payload = request.value;
+  if (payload == null) {
+    return '';
+  }
+
+  return payload.stages.find((stage) => stage.status === payload.status)?.label ?? '';
+});
+
 useSeoMeta({
-  title: computed(() =>
-    isNotFound.value ? 'Ссылка недействительна — ПК «Нордщит»' : 'ПК «Нордщит»',
-  ),
+  title: computed(() => {
+    if (isNotFound.value) {
+      return 'Ссылка недействительна — ПК «Нордщит»';
+    }
+
+    const payload = request.value;
+    const statusLabel = currentStatusLabel.value;
+    if (payload == null || statusLabel === '') {
+      return 'ПК «Нордщит»';
+    }
+
+    return `${statusLabel} — ${payload.publicNumber} — ПК «Нордщит»`;
+  }),
 });
 
 const documentStatus = documentStatusFromAsyncData(error.value);
@@ -61,7 +80,8 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
     </p>
     <template v-else-if="request">
       <p class="text-sm text-ink-muted">Статус заявки</p>
-      <h1 class="mt-2 text-xl font-semibold tabular-nums text-ink">{{ request.publicNumber }}</h1>
+      <h1 class="mt-2 text-xl font-semibold text-ink">{{ currentStatusLabel }}</h1>
+      <p class="mt-2 text-xl tabular-nums text-ink">{{ request.publicNumber }}</p>
       <p class="mt-2 text-ink">Менеджер отправил вам эту ссылку. Вход не нужен.</p>
       <p class="mt-4 text-ink">{{ request.counterpartyName }}</p>
       <p class="mt-1 text-ink-muted">{{ request.title }}</p>
