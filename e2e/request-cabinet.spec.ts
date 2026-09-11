@@ -356,6 +356,73 @@ async function expectFileNameIsTheOnlyRecordLink(
   await expect(item.locator('time').getByRole('link')).toHaveCount(0);
 }
 
+const fileSheetDisclaimer = 'Это выписка на экране, не файл для скачивания.';
+
+async function expectQuoteFileSheetExtract(page: Page) {
+  await expect(
+    page.getByRole('heading', { level: 1, name: quoteCabinet.quoteFileName }),
+  ).toBeVisible();
+  await expect(page.getByText(fileSheetDisclaimer, { exact: true })).toBeVisible();
+  await expect(page.getByText('Коммерческое предложение.', { exact: true })).toBeVisible();
+
+  const customerLabel = page.locator('dt', { hasText: /^Заказчик$/ });
+  await expect(customerLabel).toBeVisible();
+  await expect(
+    customerLabel
+      .locator('xpath=following-sibling::dd[1]')
+      .getByText(quoteCabinet.counterpartyName, {
+        exact: true,
+      }),
+  ).toBeVisible();
+
+  const productLabel = page.locator('dt', { hasText: /^Изделие$/ });
+  await expect(productLabel).toBeVisible();
+  await expect(
+    productLabel.locator('xpath=following-sibling::dd[1]').getByText(quoteCabinet.title, {
+      exact: true,
+    }),
+  ).toBeVisible();
+
+  const uploadedLabel = page.locator('dt', { hasText: /^Загружено$/ });
+  await expect(uploadedLabel).toBeVisible();
+  await expect(
+    uploadedLabel
+      .locator('xpath=following-sibling::dd[1]')
+      .locator('time[datetime="2026-09-04T12:00:00.000Z"]'),
+  ).toBeVisible();
+
+  const sizeLabel = page.locator('dt', { hasText: /^Размер$/ });
+  await expect(sizeLabel).toBeVisible();
+  await expect(
+    sizeLabel.locator('xpath=following-sibling::dd[1]').getByText('240 КБ', { exact: true }),
+  ).toBeVisible();
+
+  const specItems = page.getByRole('listitem');
+  await expect(specItems).toHaveCount(2);
+
+  const firstLine = specItems.filter({ hasText: quoteCabinet.specLine });
+  await expect(firstLine.getByText(quoteCabinet.specLine, { exact: true })).toBeVisible();
+  await expect(firstLine.getByText('1', { exact: true })).toBeVisible();
+  await expect(firstLine.getByText('шт', { exact: true })).toBeVisible();
+  await expect(firstLine.getByText('IP54, навесной', { exact: true })).toBeVisible();
+
+  const secondLine = specItems.filter({ hasText: quoteCabinet.specLineSecondary });
+  await expect(secondLine.getByText(quoteCabinet.specLineSecondary, { exact: true })).toBeVisible();
+  await expect(secondLine.getByText('1', { exact: true })).toBeVisible();
+  await expect(secondLine.getByText('шт', { exact: true })).toBeVisible();
+  await expect(secondLine.getByText('IP54, навесной')).toHaveCount(0);
+
+  await expect(page).toHaveTitle('КП — З-10043 — ПК «Нордщит»');
+
+  await expect(
+    page.getByRole('link', { name: `К заявке ${quoteCabinet.publicNumber}` }),
+  ).toBeVisible();
+  await expect(page.getByRole('link', { name: /скачать/i })).toHaveCount(0);
+  await expect(page.getByText('скачать', { exact: true })).toHaveCount(0);
+  await expect(page.locator('[download]')).toHaveCount(0);
+  await expect(page.locator('a[href="#"]')).toHaveCount(0);
+}
+
 type FileRecordFieldYs = {
   dateY: number;
   kindY: number;
@@ -737,6 +804,18 @@ test('quote cabinet file name opens an HTML document sheet', async ({ page }) =>
   await expect(page.locator('[download]')).toHaveCount(0);
   await expect(page.getByRole('link', { name: /скачать/i })).toHaveCount(0);
   await expect(page.getByRole('button')).toHaveCount(0);
+});
+
+test('quote file sheet is a labelled on-screen extract with a full specification', async ({
+  page,
+}) => {
+  const sheetPath = `/r/${quoteCabinet.accessSecret}/d/${encodeURIComponent(quoteCabinet.quoteFileName)}`;
+  const response = await page.goto(sheetPath);
+
+  expect(response, 'GET /r/{secret}/d/{fileName} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expectQuoteFileSheetExtract(page);
 });
 
 test('quote cabinet file sheet returns to the request', async ({ page }) => {

@@ -2,6 +2,11 @@
 
 ## Текущее состояние
 
+Лист файла (UX задача 10): HTML-лист КП З-10043 — подписанная выписка:
+дисклеймер `Это выписка на экране, не файл для скачивания.`; зачин D-029;
+подписи `Заказчик` / `Изделие` / `Загружено` / `Размер`; полная спека
+(`quantity` / `unit` / `comment`); title `{kindLabel} — {publicNumber} — ПК «Нордщит»`.
+`h1` остаётся `fileName`; «К заявке» и клик имени не ослаблены.
 Цикл implement→review (ветка `chore/implement-review-cycle`, #44): opt-in
 только по `через implement → review`; родитель не пишет код.
 Файлы кабинета на `main` (#43): сразу под `Файлы` фраза
@@ -39,8 +44,9 @@
 UX/UI понятности (D-036…D-040): docs-only нарезка на `main` (#19); задача 1 на
 `main` (#35); задача 2 на `main` (#36); задача 3 на `main` (#37); задача 4 на
 `main` (#38); задача 5 на `main` (#39); задача 6 на `main` (#40); задача 7 на
-`main` (#41); задача 8 на `main` (#42); задача 9 на `main` (#43); задачи 10–12 не
-начаты. Оператор `выполни ux задачу N` → `docs/ux/README.md`. Цикл —
+`main` (#41); задача 8 на `main` (#42); задача 9 на `main` (#43); задача 10 на
+ветке `fix/ux-file-sheet-extract`; задачи 11–12 не начаты. Оператор
+`выполни ux задачу N` → `docs/ux/README.md`. Цикл —
 только с `через implement → review` (skill `implement-review-cycle`).
 Без `ux` фраза `выполни задачу N` не ведёт в `docs/ux/`. Не класть
 UX-промпты в `docs/llm/feature-NN.md`.
@@ -99,7 +105,8 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | UX задача 8 spec table 390px          | проверен                          |
 | UX задача 9 files sheet hint          | проверен                          |
 | Цикл implement→review                 | выполнен                          |
-| UX задачи 10–12                       | не начаты                         |
+| UX задача 10 file sheet extract       | проверен                          |
+| UX задачи 11–12                       | не начаты                         |
 
 ## Журнал проверки
 
@@ -499,3 +506,8 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | 2026-09-11 | Cycle review fixes     | `pnpm format` затем `pnpm format:check`                                                                                                                                                                                                                                                   | exit 0                                                                                                                                                             |
 | 2026-09-11 | Cycle review fixes     | `git diff --check`                                                                                                                                                                                                                                                                        | exit 0                                                                                                                                                             |
 | 2026-09-11 | Cycle review fixes     | `pnpm lint` / `pnpm test`                                                                                                                                                                                                                                                                 | не запускались: docs-only (`change-impact-gates`)                                                                                                                  |
+| 2026-09-11 | UX-10 TDD red          | `pnpm test:e2e`                                                                                                                                                                                                                                                                           | exit 1: 26 passed, 1 failed; нет `Это выписка на экране, не файл для скачивания.`                                                                                  |
+| 2026-09-11 | UX-10 TDD green        | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 27 passed; выписка с полной спекой, клик имени и «К заявке» живы                                                                                           |
+| 2026-09-11 | UX-10 gates            | `pnpm --filter @client-portal/web test` / `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                    | exit 0: api 36, web 16, 5 tarballs; Nuxt 4.5.2 production build                                                                                                    |
+| 2026-09-11 | UX-10 format           | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
+| 2026-09-11 | UX-10 review fix       | `pnpm test:e2e`                                                                                                                                                                                                                                                                           | exit 0: 27 passed; обе `specLine` с qty/unit; title exact `КП — З-10043 — ПК «Нордщит»`                                                                            |
