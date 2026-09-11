@@ -2,13 +2,18 @@
 
 ## Текущее состояние
 
-Тупики 404 (UX задача 11): живая заявка и чужое имя — текст
+Штамп статуса на индексе (UX задача 12): плашка `statusLabel` — `font-normal`
+(weight 400), светлая `bg-accent/15 text-accent`, не semibold-кнопка и не
+`uppercase`. Строка З-10043 остаётся ссылкой на
+`/r/seed-z10043-quote-kuznetsov`; `getByRole('button')` = 0. Четыре служебные
+фразы дословны (D-027). Штамп ленты кабинета не меняли (задача 6).
+Тупики 404 на `main` (#46, UX задача 11): живая заявка и чужое имя — текст
 `Такого документа в заявке нет. Откройте заявку и выберите имя из списка.`
 и ссылка `К заявке {publicNumber}`; неизвестный секрет — текст
 `Заявки по этой ссылке нет. Проверьте адрес или попросите новую ссылку у менеджера.`,
 без ссылки в кабинет и на `/`. Оба — h1 `Ссылка недействительна`, HTTP 404,
 без `Код ошибки` / UUID. Для 5xx загрузки заявки `Код ошибки` + `traceId`
-остаются. Задачу 12 не начинали.
+остаются.
 Лист файла (UX задача 10) на `main` (#45): HTML-лист КП З-10043 — подписанная выписка:
 дисклеймер `Это выписка на экране, не файл для скачивания.`; зачин D-029;
 подписи `Заказчик` / `Изделие` / `Загружено` / `Размер`; полная спека
@@ -52,7 +57,8 @@ UX/UI понятности (D-036…D-040): docs-only нарезка на `main`
 `main` (#35); задача 2 на `main` (#36); задача 3 на `main` (#37); задача 4 на
 `main` (#38); задача 5 на `main` (#39); задача 6 на `main` (#40); задача 7 на
 `main` (#41); задача 8 на `main` (#42); задача 9 на `main` (#43); задача 10 на
-`main` (#45); задача 11 на ветке `fix/ux-missing-file-404`; задача 12 не начата.
+`main` (#45); задача 11 на `main` (#46); задача 12 на ветке
+`fix/ux-index-status-stamp`.
 Оператор
 `выполни ux задачу N` → `docs/ux/README.md`. Цикл —
 только с `через implement → review` (skill `implement-review-cycle`).
@@ -115,7 +121,7 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | Цикл implement→review                 | выполнен                          |
 | UX задача 10 file sheet extract       | проверен                          |
 | UX задача 11 missing file 404         | проверен                          |
-| UX задача 12                          | не начата                         |
+| UX задача 12 index status stamp       | проверен                          |
 
 ## Журнал проверки
 
@@ -525,3 +531,8 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | 2026-09-11 | UX-11 TDD green        | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 27 passed; два текста 404, без UUID, ссылка `К заявке З-10043`                                                                                             |
 | 2026-09-11 | UX-11 gates            | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
 | 2026-09-11 | UX-11 format           | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
+| 2026-09-11 | Merge main #46         | `git fetch origin` / `git pull --ff-only origin main`                                                                                                                                                                                                                                     | `main` `f95d2a8` UX задача 11 (#46)                                                                                                                                |
+| 2026-09-11 | UX-12 TDD red          | `pnpm test:e2e`                                                                                                                                                                                                                                                                           | exit 1: 27 passed, 1 failed; штамп `КП готово` в строке З-10043 `font-weight` 600                                                                                  |
+| 2026-09-11 | UX-12 TDD green        | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 28 passed; штамп `КП готово` weight ≤ 400, строка — ссылка, кнопок 0                                                                                       |
+| 2026-09-11 | UX-12 gates            | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-11 | UX-12 format           | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |

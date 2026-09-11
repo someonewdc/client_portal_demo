@@ -101,3 +101,45 @@ test('demo links index names itself and tells the conductor to click a row', asy
   await page.getByRole('link', { name: /З-10043/ }).click();
   await expect(page).toHaveURL(/\/r\/seed-z10043-quote-kuznetsov$/);
 });
+
+test('demo links index status stamp is a regular-weight tag, not a button', async ({ page }) => {
+  const response = await page.goto('/');
+
+  expect(response, 'GET / must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expect(page.getByRole('heading', { level: 1, name: 'Ссылки для показа' })).toBeVisible();
+  await expect(page.getByText('Этот список не показывается заказчику.')).toBeVisible();
+  await expect(
+    page.getByText('Так выглядит то, что вы отправили бы заказчику в мессенджер.'),
+  ).toBeVisible();
+  await expect(
+    page.getByText('Нажмите строку — откроется экран заказчика по ссылке.', { exact: true }),
+  ).toBeVisible();
+
+  const quoteRow = page.getByRole('link', { name: /З-10043/ });
+  await expect(quoteRow).toHaveAttribute('href', '/r/seed-z10043-quote-kuznetsov');
+  await expect(page.getByRole('button')).toHaveCount(0);
+
+  const stamp = quoteRow.getByText('КП готово', { exact: true });
+  await expect(stamp).toBeVisible();
+
+  const fontWeight = await stamp.evaluate((node) => {
+    const raw = getComputedStyle(node).fontWeight;
+    if (raw === 'normal') {
+      return 400;
+    }
+    if (raw === 'bold') {
+      return 700;
+    }
+    return Number.parseInt(raw, 10);
+  });
+
+  expect(
+    fontWeight,
+    'index status stamp must be a regular-weight tag, not semibold',
+  ).toBeLessThanOrEqual(400);
+
+  await stamp.click();
+  await expect(page).toHaveURL(/\/r\/seed-z10043-quote-kuznetsov$/);
+});
