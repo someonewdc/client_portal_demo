@@ -30,6 +30,8 @@ FROM runtime AS api
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=api-pack /out/api ./
+RUN chown -R node:node /app
+USER node
 EXPOSE 3001
 CMD ["node", "dist/main.js"]
 
@@ -37,5 +39,7 @@ FROM runtime AS web
 ENV NODE_ENV=production
 WORKDIR /app
 COPY --from=build /workspace/apps/web/.output ./.output
+RUN chown -R node:node /app
+USER node
 EXPOSE 3000
 CMD ["node", ".output/server/index.mjs"]
