@@ -349,6 +349,8 @@ async function expectDocumentLinkRestStyle(link: Locator) {
     return {
       color: computed.color,
       textDecorationColor: computed.textDecorationColor,
+      textDecorationLine: computed.textDecorationLine,
+      textUnderlineOffset: computed.textUnderlineOffset,
     };
   });
 
@@ -356,6 +358,10 @@ async function expectDocumentLinkRestStyle(link: Locator) {
   expect(style.textDecorationColor, 'document link rest underline must be accent').toBe(
     documentLinkAccentRgb,
   );
+  expect(style.textDecorationLine, 'document link rest decoration must be underline').toBe(
+    'underline',
+  );
+  expect(style.textUnderlineOffset, 'document link rest underline offset must be 2px').toBe('2px');
   await expect(link).toHaveClass(/document-link/);
 }
 
