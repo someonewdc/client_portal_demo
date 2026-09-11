@@ -8,6 +8,7 @@ import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 
 import { AppModule } from '../app.module.js';
 import type { ApiEnv } from '../core/config/api-env.js';
+import { corsOriginsFromWebOrigin } from '../core/config/cors-origins.js';
 import { ReadinessService } from '../health/readiness.service.js';
 
 export async function createApplication(): Promise<NestFastifyApplication> {
@@ -19,9 +20,9 @@ export async function createApplication(): Promise<NestFastifyApplication> {
 
   await configureBaseFastifyApplication(app, { globalPrefix: 'api/v1' });
   app.enableCors({
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    origin: [config.get('WEB_ORIGIN', { infer: true })],
+    credentials: false,
+    methods: ['GET', 'HEAD', 'OPTIONS'],
+    origin: corsOriginsFromWebOrigin(config.get('WEB_ORIGIN', { infer: true })),
   });
   const readiness = app.get(ReadinessService);
   app

@@ -2,8 +2,8 @@
 
 ## Текущее состояние
 
-Фича 21 (Cache-Control на capability JSON) в поставке этого PR. Код фич 22–27
-не начинать, пока соответствующая фича не в `main`. Фича 20 на `main` (#25).
+Фича 22 (CORS только чтение + localhost/127.0.0.1) в поставке этого PR. Код фич
+23–27 не начинать, пока соответствующая фича не в `main`. Фича 21 на `main` (#26).
 Оператор дефектов кода: `выполни задачу N` → `docs/remediation-plan.md`.
 Фича 19 на `main` (#24). Фича 18 на `main` (#23). Фича 17 на `main` (#22).
 Фича 16 на `main` (#21). Фича 15 на `main` (#20). Фича 14 на `main` (#18, D-030…D-035).
@@ -48,7 +48,8 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | Фича 19 уникальное fileName       | проверен                          |
 | Фича 20 заголовки capability HTML | проверен                          |
 | Фича 21 Cache-Control JSON        | проверен                          |
-| Фичи 22–27 задачи 8–13            | не начаты                         |
+| Фича 22 CORS read-only            | проверен                          |
+| Фичи 23–27 задачи 9–13            | не начаты                         |
 | UX docs нарезка (D-036…D-040)     | выполнен                          |
 | UX задачи 1–12                    | не начаты                         |
 
@@ -347,3 +348,8 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | 2026-09-11 | Фича 21 TDD red        | `pnpm --filter @client-portal/api exec vitest run src/requests/requests.http.spec.ts`                                                                                                                                                                                                     | exit 1: `cache-control` пустой на 200 `/demo/links`, 200 `/requests/seed-z10043-quote-kuznetsov` и 404 unknown; 4 passed, 3 failed                                 |
 | 2026-09-11 | Фича 21 TDD green      | `pnpm --filter @client-portal/api exec vitest run src/requests/requests.http.spec.ts src/health/health.http.spec.ts`                                                                                                                                                                      | exit 0: 10 passed; 200/404 capability JSON `private, no-store`; health без нового cache-требования                                                                 |
 | 2026-09-11 | Фича 21 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 26, web 14, scripts 77, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-11 | Merge main #26         | `git fetch origin` / `git pull --ff-only origin main`                                                                                                                                                                                                                                     | `main` `69db867` Фича 21 (#26); локальный `main` был на F20 `e5b030f`                                                                                              |
+| 2026-09-11 | Фича 22 TDD red        | `pnpm --filter @client-portal/api exec vitest run src/core/config src/bootstrap`                                                                                                                                                                                                          | exit 1: нет `cors-origins.js`; в `create-application.ts` нет `corsOriginsFromWebOrigin`, есть `credentials: true` и write-методы CORS                              |
+| 2026-09-11 | Фича 22 TDD green      | `pnpm --filter @client-portal/api exec vitest run src/core/config src/bootstrap`                                                                                                                                                                                                          | exit 0: 8 passed, включая twin localhost/127.0.0.1 и source-контракт GET/HEAD/OPTIONS                                                                              |
+| 2026-09-11 | Фича 22 TDD green      | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                                                                                                                                                          | exit 0: 42 passed                                                                                                                                                  |
+| 2026-09-11 | Фича 22 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 31, web 14, scripts 77, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
