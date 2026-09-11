@@ -2,10 +2,13 @@
 
 ## Текущее состояние
 
-Фраза «что дальше» в кабинете (ветка `fix/ux-cabinet-next-step`): один `<p>`
-после подписей полей, до ленты; фиксированный текст по `request.status`
-(D-037, UX задача 5). Подписи полей кабинета на `main` (#38): `Заказчик`,
-`Изделие` и `Обновлено` рядом с `time[datetime]`, без плашки статуса у даты.
+Текущий шаг ленты (ветка `fix/ux-process-current`): у пункта
+`stage.status === request.status` стоит `aria-current="step"` и внутри штампа
+`span.sr-only` «сейчас»; будущие по-прежнему `ещё нет` (D-038, UX задача 6).
+Фраза «что дальше» на `main` (#39): один `<p>` после подписей полей, до ленты;
+фиксированный текст по `request.status` (D-037, UX задача 5). Подписи полей
+кабинета на `main` (#38): `Заказчик`, `Изделие` и `Обновлено` рядом с
+`time[datetime]`, без плашки статуса у даты.
 Шапка кабинета на `main` (#37): подпись `Статус заявки` над текущим
 `stage.label` как единственным `h1`; номер tabular, не heading; title
 `{statusLabel} — {publicNumber} — ПК «Нордщит»`. Иерархия заголовков на
@@ -23,8 +26,9 @@
 
 UX/UI понятности (D-036…D-040): docs-only нарезка на `main` (#19); задача 1 на
 `main` (#35); задача 2 на `main` (#36); задача 3 на `main` (#37); задача 4 на
-`main` (#38); задача 5 — этот PR. Оператор `выполни ux задачу N` →
-`docs/ux/README.md`. Без `ux` фраза `выполни задачу N` не ведёт в
+`main` (#38); задача 5 на `main` (#39); задача 6 — этот PR. Оператор
+`выполни ux задачу N` → `docs/ux/README.md`. Без `ux` фраза
+`выполни задачу N` не ведёт в
 `docs/ux/`. Не класть UX-промпты в `docs/llm/feature-NN.md`.
 
 ## Правила обновления
@@ -76,7 +80,8 @@ UX/UI понятности (D-036…D-040): docs-only нарезка на `main`
 | UX задача 3 cabinet status header     | проверен                          |
 | UX задача 4 cabinet field labels      | проверен                          |
 | UX задача 5 cabinet next-step phrase  | проверен                          |
-| UX задачи 6–12                        | не начаты                         |
+| UX задача 6 process current step      | проверен                          |
+| UX задачи 7–12                        | не начаты                         |
 
 ## Журнал проверки
 
@@ -453,3 +458,8 @@ UX/UI понятности (D-036…D-040): docs-only нарезка на `main`
 | 2026-09-11 | UX-5 TDD green e2e     | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 20 passed; фраза после `dl`, до ленты, без CTA «оплатить»                                                                                                  |
 | 2026-09-11 | UX-5 gates             | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
 | 2026-09-11 | UX-5 format            | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
+| 2026-09-11 | Merge main #39         | `git fetch origin` / `git pull --ff-only origin main`                                                                                                                                                                                                                                     | `main` `8c31bad` UX задача 5 (#39)                                                                                                                                 |
+| 2026-09-11 | UX-6 TDD red           | `pnpm test:e2e`                                                                                                                                                                                                                                                                           | exit 1: 20 passed, 1 failed; в ленте `Этапы заявки` `[aria-current="step"]` count 0                                                                                |
+| 2026-09-11 | UX-6 TDD green         | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 21 passed; текущий `li` = `aria-current="step"` и `span.sr-only` «сейчас»                                                                                  |
+| 2026-09-11 | UX-6 gates             | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-11 | UX-6 format            | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
