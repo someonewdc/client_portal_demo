@@ -1,13 +1,13 @@
-import { PROBLEM_DETAILS_RESPONSE } from '@client-portal/nestjs-core/openapi';
-import { Controller, Get, Inject, Param, Req, UseGuards, UseInterceptors } from '@nestjs/common';
+import { PROBLEM_DETAILS_RESPONSE, RATE_LIMIT_RESPONSE } from '@client-portal/nestjs-core/openapi';
+import { Controller, Get, Inject, Param, Req, UseInterceptors } from '@nestjs/common';
 import {
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
   ApiTags,
+  ApiTooManyRequestsResponse,
 } from '@nestjs/swagger';
-import { ThrottlerGuard } from '@nestjs/throttler';
 import type { FastifyRequest } from 'fastify';
 
 import { GetRequestByAccessSecretUseCase } from '../application/get-request-by-access-secret.use-case.js';
@@ -18,7 +18,6 @@ import { RequestPortalResponseDto } from './request.dto.js';
 
 @ApiTags('requests')
 @Controller('requests')
-@UseGuards(ThrottlerGuard)
 @UseInterceptors(CapabilityCacheControlInterceptor)
 export class RequestPortalController {
   constructor(
@@ -33,6 +32,10 @@ export class RequestPortalController {
   @ApiNotFoundResponse({
     description: 'Заявка не найдена по секрету',
     ...PROBLEM_DETAILS_RESPONSE,
+  })
+  @ApiTooManyRequestsResponse({
+    description: 'Слишком много запросов с этого IP',
+    ...RATE_LIMIT_RESPONSE,
   })
   async show(
     @Param('accessSecret') accessSecret: string,

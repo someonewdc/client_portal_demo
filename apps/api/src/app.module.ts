@@ -2,7 +2,8 @@ import { PlatformLoggingModule } from '@client-portal/nestjs-core/logging';
 import { provideProblemDetailsFilter } from '@client-portal/nestjs-core/problem-details';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { ThrottlerModule } from '@nestjs/throttler';
+import { APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 
 import { validateApiEnv } from './core/config/api-env.js';
 import { HealthModule } from './health/health.module.js';
@@ -21,6 +22,9 @@ import { RequestsModule } from './requests/requests.module.js';
     HealthModule,
     RequestsModule,
   ],
-  providers: [provideProblemDetailsFilter({ typeBaseUrl: 'https://demo.local/problems' })],
+  providers: [
+    provideProblemDetailsFilter({ typeBaseUrl: 'https://demo.local/problems' }),
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+  ],
 })
 export class AppModule {}

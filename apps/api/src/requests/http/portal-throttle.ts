@@ -2,6 +2,7 @@ import type { ThrottlerModuleOptions } from '@nestjs/throttler';
 
 export const PORTAL_THROTTLE_TTL_MS = 60_000;
 export const PORTAL_THROTTLE_LIMIT = 60;
+export const PORTAL_THROTTLE_DETAIL = 'The client has sent too many requests';
 
 export function clientIpTracker(req: { readonly ip?: unknown }): string {
   return typeof req.ip === 'string' && req.ip.length > 0 ? req.ip : 'unknown';
@@ -19,6 +20,7 @@ export function portalThrottlerModuleOptions(
   limit: number = PORTAL_THROTTLE_LIMIT,
 ): ThrottlerModuleOptions {
   return {
+    errorMessage: PORTAL_THROTTLE_DETAIL,
     generateKey: portalThrottleKey,
     getTracker: clientIpTracker,
     throttlers: [{ limit, ttl: PORTAL_THROTTLE_TTL_MS }],
