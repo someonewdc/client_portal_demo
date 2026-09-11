@@ -2,9 +2,9 @@
 
 ## Текущее состояние
 
-Фича 24 (in-memory throttle GET заявки по секрету, 60/мин на IP) в поставке
-этого PR. Код фич 25–27 не начинать, пока соответствующая фича не в `main`.
-Фича 23 на `main` (#28). Фича 22 на `main` (#27).
+Вендорные Prisma agent skills (D-041) в поставке этого PR; код продукта не
+менять. Фича 24 на `main` (#29). Код фич 25–27 не начинать, пока соответствующая
+фича не в `main`. Фича 23 на `main` (#28). Фича 22 на `main` (#27).
 Оператор дефектов кода: `выполни задачу N` → `docs/remediation-plan.md`.
 Фича 19 на `main` (#24). Фича 18 на `main` (#23). Фича 17 на `main` (#22).
 Фича 16 на `main` (#21). Фича 15 на `main` (#20). Фича 14 на `main` (#18, D-030…D-035).
@@ -52,6 +52,7 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | Фича 22 CORS read-only            | проверен                          |
 | Фича 23 timeout OpenAPI-клиента   | проверен                          |
 | Фича 24 throttle GET по секрету   | проверен                          |
+| Prisma vendor skills (D-041)      | выполнен                          |
 | Фичи 25–27 задачи 11–13           | не начаты                         |
 | UX docs нарезка (D-036…D-040)     | выполнен                          |
 | UX задачи 1–12                    | не начаты                         |
@@ -373,3 +374,6 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | 2026-09-11 | Фича 24 generate:api   | `pnpm generate:api` затем `git diff --stat -- packages/api-client/openapi.json packages/api-client/src/schema.d.ts`                                                                                                                                                                       | exit 0: 429 problem+json + Retry-After на GET /requests/{accessSecret}                                                                                             |
 | 2026-09-11 | Фича 24 review gates   | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 35, web 14, scripts 77, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
 | 2026-09-11 | Фича 24 review fmt     | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
+| 2026-09-11 | Merge main #29         | `git fetch origin` затем `git merge origin/main`                                                                                                                                                                                                                                          | `main` `380fbed` Фича 24 (#29); конфликт только `docs/implementation-status.md`                                                                                    |
+| 2026-09-11 | Prisma vendor skills   | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0; вендор `apps/api/.agents` не в прогоне Prettier                                                                                                            |
+| 2026-09-11 | Prisma vendor skills   | `pnpm lint` / `pnpm test`                                                                                                                                                                                                                                                                 | не запускались: docs + vendor markdown (`change-impact-gates`)                                                                                                     |
