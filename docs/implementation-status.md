@@ -7,9 +7,9 @@
 «К заявке» с декоративной `←`. Штамп статуса (D-045, D-040 уточнён) — `.status-stamp`: чернила
 на `--color-rule`, `cursor: default`, не акцент ссылки; тот же класс на
 текущем шаге ленты.
-Ссылки индекса в покое (UX задача 14): номер `З-10043` и title `ВРУ 400 А`
-на `/` — класс `.document-link`, цвет и линия акцента `rgb(61, 90, 115)`.
-Штамп `КП готово` остаётся tag задачи 12 (не underline, weight ≤ 400).
+Ссылки индекса в покое (UX задача 14) на `main` (#50): номер `З-10043` и title
+`ВРУ 400 А` на `/` — класс `.document-link`, цвет и линия акцента
+`rgb(61, 90, 115)`. Штамп `КП готово` — tag D-045 (не underline, weight ≤ 400).
 Четыре служебные фразы дословны.
 Ссылки кабинета и листа в покое (UX задача 13): класс `.document-link` —
 цвет и линия акцента `rgb(61, 90, 115)` на имени `КП-З-10043.pdf` в кабинете
@@ -75,7 +75,8 @@ UX/UI понятности (D-036…D-043): docs-only нарезка на `main`
 `main` (#35); задача 2 на `main` (#36); задача 3 на `main` (#37); задача 4 на
 `main` (#38); задача 5 на `main` (#39); задача 6 на `main` (#40); задача 7 на
 `main` (#41); задача 8 на `main` (#42); задача 9 на `main` (#43); задача 10 на
-`main` (#45); задача 11 на `main` (#46); задача 12 на `main` (#47).
+`main` (#45); задача 11 на `main` (#46); задача 12 на `main` (#47);
+задача 13 на `main` (#49); задача 14 на `main` (#50).
 Оператор
 `выполни ux задачу N` → `docs/ux/README.md` (задачи 1–12, один чат).
 `реализуй ux задачу N` → тот же каталог + цикл (задачи 13–18, D-042).
@@ -579,3 +580,5 @@ UX/UI понятности (D-036…D-043): docs-only нарезка на `main`
 | 2026-09-12 | D-044/045 gates        | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
 | 2026-09-12 | D-044/045 e2e          | `pnpm exec playwright test --workers=2` против `make dev` + seed                                                                                                                                                                                                                          | exit 0: 30 passed                                                                                                                                                  |
 | 2026-09-12 | PR #51 review canon    | `pnpm exec playwright test --workers=2` против `make dev` + seed                                                                                                                                                                                                                          | exit 0: 30 passed; D-040 снят запрет переноса штампа; `cursor: default` закреплён; «К заявке» `exact: true`                                                        |
+| 2026-09-12 | Merge main #50         | `git fetch origin` / `git merge origin/main`                                                                                                                                                                                                                                              | `main` `0e0dc42` UX задача 14 (#50); конфликт индекса/e2e/status — оставлены D-044/D-045                                                                           |
+| 2026-09-12 | Merge #50 e2e          | `pnpm exec playwright test --workers=2` против `make dev` + seed                                                                                                                                                                                                                          | exit 0: 30 passed                                                                                                                                                  |
