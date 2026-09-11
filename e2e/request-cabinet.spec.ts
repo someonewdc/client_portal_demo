@@ -219,6 +219,113 @@ async function expectProcessRibbonStacksOnNarrowPhone(page: Page) {
   await expect(stageRibbon.getByText('ещё нет', { exact: true })).toBeVisible();
 }
 
+const specColumnLabels = ['Наименование', 'Кол-во', 'Ед.', 'Комментарий'] as const;
+
+async function expectSpecLineBlockLabels(
+  row: ReturnType<Page['locator']>,
+  labels: readonly string[],
+) {
+  for (const label of labels) {
+    const heading = row.getByText(label, { exact: true });
+    await expect(heading).toBeVisible();
+    await expect(heading).toHaveText(label);
+
+    const metrics = await heading.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return {
+        clientWidth: element.clientWidth,
+        right: rect.right,
+        scrollWidth: element.scrollWidth,
+      };
+    });
+    expect(metrics.scrollWidth, `${label} must not clip`).toBeLessThanOrEqual(
+      metrics.clientWidth + 1,
+    );
+    expect(metrics.right, `${label} must stay inside the 390px viewport`).toBeLessThanOrEqual(390);
+  }
+}
+
+async function expectSpecTableStacksOnNarrowPhone(page: Page) {
+  const specTable = page.getByRole('table', { name: 'Спецификация' });
+  await expect(specTable).toBeVisible();
+  await expect(specTable.getByText(quoteCabinet.specLine, { exact: true })).toBeVisible();
+  await expect(specTable.getByText('IP54, навесной', { exact: true })).toBeVisible();
+  await expect(specTable.getByText(quoteCabinet.specLineSecondary, { exact: true })).toBeVisible();
+
+  const rows = specTable.locator('tbody tr');
+  await expect(rows).toHaveCount(2);
+
+  const firstRow = rows.filter({ hasText: quoteCabinet.specLine });
+  const secondRow = rows.filter({ hasText: quoteCabinet.specLineSecondary });
+
+  await expectSpecLineBlockLabels(firstRow, specColumnLabels);
+  await expectSpecLineBlockLabels(secondRow, specColumnLabels);
+
+  for (const row of [firstRow, secondRow]) {
+    const layout = await row.evaluate((tr) => {
+      const cells = [...tr.querySelectorAll('td')];
+      return {
+        cellYs: cells.map((cell) => cell.getBoundingClientRect().y),
+        display: getComputedStyle(tr).display,
+      };
+    });
+
+    expect(layout.display, 'each spec line is a block, not a 4-column table-row').toBe('block');
+    expect(layout.cellYs.length, 'spec line keeps name, qty, unit, comment cells').toBe(4);
+    for (let index = 1; index < layout.cellYs.length; index += 1) {
+      expect(
+        layout.cellYs[index],
+        `cell ${index} (y=${layout.cellYs[index]}) must sit below cell ${index - 1} (y=${layout.cellYs[index - 1]})`,
+      ).toBeGreaterThan(layout.cellYs[index - 1] + 4);
+    }
+  }
+
+  const widths = await specTable.evaluate((table) => ({
+    pageScrollWidth: document.documentElement.scrollWidth,
+    tableClientWidth: table.clientWidth,
+    tableScrollWidth: table.scrollWidth,
+  }));
+  expect(widths.tableScrollWidth, 'spec table must not clip horizontally').toBeLessThanOrEqual(
+    widths.tableClientWidth + 1,
+  );
+  expect(
+    widths.pageScrollWidth,
+    'page must not scroll horizontally because of the spec table',
+  ).toBeLessThanOrEqual(390);
+}
+
+async function expectSpecTableDesktopColumns(page: Page) {
+  const specTable = page.getByRole('table', { name: 'Спецификация' });
+  await expect(specTable).toBeVisible();
+
+  const nameHeader = specTable.getByRole('columnheader', { name: 'Наименование', exact: true });
+  const quantityHeader = specTable.getByRole('columnheader', { name: 'Кол-во', exact: true });
+  const unitHeader = specTable.getByRole('columnheader', { name: 'Ед.', exact: true });
+  const commentHeader = specTable.getByRole('columnheader', { name: 'Комментарий', exact: true });
+
+  await expect(nameHeader).toBeVisible();
+  await expect(nameHeader).toHaveText('Наименование');
+  await expect(quantityHeader).toBeVisible();
+  await expect(quantityHeader).toHaveText('Кол-во');
+  await expect(unitHeader).toBeVisible();
+  await expect(unitHeader).toHaveText('Ед.');
+  await expect(commentHeader).toBeVisible();
+  await expect(commentHeader).toHaveText('Комментарий');
+
+  await expect(
+    specTable.getByRole('cell', { name: quoteCabinet.specLine, exact: true }),
+  ).toBeVisible();
+  await expect(specTable.getByRole('cell', { name: 'IP54, навесной', exact: true })).toBeVisible();
+  await expect(
+    specTable.getByRole('cell', { name: quoteCabinet.specLineSecondary, exact: true }),
+  ).toBeVisible();
+
+  const firstRow = specTable.locator('tbody tr').filter({ hasText: quoteCabinet.specLine });
+  const layout = await firstRow.evaluate((tr) => getComputedStyle(tr).display);
+  expect(layout, 'desktop spec stays a table-row').toBe('table-row');
+  await expect(firstRow.getByText('Наименование', { exact: true })).toBeHidden();
+}
+
 const unknownSecret = 'this-secret-does-not-exist';
 
 test('quote cabinet shows Z-10043 seed payload from GET /requests/{accessSecret}', async ({
@@ -348,6 +455,30 @@ test('quote cabinet process list stays readable on a 390px messenger viewport', 
     pastLabels: ['Принят', 'В расчёте'],
     futureLabel: 'Счёт выставлен',
   });
+});
+
+test('quote cabinet specification stays readable on a 390px messenger viewport', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const response = await page.goto(`/r/${quoteCabinet.accessSecret}`);
+
+  expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expectCabinetStatusHeader(page, quoteCabinet.publicNumber, quoteCabinet.statusLabel);
+  await expectSpecTableStacksOnNarrowPhone(page);
+});
+
+test('quote cabinet specification keeps a desktop table with thead at 1280px', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 844 });
+  const response = await page.goto(`/r/${quoteCabinet.accessSecret}`);
+
+  expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expectCabinetStatusHeader(page, quoteCabinet.publicNumber, quoteCabinet.statusLabel);
+  await expectSpecTableDesktopColumns(page);
 });
 
 for (const cabinet of nextStepCabinets) {

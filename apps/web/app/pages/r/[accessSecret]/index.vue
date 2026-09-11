@@ -124,11 +124,11 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
         </li>
       </ol>
 
-      <table class="mt-8 w-full border-collapse text-left">
+      <table class="mt-8 w-full min-w-0 max-w-full border-collapse text-left">
         <caption class="mb-3 text-left font-semibold text-ink">
           Спецификация
         </caption>
-        <thead>
+        <thead class="max-sm:hidden">
           <tr class="border-b border-rule text-sm text-ink-muted">
             <th class="py-2 pr-4 font-semibold">Наименование</th>
             <th class="py-2 pr-4 font-semibold">Кол-во</th>
@@ -137,11 +137,27 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
           </tr>
         </thead>
         <tbody>
-          <tr v-for="line in request.specLines" :key="line.name" class="border-b border-rule">
-            <td class="py-3 pr-4 text-ink">{{ line.name }}</td>
-            <td class="py-3 pr-4 tabular-nums text-ink">{{ line.quantity }}</td>
-            <td class="py-3 pr-4 text-ink">{{ line.unit }}</td>
-            <td v-if="hasSpecComments" class="py-3 text-ink-muted">{{ line.comment }}</td>
+          <tr
+            v-for="line in request.specLines"
+            :key="line.name"
+            class="block border-b border-rule py-3 sm:table-row sm:py-0"
+          >
+            <td class="block py-1 text-ink sm:table-cell sm:py-3 sm:pr-4">
+              <span class="block text-sm text-ink-muted sm:hidden">Наименование</span>
+              <span class="break-words">{{ line.name }}</span>
+            </td>
+            <td class="block py-1 text-ink sm:table-cell sm:py-3 sm:pr-4">
+              <span class="block text-sm text-ink-muted sm:hidden">Кол-во</span>
+              <span class="tabular-nums">{{ line.quantity }}</span>
+            </td>
+            <td class="block py-1 text-ink sm:table-cell sm:py-3 sm:pr-4">
+              <span class="block text-sm text-ink-muted sm:hidden">Ед.</span>
+              <span>{{ line.unit }}</span>
+            </td>
+            <td v-if="hasSpecComments" class="block py-1 text-ink-muted sm:table-cell sm:py-3">
+              <span class="block text-sm sm:hidden">Комментарий</span>
+              <span class="break-words">{{ line.comment }}</span>
+            </td>
           </tr>
         </tbody>
       </table>
