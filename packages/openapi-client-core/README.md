@@ -25,10 +25,11 @@ const client = createProblemAwareClient<Paths>('https://api.example.test/api/v1'
 ```
 
 The root export wraps `openapi-fetch`: adds/checks `X-Correlation-Id` through
-`platform-core/correlation-id`, normalizes the base URL, converts Problem Details responses into
-`ApiProblemError` via pure `isProblemDetails`, and distinguishes network failures as
-`ApiNetworkError`. `ProblemDetails` / `ProblemFieldError` are re-exported from
-`platform-core/problem-details`.
+`platform-core/correlation-id`, normalizes the base URL, aborts each request with
+`AbortSignal.timeout` after 5000 ms (`timeoutMs`; `0` keeps the default), converts Problem
+Details responses into `ApiProblemError` via pure `isProblemDetails`, and distinguishes
+network failures as `ApiNetworkError`. `ProblemDetails` / `ProblemFieldError` are re-exported
+from `platform-core/problem-details`.
 
 ## Dependencies
 

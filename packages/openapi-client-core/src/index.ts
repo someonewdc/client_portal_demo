@@ -17,6 +17,28 @@ export type {
 
 export interface ProblemAwareClientOptions extends Omit<ClientOptions, 'baseUrl'> {
   readonly createCorrelationId?: () => string;
+  readonly timeoutMs?: number;
+}
+
+const DEFAULT_TIMEOUT_MS = 5000;
+
+type FetchFn = (input: Request, init?: RequestInit) => Promise<Response>;
+
+function resolveTimeoutMs(timeoutMs: number | undefined): number {
+  return timeoutMs === undefined || timeoutMs === 0 ? DEFAULT_TIMEOUT_MS : timeoutMs;
+}
+
+function fetchWithTimeout(fetchImpl: FetchFn, timeoutMs: number): FetchFn {
+  return (input, init) => {
+    const timeoutSignal = AbortSignal.timeout(timeoutMs);
+    const signal = init?.signal
+      ? AbortSignal.any([input.signal, init.signal, timeoutSignal])
+      : AbortSignal.any([input.signal, timeoutSignal]);
+    const timedRequest = new Request(input, { signal });
+    return init === undefined
+      ? fetchImpl(timedRequest)
+      : fetchImpl(timedRequest, { ...init, signal });
+  };
 }
 
 export class ApiProblemError extends Error {
@@ -89,8 +111,20 @@ export function createProblemAwareClient<Paths extends object>(
   options: ProblemAwareClientOptions = {},
 ): Client<Paths> {
   const normalizedBaseUrl = new URL(baseUrl).toString().replace(/\/$/, '');
-  const { createCorrelationId = () => globalThis.crypto.randomUUID(), ...clientOptions } = options;
-  const client = createClient<Paths>({ ...clientOptions, baseUrl: normalizedBaseUrl });
+  const {
+    createCorrelationId = () => globalThis.crypto.randomUUID(),
+    timeoutMs,
+    fetch: userFetch,
+    ...clientOptions
+  } = options;
+  const client = createClient<Paths>({
+    ...clientOptions,
+    fetch: fetchWithTimeout(
+      userFetch ?? (globalThis.fetch.bind(globalThis) as FetchFn),
+      resolveTimeoutMs(timeoutMs),
+    ),
+    baseUrl: normalizedBaseUrl,
+  });
 
   client.use(correlationMiddleware(createCorrelationId), errorMiddleware);
   return client;
