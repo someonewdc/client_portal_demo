@@ -2,23 +2,26 @@
 
 ## Текущее состояние
 
-Шапка кабинета (ветка `fix/ux-cabinet-status-header`): подпись `Статус заявки`
-стоит над текущим `stage.label` как единственным `h1`; номер tabular, не
-heading; title `{statusLabel} — {publicNumber} — ПК «Нордщит»` (D-037, UX
-задача 3). Иерархия заголовков на `main` (#36): бренд шапки — `<p>`, не heading;
-смысловой `h1` на индексе, кабинете, листе и 404; title индекса и тупика
-неизвестного секрета различаются (D-040, UX задача 2). Клавиатурный
-фокус `:focus-visible` на `main` (#35). Сняты избыточные btree-индексы заявки
-на `main` (#34). Фича 27 на `main` (#33). Фича 26 на `main` (#32). Фича 25 на
-`main` (#31). Фича 24 на `main` (#29). Фича 23 на `main` (#28). Фича 22 на
-`main` (#27). Нарезка дефектов кода D-030 закрыта.
+Подписи полей кабинета (ветка `fix/ux-cabinet-field-labels`): `Заказчик`,
+`Изделие` и `Обновлено` рядом с `time[datetime]`, без плашки статуса у даты
+(D-037, UX задача 4). Шапка кабинета на `main` (#37): подпись `Статус заявки`
+над текущим `stage.label` как единственным `h1`; номер tabular, не heading;
+title `{statusLabel} — {publicNumber} — ПК «Нордщит»`. Иерархия заголовков на
+`main` (#36): бренд шапки — `<p>`, не heading; смысловой `h1` на индексе,
+кабинете, листе и 404; title индекса и тупика неизвестного секрета различаются
+(D-040, UX задача 2). Клавиатурный фокус `:focus-visible` на `main` (#35).
+Сняты избыточные btree-индексы заявки на `main` (#34). Фича 27 на `main` (#33).
+Фича 26 на `main` (#32). Фича 25 на `main` (#31). Фича 24 на `main` (#29).
+Фича 23 на `main` (#28). Фича 22 на `main` (#27). Нарезка дефектов кода D-030
+закрыта.
 Оператор дефектов кода: `выполни задачу N` → `docs/remediation-plan.md`.
 Фича 19 на `main` (#24). Фича 18 на `main` (#23). Фича 17 на `main` (#22).
 Фича 15 на `main` (#20). Фича 14 на `main` (#18, D-030…D-035).
 Вендорные Prisma agent skills (D-041) на `main` (#30).
 
 UX/UI понятности (D-036…D-040): docs-only нарезка на `main` (#19); задача 1 на
-`main` (#35); задача 2 на `main` (#36); задача 3 — этот PR. Оператор `выполни ux задачу N` →
+`main` (#35); задача 2 на `main` (#36); задача 3 на `main` (#37); задача 4 —
+этот PR. Оператор `выполни ux задачу N` →
 `docs/ux/README.md`. Без `ux` фраза `выполни задачу N` не ведёт в
 `docs/ux/`. Не класть UX-промпты в `docs/llm/feature-NN.md`.
 
@@ -69,7 +72,8 @@ UX/UI понятности (D-036…D-040): docs-only нарезка на `main`
 | UX задача 1 focus-visible             | проверен                          |
 | UX задача 2 heading hierarchy         | проверен                          |
 | UX задача 3 cabinet status header     | проверен                          |
-| UX задачи 4–12                        | не начаты                         |
+| UX задача 4 cabinet field labels      | проверен                          |
+| UX задачи 5–12                        | не начаты                         |
 
 ## Журнал проверки
 
@@ -434,3 +438,8 @@ UX/UI понятности (D-036…D-040): docs-only нарезка на `main`
 | 2026-09-11 | UX-3 lifecycle         | `node --test scripts/lifecycle-targets.spec.mjs`                                                                                                                                                                                                                                          | exit 0: 45 passed; кабинет `h1` = `currentStatusLabel`, не `request.publicNumber`                                                                                  |
 | 2026-09-11 | UX-3 gates             | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 14, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
 | 2026-09-11 | UX-3 format            | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
+| 2026-09-11 | Merge main #37         | `git fetch origin` / `git pull --ff-only origin main`                                                                                                                                                                                                                                     | `main` `99ab5df` UX задача 3 (#37)                                                                                                                                 |
+| 2026-09-11 | UX-4 TDD red           | `pnpm test:e2e`                                                                                                                                                                                                                                                                           | exit 1: 13 passed, 3 failed; нет текста `Заказчик` на кабинете З-10043                                                                                             |
+| 2026-09-11 | UX-4 TDD green         | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 16 passed; подписи `Заказчик` / `Изделие` / `Обновлено` рядом с `time[datetime]`                                                                           |
+| 2026-09-11 | UX-4 gates             | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 14, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-11 | UX-4 format            | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |

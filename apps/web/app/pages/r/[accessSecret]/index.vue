@@ -83,13 +83,18 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
       <h1 class="mt-2 text-xl font-semibold text-ink">{{ currentStatusLabel }}</h1>
       <p class="mt-2 text-xl tabular-nums text-ink">{{ request.publicNumber }}</p>
       <p class="mt-2 text-ink">Менеджер отправил вам эту ссылку. Вход не нужен.</p>
-      <p class="mt-4 text-ink">{{ request.counterpartyName }}</p>
-      <p class="mt-1 text-ink-muted">{{ request.title }}</p>
-      <p class="mt-4">
-        <time class="text-sm tabular-nums text-ink-muted" :datetime="request.updatedAt">
-          {{ formatRequestUpdatedAt(request.updatedAt) }}
-        </time>
-      </p>
+      <dl class="mt-4">
+        <dt class="text-sm text-ink-muted">Заказчик</dt>
+        <dd class="mt-1 text-ink">{{ request.counterpartyName }}</dd>
+        <dt class="mt-2 text-sm text-ink-muted">Изделие</dt>
+        <dd class="mt-1 text-ink-muted">{{ request.title }}</dd>
+        <dt class="mt-4 text-sm text-ink-muted">Обновлено</dt>
+        <dd class="mt-1">
+          <time class="text-sm tabular-nums text-ink-muted" :datetime="request.updatedAt">
+            {{ formatRequestUpdatedAt(request.updatedAt) }}
+          </time>
+        </dd>
+      </dl>
 
       <ol class="mt-8 space-y-3" aria-label="Этапы заявки" role="list">
         <li
