@@ -2,10 +2,14 @@
 
 ## Текущее состояние
 
+Ссылки индекса в покое (UX задача 14): номер `З-10043` и title `ВРУ 400 А`
+на `/` — класс `.document-link`, цвет и линия акцента `rgb(61, 90, 115)`.
+Штамп `КП готово` остаётся tag задачи 12 (не underline, weight ≤ 400).
+Четыре служебные фразы дословны. `main.css` и кабинет не меняли.
 Ссылки кабинета и листа в покое (UX задача 13): класс `.document-link` —
 цвет и линия акцента `rgb(61, 90, 115)` на имени `КП-З-10043.pdf` в кабинете
 и на «К заявке З-10043» на листе КП и 404 чужого файла. Hover может уходить
-в ink. Индекс `/` не меняли (задача 14).
+в ink.
 Нарезка UX сетки и ссылок в покое (D-042, D-043): промпты
 `docs/ux/task-13.md` … `task-18.md`. Оператор `реализуй ux задачу N` — полный
 вход и цикл implement → review. Код 13–18 не писать в docs-PR нарезки. Задача
@@ -133,7 +137,7 @@ UX/UI понятности (D-036…D-043): docs-only нарезка на `main`
 | UX задача 12 index status stamp       | проверен                          |
 | UX docs сетка и ссылки (D-042…D-043)  | выполнен                          |
 | UX задача 13 document-link cabinet    | проверен                          |
-| UX задача 14 document-link index      | не начата                         |
+| UX задача 14 document-link index      | проверен                          |
 | UX задача 15 files shared grid        | не начата                         |
 | UX задача 16 process shared columns   | не начата                         |
 | UX задача 17 file sheet spec grid     | не начата                         |
@@ -560,3 +564,8 @@ UX/UI понятности (D-036…D-043): docs-only нарезка на `main`
 | 2026-09-12 | UX-13 gates            | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
 | 2026-09-12 | UX-13 format           | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
 | 2026-09-12 | UX-13 review fix       | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 29 passed; rest-state assert: underline + offset 2px                                                                                                       |
+| 2026-09-12 | Merge main #49         | `git fetch origin` / `git pull --ff-only origin main`                                                                                                                                                                                                                                     | `main` `733e735` UX задача 13 (#49)                                                                                                                                |
+| 2026-09-12 | UX-14 TDD red          | `pnpm test:e2e`                                                                                                                                                                                                                                                                           | exit 1: 29 passed, 1 failed; у `З-10043` class `decoration-rule`, нет `.document-link`                                                                             |
+| 2026-09-12 | UX-14 TDD green        | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 30 passed; номер и title color/decoration `rgb(61, 90, 115)`                                                                                               |
+| 2026-09-12 | UX-14 gates            | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-12 | UX-14 format           | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
