@@ -115,12 +115,12 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
           role="listitem"
         >
           <span class="text-sm font-semibold text-ink-muted">{{ fileKindLabel(file.kind) }}</span>
-          <a
+          <NuxtLink
             class="underline decoration-rule underline-offset-2 hover:text-accent"
-            :href="requestFileHref(accessSecret, file.fileName)"
+            :to="requestFileHref(accessSecret, file.fileName)"
           >
             {{ file.fileName }}
-          </a>
+          </NuxtLink>
           <span class="tabular-nums text-sm text-ink-muted">{{
             formatByteSize(file.byteSize)
           }}</span>

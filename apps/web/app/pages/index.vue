@@ -68,7 +68,7 @@ function formatUpdatedAt(iso: string): string {
     <p v-else-if="items.length === 0" class="mt-8 text-ink-muted">Заявок пока нет.</p>
     <ul v-else class="mt-8 divide-y divide-rule">
       <li v-for="item in items" :key="item.publicNumber">
-        <a class="block py-4 text-ink hover:text-accent" :href="item.portalPath">
+        <NuxtLink class="block py-4 text-ink hover:text-accent" :to="item.portalPath">
           <span class="font-semibold tabular-nums underline decoration-rule underline-offset-2">
             {{ item.publicNumber }}
           </span>
@@ -84,7 +84,7 @@ function formatUpdatedAt(iso: string): string {
               {{ formatUpdatedAt(item.updatedAt) }}
             </time>
           </span>
-        </a>
+        </NuxtLink>
       </li>
     </ul>
   </main>
