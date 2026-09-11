@@ -366,6 +366,32 @@ describe('request HTTP', () => {
     ]);
   });
 
+  it('keeps only primary and unique indexes; unique composites already cover requestId lookups', async () => {
+    const { PrismaService } = await import('../persistence/prisma.service.js');
+    const indexes = await app!.get(PrismaService).asClient().$queryRaw<
+      Array<{ indexname: string; tablename: string }>
+    >`
+      SELECT tablename, indexname
+      FROM pg_indexes
+      WHERE schemaname = 'public'
+        AND tablename IN ('Request', 'RequestSpecLine', 'RequestFile', 'RequestStageHistory')
+      ORDER BY tablename, indexname
+    `;
+
+    expect(indexes).toEqual([
+      { indexname: 'Request_accessSecretHash_key', tablename: 'Request' },
+      { indexname: 'Request_pkey', tablename: 'Request' },
+      { indexname: 'Request_publicNumber_key', tablename: 'Request' },
+      { indexname: 'RequestFile_pkey', tablename: 'RequestFile' },
+      { indexname: 'RequestFile_requestId_fileName_key', tablename: 'RequestFile' },
+      { indexname: 'RequestFile_requestId_position_key', tablename: 'RequestFile' },
+      { indexname: 'RequestSpecLine_pkey', tablename: 'RequestSpecLine' },
+      { indexname: 'RequestSpecLine_requestId_position_key', tablename: 'RequestSpecLine' },
+      { indexname: 'RequestStageHistory_pkey', tablename: 'RequestStageHistory' },
+      { indexname: 'RequestStageHistory_requestId_status_key', tablename: 'RequestStageHistory' },
+    ]);
+  });
+
   it('returns 404 Problem Details for an unknown secret without leaking SQL, stack or the secret', async () => {
     const response = await app!.inject({
       method: 'GET',

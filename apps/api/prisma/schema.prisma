@@ -33,8 +33,6 @@ model Request {
   specLines        RequestSpecLine[]
   files            RequestFile[]
   stageHistory     RequestStageHistory[]
-
-  @@index([status])
 }
 
 model RequestSpecLine {
@@ -50,7 +48,6 @@ model RequestSpecLine {
   updatedAt DateTime @updatedAt @db.Timestamptz
 
   @@unique([requestId, position])
-  @@index([requestId])
 }
 
 model RequestFile {
@@ -67,7 +64,6 @@ model RequestFile {
 
   @@unique([requestId, position])
   @@unique([requestId, fileName])
-  @@index([requestId])
 }
 
 model RequestStageHistory {
@@ -80,5 +76,4 @@ model RequestStageHistory {
   updatedAt DateTime      @updatedAt @db.Timestamptz
 
   @@unique([requestId, status])
-  @@index([requestId])
 }
