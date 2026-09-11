@@ -11,6 +11,9 @@ const intendedDatabaseUrl =
 
 const Z10043_SECRET = 'seed-z10043-quote-kuznetsov';
 const UNKNOWN_SECRET = 'unknown-secret-not-in-seed';
+const UNKNOWN_SECRET_A = 'unknown-secret-a';
+const UNKNOWN_SECRET_B = 'unknown-secret-b';
+const SAME_CLIENT_IP = '127.0.0.1';
 
 function expectPrivateNoStore(headers: Record<string, unknown>): void {
   const cacheControl = headers['cache-control'];
@@ -119,11 +122,48 @@ function applyEnv(databaseUrl: string): void {
   process.env.WEB_ORIGIN = 'http://localhost:3000';
 }
 
+function problemDetail(body: unknown): string {
+  return typeof body === 'object' &&
+    body !== null &&
+    'detail' in body &&
+    typeof body.detail === 'string'
+    ? body.detail
+    : '';
+}
+
 async function startSeededApp(): Promise<NestFastifyApplication> {
   applyEnv(intendedDatabaseUrl);
   vi.resetModules();
   const { applyRequestSeed } = await import('./infrastructure/apply-request-seed.js');
   await applyRequestSeed();
+  await applyRequestSeed();
+  const { createApplication } = await import('../bootstrap/create-application.js');
+  const app = await createApplication();
+  await app.init();
+  return app;
+}
+
+async function startSeededAppWithPortalThrottleLimit(
+  limit: number,
+): Promise<NestFastifyApplication> {
+  applyEnv(intendedDatabaseUrl);
+  vi.resetModules();
+  vi.doMock('./http/portal-throttle.js', () => ({
+    PORTAL_THROTTLE_LIMIT: limit,
+    PORTAL_THROTTLE_TTL_MS: 60_000,
+    clientIpTracker: (req: { ip?: string }) =>
+      typeof req.ip === 'string' && req.ip.length > 0 ? req.ip : SAME_CLIENT_IP,
+    portalThrottleKey: (_context: unknown, tracker: string, throttlerName: string) =>
+      `request-portal:${throttlerName}:${tracker}`,
+    portalThrottlerModuleOptions: (overrideLimit = limit) => ({
+      generateKey: (_context: unknown, tracker: string, throttlerName: string) =>
+        `request-portal:${throttlerName}:${tracker}`,
+      getTracker: (req: { ip?: string }) =>
+        typeof req.ip === 'string' && req.ip.length > 0 ? req.ip : SAME_CLIENT_IP,
+      throttlers: [{ ttl: 60_000, limit: overrideLimit }],
+    }),
+  }));
+  const { applyRequestSeed } = await import('./infrastructure/apply-request-seed.js');
   await applyRequestSeed();
   const { createApplication } = await import('../bootstrap/create-application.js');
   const app = await createApplication();
@@ -335,13 +375,7 @@ describe('request HTTP', () => {
       url: `/api/v1/requests/${UNKNOWN_SECRET}`,
     });
     const body: unknown = response.json();
-    const detail =
-      typeof body === 'object' &&
-      body !== null &&
-      'detail' in body &&
-      typeof body.detail === 'string'
-        ? body.detail
-        : '';
+    const detail = problemDetail(body);
 
     expect(response.statusCode).toBe(404);
     expectPrivateNoStore(response.headers);
@@ -356,5 +390,85 @@ describe('request HTTP', () => {
     expect(body).toMatchObject({
       instance: `/api/v1/requests/${UNKNOWN_SECRET}`,
     });
+  });
+
+  it('keeps the default portal throttle at 60 requests per 60 seconds', async () => {
+    const { PORTAL_THROTTLE_LIMIT, PORTAL_THROTTLE_TTL_MS } =
+      await import('./http/portal-throttle.js');
+
+    expect(PORTAL_THROTTLE_LIMIT).toBe(60);
+    expect(PORTAL_THROTTLE_TTL_MS).toBe(60_000);
+  });
+});
+
+describe('request HTTP throttle', () => {
+  let app: NestFastifyApplication | undefined;
+
+  beforeEach(async () => {
+    app = await startSeededAppWithPortalThrottleLimit(1);
+  });
+
+  afterEach(async () => {
+    if (app !== undefined) {
+      await app.close();
+      app = undefined;
+    }
+    vi.doUnmock('./http/portal-throttle.js');
+    vi.resetModules();
+  });
+
+  it('returns 429 Problem Details for a second GET from the same IP against a different unknown secret', async () => {
+    const first = await app!.inject({
+      method: 'GET',
+      remoteAddress: SAME_CLIENT_IP,
+      url: `/api/v1/requests/${UNKNOWN_SECRET_A}`,
+    });
+    const second = await app!.inject({
+      method: 'GET',
+      remoteAddress: SAME_CLIENT_IP,
+      url: `/api/v1/requests/${UNKNOWN_SECRET_B}`,
+    });
+    const body: unknown = second.json();
+    const detail = problemDetail(body);
+
+    expect(first.statusCode).toBe(404);
+    expect(second.statusCode).toBe(429);
+    expect(second.headers['content-type']).toContain('application/problem+json');
+    expect(isProblemDetails(body)).toBe(true);
+    expect(body).toMatchObject({
+      status: 429,
+      title: 'Too many requests',
+    });
+    expect(detail).not.toContain(UNKNOWN_SECRET_A);
+    expect(detail).not.toContain(UNKNOWN_SECRET_B);
+    expect(detail.toLowerCase()).not.toMatch(/select |from |stack|prisma/i);
+  });
+
+  it('does not apply the portal secret limit to health or demo links', async () => {
+    const firstPortal = await app!.inject({
+      method: 'GET',
+      remoteAddress: SAME_CLIENT_IP,
+      url: `/api/v1/requests/${UNKNOWN_SECRET_A}`,
+    });
+    const secondPortal = await app!.inject({
+      method: 'GET',
+      remoteAddress: SAME_CLIENT_IP,
+      url: `/api/v1/requests/${UNKNOWN_SECRET_B}`,
+    });
+    const demo = await app!.inject({
+      method: 'GET',
+      remoteAddress: SAME_CLIENT_IP,
+      url: '/api/v1/demo/links',
+    });
+    const live = await app!.inject({
+      method: 'GET',
+      remoteAddress: SAME_CLIENT_IP,
+      url: '/api/v1/health/live',
+    });
+
+    expect(firstPortal.statusCode).toBe(404);
+    expect(secondPortal.statusCode).toBe(429);
+    expect(demo.statusCode).toBe(200);
+    expect(live.statusCode).toBe(200);
   });
 });
