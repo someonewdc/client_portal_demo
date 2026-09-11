@@ -2,10 +2,14 @@
 
 ## Текущее состояние
 
+Ссылки кабинета и листа в покое (UX задача 13): класс `.document-link` —
+цвет и линия акцента `rgb(61, 90, 115)` на имени `КП-З-10043.pdf` в кабинете
+и на «К заявке З-10043» на листе КП и 404 чужого файла. Hover может уходить
+в ink. Индекс `/` не меняли (задача 14).
 Нарезка UX сетки и ссылок в покое (D-042, D-043): промпты
 `docs/ux/task-13.md` … `task-18.md`. Оператор `реализуй ux задачу N` — полный
 вход и цикл implement → review. Код 13–18 не писать в docs-PR нарезки. Задача
-12 уже на `main` (#47) — 13 можно стартовать после merge этой нарезки.
+12 уже на `main` (#47).
 Штамп статуса на индексе (UX задача 12) на `main` (#47): плашка `statusLabel` —
 `font-normal` (weight 400), светлая `bg-accent/15 text-accent`, не
 semibold-кнопка и не `uppercase`. Строка З-10043 остаётся ссылкой на
@@ -128,7 +132,7 @@ UX/UI понятности (D-036…D-043): docs-only нарезка на `main`
 | UX задача 11 missing file 404         | проверен                          |
 | UX задача 12 index status stamp       | проверен                          |
 | UX docs сетка и ссылки (D-042…D-043)  | выполнен                          |
-| UX задача 13 document-link cabinet    | не начата                         |
+| UX задача 13 document-link cabinet    | проверен                          |
 | UX задача 14 document-link index      | не начата                         |
 | UX задача 15 files shared grid        | не начата                         |
 | UX задача 16 process shared columns   | не начата                         |
@@ -551,3 +555,8 @@ UX/UI понятности (D-036…D-043): docs-only нарезка на `main`
 | 2026-09-11 | UX-12 review fix       | `pnpm test:e2e`                                                                                                                                                                                                                                                                           | exit 0: 28 passed; h1 / дисклеймер / мессенджер / инструкция клика — `exact: true`                                                                                 |
 | 2026-09-11 | UX docs 13–18          | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0; docs-only (D-042…D-043, `docs/ux/task-13`…`18`); lint/test продукта не запускались                                                                         |
 | 2026-09-12 | UX docs review #48     | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | rebase на `main` `a0e9b0a` (#47); задача 12 — `проверен`; task-18 TDD = `Range` по тексту, не box `th`; lint/test продукта не запускались                          |
+| 2026-09-12 | UX-13 TDD red          | `pnpm test:e2e`                                                                                                                                                                                                                                                                           | exit 1: 28 passed, 1 failed; КП-З-10043.pdf rest color `rgb(28, 25, 23)`, нужно `rgb(61, 90, 115)`                                                                 |
+| 2026-09-12 | UX-13 TDD green        | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 29 passed; имя КП и «К заявке З-10043» color/decoration `rgb(61, 90, 115)`                                                                                 |
+| 2026-09-12 | UX-13 gates            | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-12 | UX-13 format           | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
+| 2026-09-12 | UX-13 review fix       | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 29 passed; rest-state assert: underline + offset 2px                                                                                                       |

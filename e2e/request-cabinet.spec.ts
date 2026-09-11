@@ -1,4 +1,4 @@
-import { expect, type Page, test } from '@playwright/test';
+import { expect, type Locator, type Page, test } from '@playwright/test';
 
 const quoteCabinet = {
   accessSecret: 'seed-z10043-quote-kuznetsov',
@@ -337,6 +337,32 @@ async function expectFilesSheetHint(page: Page) {
   await expect(page.locator('main h2 + p')).toHaveText(filesSheetHint);
   await expect(page.locator('main h2 + p + ul[aria-label="Файлы"]')).toBeVisible();
   await expect(page.getByRole('heading', { name: filesSheetHint })).toHaveCount(0);
+}
+
+const documentLinkAccentRgb = 'rgb(61, 90, 115)';
+
+async function expectDocumentLinkRestStyle(link: Locator) {
+  await expect(link).toBeVisible();
+
+  const style = await link.evaluate((node) => {
+    const computed = getComputedStyle(node);
+    return {
+      color: computed.color,
+      textDecorationColor: computed.textDecorationColor,
+      textDecorationLine: computed.textDecorationLine,
+      textUnderlineOffset: computed.textUnderlineOffset,
+    };
+  });
+
+  expect(style.color, 'document link rest color must be accent').toBe(documentLinkAccentRgb);
+  expect(style.textDecorationColor, 'document link rest underline must be accent').toBe(
+    documentLinkAccentRgb,
+  );
+  expect(style.textDecorationLine, 'document link rest decoration must be underline').toBe(
+    'underline',
+  );
+  expect(style.textUnderlineOffset, 'document link rest underline offset must be 2px').toBe('2px');
+  await expect(link).toHaveClass(/document-link/);
 }
 
 async function expectFileNameIsTheOnlyRecordLink(
@@ -768,6 +794,48 @@ test('quote cabinet file records keep one rhythm on a 390px messenger viewport',
 
   await expectFilesSheetHint(page);
   await expectFileRecordsShareOneRhythm(page);
+  await expect(page.getByRole('link', { name: /скачать/i })).toHaveCount(0);
+  await expect(page.locator('[download]')).toHaveCount(0);
+});
+
+test('quote cabinet and file sheet rest-state links use accent color', async ({ page }) => {
+  const cabinetResponse = await page.goto(`/r/${quoteCabinet.accessSecret}`);
+
+  expect(cabinetResponse, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
+  expect(cabinetResponse?.ok()).toBe(true);
+
+  const fileLink = page.getByRole('link', { name: quoteCabinet.quoteFileName, exact: true });
+  await expectDocumentLinkRestStyle(fileLink);
+  await expect(page.getByRole('link', { name: /скачать/i })).toHaveCount(0);
+  await expect(page.locator('[download]')).toHaveCount(0);
+
+  await fileLink.click();
+  await expect(page).toHaveURL(new RegExp(`/r/${quoteCabinet.accessSecret}/d/`));
+  await expect(
+    page.getByRole('heading', { level: 1, name: quoteCabinet.quoteFileName }),
+  ).toBeVisible();
+
+  const sheetBack = page.getByRole('link', { name: `К заявке ${quoteCabinet.publicNumber}` });
+  await expectDocumentLinkRestStyle(sheetBack);
+  await expect(page.getByRole('link', { name: /скачать/i })).toHaveCount(0);
+  await expect(page.locator('[download]')).toHaveCount(0);
+
+  await sheetBack.click();
+  await expect(page).toHaveURL(new RegExp(`/r/${quoteCabinet.accessSecret}$`));
+  await expectCabinetStatusHeader(page, quoteCabinet.publicNumber, quoteCabinet.statusLabel);
+
+  const missingResponse = await page.goto(
+    `/r/${quoteCabinet.accessSecret}/d/${encodeURIComponent('нет-такого.pdf')}`,
+  );
+
+  expect(
+    missingResponse,
+    'GET /r/{secret}/d/{unknown} must receive a response from :3000',
+  ).toBeTruthy();
+  expect(missingResponse?.status()).toBe(404);
+
+  const missingBack = page.getByRole('link', { name: `К заявке ${quoteCabinet.publicNumber}` });
+  await expectDocumentLinkRestStyle(missingBack);
   await expect(page.getByRole('link', { name: /скачать/i })).toHaveCount(0);
   await expect(page.locator('[download]')).toHaveCount(0);
 });
