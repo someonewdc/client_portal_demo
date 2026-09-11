@@ -69,9 +69,6 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
       <p class="mt-3 text-ink-muted">
         Заявки по этой ссылке нет. Проверьте адрес или попросите новую ссылку у менеджера.
       </p>
-      <p v-if="errorTraceId" class="mt-4 tabular-nums text-ink-muted">
-        Код ошибки: {{ errorTraceId }}
-      </p>
     </section>
     <p v-else-if="error" class="text-ink" role="alert">
       Не удалось загрузить заявку.
