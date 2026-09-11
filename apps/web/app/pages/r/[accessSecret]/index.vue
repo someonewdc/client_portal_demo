@@ -99,13 +99,13 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
         <li
           v-for="(stage, index) in request.stages"
           :key="stage.status"
-          class="flex flex-col items-start gap-1 sm:flex-row sm:flex-wrap sm:items-baseline sm:gap-3"
+          class="flex flex-col items-start gap-1 sm:grid sm:grid-cols-[2rem_minmax(0,1fr)_12rem] sm:items-baseline sm:gap-x-3"
           role="listitem"
           :aria-current="stage.status === request.status ? 'step' : undefined"
         >
-          <span class="flex items-baseline gap-3">
+          <span class="flex items-baseline gap-3 sm:contents">
             <span class="tabular-nums text-sm text-ink-muted">{{ index + 1 }}</span>
-            <span :class="stampClass(stage, request.status)">
+            <span :class="[stampClass(stage, request.status), 'w-fit']">
               <span>{{ stage.label }}</span>
               <span v-if="stage.status === request.status" class="sr-only">сейчас</span>
             </span>

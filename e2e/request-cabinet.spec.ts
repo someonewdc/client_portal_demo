@@ -231,6 +231,24 @@ async function expectProcessRibbonStacksOnNarrowPhone(page: Page) {
   await expect(stageRibbon.getByText('ещё нет', { exact: true })).toBeVisible();
 }
 
+async function processStepDateXs(page: Page): Promise<number[]> {
+  return page.getByRole('list', { name: 'Этапы заявки' }).evaluate(async (list) => {
+    await document.fonts.ready;
+    return [...list.querySelectorAll('[role="listitem"]')].map((item, index) => {
+      const dateEl =
+        item.querySelector('time') ??
+        [...item.querySelectorAll('span')].find(
+          (element) => element.textContent?.trim() === 'ещё нет',
+        );
+      if (dateEl == null) {
+        throw new Error(`missing process date or ещё нет in step ${index + 1}`);
+      }
+
+      return dateEl.getBoundingClientRect().x;
+    });
+  });
+}
+
 const specColumnLabels = ['Наименование', 'Кол-во', 'Ед.', 'Комментарий'] as const;
 
 async function expectSpecLineBlockLabels(
@@ -817,6 +835,30 @@ test('quote cabinet process list stays readable on a 390px messenger viewport', 
     pastLabels: ['Принят', 'В расчёте'],
     futureLabel: 'Счёт выставлен',
   });
+});
+
+test('invoice cabinet process dates share one desktop column at 1280px', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const response = await page.goto(`/r/${invoiceCabinet.accessSecret}`);
+
+  expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Счёт выставлен', exact: true }),
+  ).toBeVisible();
+
+  const stageRibbon = page.getByRole('list', { name: 'Этапы заявки' });
+  const stageItems = stageRibbon.getByRole('listitem');
+  await expect(stageItems).toHaveCount(4);
+
+  const current = stageRibbon.locator('[aria-current="step"]');
+  await expect(current).toHaveCount(1);
+  await expect(current).toHaveJSProperty('tagName', 'LI');
+  await expect(current.getByText('Счёт выставлен', { exact: true })).toBeVisible();
+  await expect(current.locator('span.sr-only')).toHaveText('сейчас');
+
+  expectSharedXs(await processStepDateXs(page), 'invoice process date');
 });
 
 test('quote cabinet specification stays readable on a 390px messenger viewport', async ({
