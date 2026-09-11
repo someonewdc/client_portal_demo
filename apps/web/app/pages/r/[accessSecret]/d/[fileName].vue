@@ -51,13 +51,24 @@ useSeoMeta({
 <template>
   <main>
     <p v-if="status === 'pending'" class="text-ink-muted" role="status">Загрузка заявки…</p>
-    <section v-else-if="isNotFound || isMissingFile" role="alert">
+    <section v-else-if="isNotFound" role="alert">
       <h1 class="text-xl font-semibold text-ink">Ссылка недействительна</h1>
       <p class="mt-3 text-ink-muted">
         Заявки по этой ссылке нет. Проверьте адрес или попросите новую ссылку у менеджера.
       </p>
-      <p v-if="errorTraceId" class="mt-4 tabular-nums text-ink-muted">
-        Код ошибки: {{ errorTraceId }}
+    </section>
+    <section v-else-if="isMissingFile && request" role="alert">
+      <h1 class="text-xl font-semibold text-ink">Ссылка недействительна</h1>
+      <p class="mt-3 text-ink-muted">
+        Такого документа в заявке нет. Откройте заявку и выберите имя из списка.
+      </p>
+      <p class="mt-8">
+        <NuxtLink
+          class="underline decoration-rule underline-offset-2 hover:text-accent"
+          :to="`/r/${accessSecret}`"
+        >
+          К заявке {{ request.publicNumber }}
+        </NuxtLink>
       </p>
     </section>
     <p v-else-if="error" class="text-ink" role="alert">

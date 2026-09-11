@@ -842,7 +842,20 @@ test('unknown file name on a live secret is a Russian dead-end', async ({ page }
   await expect(
     deadEnd.getByRole('heading', { level: 1, name: 'Ссылка недействительна' }),
   ).toBeVisible();
-  await expect(deadEnd.getByText(/заявки по этой ссылке нет/i)).toBeVisible();
+  expect(await page.title()).toContain('Ссылка недействительна — ПК «Нордщит»');
+  await expect(
+    deadEnd.getByText('Такого документа в заявке нет. Откройте заявку и выберите имя из списка.', {
+      exact: true,
+    }),
+  ).toBeVisible();
+  await expect(deadEnd.getByText(/Заявки по этой ссылке нет/)).toHaveCount(0);
+  await expect(page.getByText(/Код ошибки:/)).toHaveCount(0);
+
+  const backLink = page.getByRole('link', { name: `К заявке ${quoteCabinet.publicNumber}` });
+  await expect(backLink).toBeVisible();
+  await expect(backLink).toHaveAttribute('href', `/r/${quoteCabinet.accessSecret}`);
+  await expect(page.locator('main a[href="/"]')).toHaveCount(0);
+
   await expect(page.getByRole('heading', { name: quoteCabinet.publicNumber })).toHaveCount(0);
   await expect(page.getByRole('heading', { name: quoteCabinet.quoteFileName })).toHaveCount(0);
 
@@ -900,8 +913,15 @@ test('unknown secret is a Russian dead-end without login and API 404', async ({
     deadEnd.getByRole('heading', { level: 1, name: 'Ссылка недействительна' }),
   ).toBeVisible();
   expect(await page.title()).toContain('Ссылка недействительна — ПК «Нордщит»');
-  await expect(deadEnd.getByText(/заявки по этой ссылке нет/i)).toBeVisible();
-  await expect(deadEnd.getByText(/Код ошибки:/)).toBeVisible();
+  await expect(
+    deadEnd.getByText(
+      'Заявки по этой ссылке нет. Проверьте адрес или попросите новую ссылку у менеджера.',
+      { exact: true },
+    ),
+  ).toBeVisible();
+  await expect(page.getByText(/Код ошибки:/)).toHaveCount(0);
+  await expect(page.getByRole('link', { name: /К заявке/ })).toHaveCount(0);
+  await expect(page.locator('main a[href="/"]')).toHaveCount(0);
   await expect(page.getByText(unknownSecret)).toHaveCount(0);
 
   await expect(page.locator('form')).toHaveCount(0);
