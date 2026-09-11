@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, type Page, test } from '@playwright/test';
 
 const quoteCabinet = {
   accessSecret: 'seed-z10043-quote-kuznetsov',
@@ -15,6 +15,22 @@ const quoteCabinet = {
   quoteFileName: 'КП-З-10043.pdf',
 } as const;
 
+const calculationCabinet = {
+  accessSecret: 'seed-z10042-calc-portline',
+  publicNumber: 'З-10042',
+  statusLabel: 'В расчёте',
+} as const;
+
+async function expectCabinetStatusHeader(page: Page, publicNumber: string, statusLabel: string) {
+  await expect(
+    page.getByRole('heading', { level: 1, name: statusLabel, exact: true }),
+  ).toBeVisible();
+  const publicNumberText = page.getByText(publicNumber, { exact: true });
+  await expect(publicNumberText).toBeVisible();
+  await expect(publicNumberText).toHaveClass(/tabular-nums/);
+  await expect(page.getByRole('heading', { name: publicNumber })).toHaveCount(0);
+}
+
 const unknownSecret = 'this-secret-does-not-exist';
 
 test('quote cabinet shows Z-10043 seed payload from GET /requests/{accessSecret}', async ({
@@ -28,9 +44,8 @@ test('quote cabinet shows Z-10043 seed payload from GET /requests/{accessSecret}
   const banner = page.getByRole('banner');
   await expect(banner.getByText(quoteCabinet.plantName, { exact: true })).toBeVisible();
   await expect(banner.getByRole('heading', { name: quoteCabinet.plantName })).toHaveCount(0);
-  await expect(
-    page.getByRole('heading', { level: 1, name: quoteCabinet.publicNumber }),
-  ).toBeVisible();
+  await expectCabinetStatusHeader(page, quoteCabinet.publicNumber, quoteCabinet.statusLabel);
+  expect(await page.title()).toContain('КП готово — З-10043 — ПК «Нордщит»');
   await expect(page.getByText(quoteCabinet.counterpartyName)).toBeVisible();
   await expect(page.getByText(quoteCabinet.title, { exact: true })).toBeVisible();
 
@@ -63,9 +78,9 @@ test('quote cabinet reads as a status document with a dated process list', async
   await expect(
     page.getByText('Менеджер отправил вам эту ссылку. Вход не нужен.', { exact: true }),
   ).toBeVisible();
-  await expect(
-    page.getByRole('heading', { level: 1, name: quoteCabinet.publicNumber }),
-  ).toBeVisible();
+  await expectCabinetStatusHeader(page, quoteCabinet.publicNumber, quoteCabinet.statusLabel);
+  expect(await page.title()).toContain('КП готово — З-10043 — ПК «Нордщит»');
+  expect(await page.getByText('КП готово', { exact: true }).count()).toBeGreaterThanOrEqual(2);
 
   const stageRibbon = page.getByRole('list', { name: 'Этапы заявки' });
   const stageItems = stageRibbon.getByRole('listitem');
@@ -91,8 +106,11 @@ test('quote cabinet reads as a status document with a dated process list', async
   await expect(invoiceIssued.getByText('ещё нет', { exact: true })).toBeVisible();
   await expect(invoiceIssued.locator('time')).toHaveCount(0);
 
-  await expect(page.getByText('КП готово', { exact: true })).toHaveCount(1);
-  await expect(page.locator(`p > time[datetime="${quoteCabinet.updatedAt}"]`)).toBeVisible();
+  const updatedAt = page.locator(`p > time[datetime="${quoteCabinet.updatedAt}"]`);
+  await expect(updatedAt).toBeVisible();
+  await expect(
+    updatedAt.locator('xpath=ancestor::p[1]').getByText(quoteCabinet.statusLabel, { exact: true }),
+  ).toHaveCount(0);
   await expect(page.getByRole('button')).toHaveCount(0);
   await expect(page.locator('a[href="#"]')).toHaveCount(0);
 });
@@ -178,9 +196,7 @@ test('quote cabinet file sheet returns to the request', async ({ page }) => {
 
   await page.getByRole('link', { name: `К заявке ${quoteCabinet.publicNumber}` }).click();
   await expect(page).toHaveURL(new RegExp(`/r/${quoteCabinet.accessSecret}$`));
-  await expect(
-    page.getByRole('heading', { level: 1, name: quoteCabinet.publicNumber }),
-  ).toBeVisible();
+  await expectCabinetStatusHeader(page, quoteCabinet.publicNumber, quoteCabinet.statusLabel);
 });
 
 test('unknown file name on a live secret is a Russian dead-end', async ({ page }) => {
@@ -205,12 +221,16 @@ test('unknown file name on a live secret is a Russian dead-end', async ({ page }
 });
 
 test('calculation cabinet hides an empty specification comment column', async ({ page }) => {
-  const response = await page.goto('/r/seed-z10042-calc-portline');
+  const response = await page.goto(`/r/${calculationCabinet.accessSecret}`);
 
   expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
   expect(response?.ok()).toBe(true);
 
-  await expect(page.getByRole('heading', { level: 1, name: 'З-10042' })).toBeVisible();
+  await expectCabinetStatusHeader(
+    page,
+    calculationCabinet.publicNumber,
+    calculationCabinet.statusLabel,
+  );
   await expect(page.getByRole('columnheader', { name: 'Комментарий' })).toHaveCount(0);
   await expect(page.getByRole('cell', { name: 'НКУ освещения причала' })).toBeVisible();
 });
@@ -224,9 +244,7 @@ test('index click opens the filled quote cabinet, not an empty shell', async ({ 
   await page.getByRole('link', { name: new RegExp(quoteCabinet.publicNumber) }).click();
   await expect(page).toHaveURL(new RegExp(`/r/${quoteCabinet.accessSecret}$`));
 
-  await expect(
-    page.getByRole('heading', { level: 1, name: quoteCabinet.publicNumber }),
-  ).toBeVisible();
+  await expectCabinetStatusHeader(page, quoteCabinet.publicNumber, quoteCabinet.statusLabel);
   await expect(
     page.getByRole('list', { name: 'Этапы заявки' }).getByText(quoteCabinet.statusLabel, {
       exact: true,

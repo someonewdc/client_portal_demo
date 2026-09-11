@@ -612,7 +612,9 @@ describe('feature 7 request cabinet', () => {
     assert.match(cabinetPage, /Код ошибки:/);
     assert.match(cabinetPage, /role=["']alert["']/);
     assert.match(cabinetSources, /setResponseStatus/);
-    assert.match(cabinetPage, /<h1[^>]*>\{\{\s*request\.publicNumber\s*\}\}<\/h1>/);
+    assert.match(cabinetPage, /<h1[^>]*>\{\{\s*currentStatusLabel\s*\}\}<\/h1>/);
+    assert.match(cabinetPage, /request\.publicNumber/);
+    assert.doesNotMatch(cabinetPage, /<h1[^>]*>\{\{\s*request\.publicNumber\s*\}\}<\/h1>/);
     assert.match(cabinetPage, /tabular-nums/);
     assert.match(cabinetPage, /specLines/);
     assert.match(cabinetPage, /fileName/);
