@@ -2,10 +2,11 @@
 
 ## Текущее состояние
 
-Фича 27 (опубликованные порты Compose только на `127.0.0.1`) в поставке этого PR.
-Фича 26 на `main` (#32). Фича 25 на `main` (#31).
+Сняты избыточные btree-индексы заявки (ветка `chore/drop-redundant-request-indexes`):
+`Request_status_idx` и три `requestId` рядом с unique-композитами. Unique и PK оставлены.
+Фича 27 на `main` (#33). Фича 26 на `main` (#32). Фича 25 на `main` (#31).
 Фича 24 на `main` (#29). Фича 23 на `main` (#28). Фича 22 на `main` (#27).
-Это последняя задача нарезки D-030.
+Нарезка дефектов кода D-030 закрыта.
 Оператор дефектов кода: `выполни задачу N` → `docs/remediation-plan.md`.
 Фича 19 на `main` (#24). Фича 18 на `main` (#23). Фича 17 на `main` (#22).
 Фича 15 на `main` (#20). Фича 14 на `main` (#18, D-030…D-035).
@@ -58,6 +59,7 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | Фича 25 NuxtLink внутренних переходов | проверен                          |
 | Фича 26 Docker USER node              | проверен                          |
 | Фича 27 bind 127.0.0.1                | проверен                          |
+| Drop redundant request indexes        | проверен                          |
 | UX docs нарезка (D-036…D-040)         | выполнен                          |
 | UX задачи 1–12                        | не начаты                         |
 
@@ -400,3 +402,9 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | 2026-09-11 | Фича 27 e2e            | `pnpm test:e2e` против `make up`                                                                                                                                                                                                                                                          | exit 0: 14 passed                                                                                                                                                  |
 | 2026-09-11 | Фича 27 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm format:check` / `git diff --check`                                                                                                                                                                                                          | exit 0; `pnpm test` продукта не запускался: менялись compose.yaml и lifecycle spec                                                                                 |
 | 2026-09-11 | Фича 27 format         | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
+| 2026-09-11 | Merge main #33         | `git fetch origin` / `git pull --ff-only origin main`                                                                                                                                                                                                                                     | `main` `4b4e117` Фича 27 (#33)                                                                                                                                     |
+| 2026-09-11 | Drop indexes TDD red   | `pnpm --filter @client-portal/api exec vitest run src/requests/requests.http.spec.ts`                                                                                                                                                                                                     | exit 1: 11 passed, 1 failed; в `pg_indexes` ещё `Request_status_idx` и три `requestId_idx`                                                                         |
+| 2026-09-11 | Drop indexes migrate   | `pnpm db:generate` затем `pnpm db:migrate`                                                                                                                                                                                                                                                | exit 0; Prisma Client 7.10.0; applied `20260911133000_drop_redundant_request_indexes` на `127.0.0.1:5433`                                                          |
+| 2026-09-11 | Drop indexes TDD green | `pnpm --filter @client-portal/api exec vitest run src/requests/requests.http.spec.ts`                                                                                                                                                                                                     | exit 0: 12 passed; 10 индексов = PK + unique, без `status`/`requestId` btree                                                                                       |
+| 2026-09-11 | Drop indexes format    | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
+| 2026-09-11 | Drop indexes lint      | `pnpm lint`                                                                                                                                                                                                                                                                               | exit 0                                                                                                                                                             |
