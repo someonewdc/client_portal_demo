@@ -2,11 +2,11 @@
 name: implement-review-cycle
 description: >-
   Dispatches one plan item through plan-item-implementer, then
-  plan-diff-reviewer, then resume-implementer on must-fix. Use only when the
-  user writes implement→review / через implement → review, or names this
-  skill. Do not use for a bare «следующий пункт», «суперагент»,
-  выполни задачу N, /review, /review-bugbot, /review-security, or GitHub PR
-  review (pr-review).
+  plan-diff-reviewer, then resume-implementer on must-fix. Use when the
+  user writes implement→review / через implement → review, реализуй ux
+  задачу N, or names this skill. Do not use for a bare «следующий пункт»,
+  «суперагент», выполни задачу N, выполни ux задачу N, /review,
+  /review-bugbot, /review-security, or GitHub PR review (pr-review).
 ---
 
 # Implement → review cycle
@@ -17,11 +17,17 @@ Bugbot, не `pr-review` и не хуки `stop` / `subagentStop`.
 
 ## Opt-in
 
-Цикл включается только если пользователь явно написал `через implement → review`
-/ `implement→review` или назвал этот skill. Голые «суперагент», «следующий
-пункт», `выполни задачу N`, `выполни ux задачу N` — не этот skill: один чат по
-промпту пункта. Если skill открыли без фразы цикла — не диспатчь, скажи
-человеку и остановись.
+Цикл включается, если пользователь явно написал одно из:
+
+- `через implement → review` / `implement→review`;
+- имя этого skill;
+- `реализуй ux задачу N` (D-042: цикл входит во фразу, отдельно «через …»
+  не нужно).
+
+Голые «суперагент», «следующий пункт», `выполни задачу N`, `выполни ux задачу N`
+без фразы цикла и без `реализуй` — не этот skill: один чат по промпту пункта.
+`реализуй задачу N` без слова `ux` цикл не включает и `docs/ux/` не открывает.
+Если skill открыли без фразы цикла — не диспатчь, скажи человеку и остановись.
 
 ## Планы (не выдумывай формат)
 
@@ -31,8 +37,10 @@ Bugbot, не `pr-review` и не хуки `stop` / `subagentStop`.
 Дефекты кода (`выполни задачу N` без `ux`):
 [`docs/remediation-plan.md`](../../../docs/remediation-plan.md) → тот же `feature-NN.md`.
 
-UX (`выполни ux задачу N`): [`docs/ux/README.md`](../../../docs/ux/README.md) →
+UX (`выполни ux задачу N` или `реализуй ux задачу N`):
+[`docs/ux/README.md`](../../../docs/ux/README.md) →
 [`docs/ux/task-NN.md`](../../../docs/ux/task-01.md).
+`реализуй ux задачу N` всегда этот цикл (задачи 13–18 так и задуманы).
 
 Готовность пунктов — [`docs/implementation-status.md`](../../../docs/implementation-status.md)
 (таблица этапов / журнал). В планах нет чекбоксов — не добавляй.
@@ -72,7 +80,9 @@ UX (`выполни ux задачу N`): [`docs/ux/README.md`](../../../docs/ux/
 1. Нет фразы цикла и skill не назван — стоп (раздел Opt-in). Иначе прочитай
    **названный** план и `docs/implementation-status.md`. Возьми один пункт
    (или spec текстом от пользователя). Соседние пункты не открывай. План не
-   назван и нет spec — стоп, спроси человека.
+   назван и нет spec — стоп, спроси человека. `реализуй ux задачу N` называет
+   план [`docs/ux/README.md`](../../../docs/ux/README.md) и пункт
+   `docs/ux/task-NN.md`.
 2. `git status --short`. Если дерево грязное до старта этого пункта (чужой
    unstaged/uncommitted diff) — стоп, скажи человеку. Не запускай implementer
    поверх чужой работы. После implementer грязное дерево ожидаемо.

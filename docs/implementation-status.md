@@ -2,9 +2,13 @@
 
 ## Текущее состояние
 
-Штамп статуса на индексе (UX задача 12): плашка `statusLabel` — `font-normal`
-(weight 400), светлая `bg-accent/15 text-accent`, не semibold-кнопка и не
-`uppercase`. Строка З-10043 остаётся ссылкой на
+Нарезка UX сетки и ссылок в покое (D-042, D-043): промпты
+`docs/ux/task-13.md` … `task-18.md`. Оператор `реализуй ux задачу N` — полный
+вход и цикл implement → review. Код 13–18 не писать в docs-PR нарезки. Задача
+12 уже на `main` (#47) — 13 можно стартовать после merge этой нарезки.
+Штамп статуса на индексе (UX задача 12) на `main` (#47): плашка `statusLabel` —
+`font-normal` (weight 400), светлая `bg-accent/15 text-accent`, не
+semibold-кнопка и не `uppercase`. Строка З-10043 остаётся ссылкой на
 `/r/seed-z10043-quote-kuznetsov`; `getByRole('button')` = 0. Четыре служебные
 фразы дословны (D-027). Штамп ленты кабинета не меняли (задача 6).
 Тупики 404 на `main` (#46, UX задача 11): живая заявка и чужое имя — текст
@@ -20,7 +24,8 @@
 (`quantity` / `unit` / `comment`); title `{kindLabel} — {publicNumber} — ПК «Нордщит»`.
 `h1` остаётся `fileName`; «К заявке» и клик имени не ослаблены.
 Цикл implement→review (ветка `chore/implement-review-cycle`, #44): opt-in
-только по `через implement → review`; родитель не пишет код.
+по `через implement → review` или `реализуй ux задачу N` (D-042); родитель не
+пишет код.
 Файлы кабинета на `main` (#43): сразу под `Файлы` фраза
 `Имя открывает выписку на экране.`; кликабельно только имя на HTML-лист;
 тип, размер и дата в одной сетке на `li` (D-039, UX задача 9).
@@ -53,17 +58,17 @@
 Фича 15 на `main` (#20). Фича 14 на `main` (#18, D-030…D-035).
 Вендорные Prisma agent skills (D-041) на `main` (#30).
 
-UX/UI понятности (D-036…D-040): docs-only нарезка на `main` (#19); задача 1 на
+UX/UI понятности (D-036…D-043): docs-only нарезка на `main` (#19); задача 1 на
 `main` (#35); задача 2 на `main` (#36); задача 3 на `main` (#37); задача 4 на
 `main` (#38); задача 5 на `main` (#39); задача 6 на `main` (#40); задача 7 на
 `main` (#41); задача 8 на `main` (#42); задача 9 на `main` (#43); задача 10 на
-`main` (#45); задача 11 на `main` (#46); задача 12 на ветке
-`fix/ux-index-status-stamp`.
+`main` (#45); задача 11 на `main` (#46); задача 12 на `main` (#47).
 Оператор
-`выполни ux задачу N` → `docs/ux/README.md`. Цикл —
-только с `через implement → review` (skill `implement-review-cycle`).
-Без `ux` фраза `выполни задачу N` не ведёт в `docs/ux/`. Не класть
-UX-промпты в `docs/llm/feature-NN.md`.
+`выполни ux задачу N` → `docs/ux/README.md` (задачи 1–12, один чат).
+`реализуй ux задачу N` → тот же каталог + цикл (задачи 13–18, D-042).
+`через implement → review` по-прежнему включает цикл для любого пункта.
+Без `ux` фразы `выполни задачу N` и `реализуй задачу N` не ведут в
+`docs/ux/`. Не класть UX-промпты в `docs/llm/feature-NN.md`.
 
 ## Правила обновления
 
@@ -122,6 +127,13 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | UX задача 10 file sheet extract       | проверен                          |
 | UX задача 11 missing file 404         | проверен                          |
 | UX задача 12 index status stamp       | проверен                          |
+| UX docs сетка и ссылки (D-042…D-043)  | выполнен                          |
+| UX задача 13 document-link cabinet    | не начата                         |
+| UX задача 14 document-link index      | не начата                         |
+| UX задача 15 files shared grid        | не начата                         |
+| UX задача 16 process shared columns   | не начата                         |
+| UX задача 17 file sheet spec grid     | не начата                         |
+| UX задача 18 spec qty column          | не начата                         |
 
 ## Журнал проверки
 
@@ -537,3 +549,5 @@ UX-промпты в `docs/llm/feature-NN.md`.
 | 2026-09-11 | UX-12 gates            | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
 | 2026-09-11 | UX-12 format           | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
 | 2026-09-11 | UX-12 review fix       | `pnpm test:e2e`                                                                                                                                                                                                                                                                           | exit 0: 28 passed; h1 / дисклеймер / мессенджер / инструкция клика — `exact: true`                                                                                 |
+| 2026-09-11 | UX docs 13–18          | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0; docs-only (D-042…D-043, `docs/ux/task-13`…`18`); lint/test продукта не запускались                                                                         |
+| 2026-09-12 | UX docs review #48     | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | rebase на `main` `a0e9b0a` (#47); задача 12 — `проверен`; task-18 TDD = `Range` по тексту, не box `th`; lint/test продукта не запускались                          |
