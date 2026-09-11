@@ -77,9 +77,11 @@ function formatUpdatedAt(iso: string): string {
             {{ item.publicNumber }}
           </span>
           <span class="text-ink-muted"> · {{ item.counterpartyName }}</span>
-          <span class="document-link mt-1 block">{{ item.title }}</span>
+          <span class="mt-1 block">
+            <span class="document-link">{{ item.title }}</span>
+          </span>
           <span class="mt-2 flex flex-wrap items-center gap-3">
-            <span class="inline-block bg-accent/15 px-2 py-0.5 text-sm font-normal text-accent">
+            <span class="status-stamp text-sm">
               {{ item.statusLabel }}
             </span>
             <time class="text-sm tabular-nums text-ink-muted" :datetime="item.updatedAt">
