@@ -2,6 +2,12 @@
 
 ## Текущее состояние
 
+Общая сетка файлов (UX задача 15): в блоке «Файлы» у каждого `li` один
+`grid-template-columns` (не `auto` под тип). От `40rem` четыре колонки
+тип / имя / размер / дата (`9rem | 1fr | 4.5rem | 12rem`); ниже — две общие
+(`9rem | 1fr`). На З-10044 имена (и на 390px даты) в одном X, страница без
+горизонтального скролла. Фраза `Имя открывает выписку на экране.` и клик
+только имени на З-10043 не ослаблены.
 Начертание ссылки в покое (D-044): `.document-link` — типографика, не рамка.
 Линия 2px / offset 3px, лёгкая плашка акцента 10% с `box-decoration-break: clone`.
 «К заявке» с декоративной `←`. Штамп статуса (D-045, D-040 уточнён) — `.status-stamp`: чернила
@@ -76,7 +82,8 @@ UX/UI понятности (D-036…D-043): docs-only нарезка на `main`
 `main` (#38); задача 5 на `main` (#39); задача 6 на `main` (#40); задача 7 на
 `main` (#41); задача 8 на `main` (#42); задача 9 на `main` (#43); задача 10 на
 `main` (#45); задача 11 на `main` (#46); задача 12 на `main` (#47);
-задача 13 на `main` (#49); задача 14 на `main` (#50).
+задача 13 на `main` (#49); задача 14 на `main` (#50); задача 15 на ветке
+`fix/ux-files-shared-grid`.
 Оператор
 `выполни ux задачу N` → `docs/ux/README.md` (задачи 1–12, один чат).
 `реализуй ux задачу N` → тот же каталог + цикл (задачи 13–18, D-042).
@@ -144,7 +151,7 @@ UX/UI понятности (D-036…D-043): docs-only нарезка на `main`
 | UX docs сетка и ссылки (D-042…D-043)  | выполнен                          |
 | UX задача 13 document-link cabinet    | проверен                          |
 | UX задача 14 document-link index      | проверен                          |
-| UX задача 15 files shared grid        | не начата                         |
+| UX задача 15 files shared grid        | проверен                          |
 | UX задача 16 process shared columns   | не начата                         |
 | UX задача 17 file sheet spec grid     | не начата                         |
 | UX задача 18 spec qty column          | не начата                         |
@@ -582,3 +589,7 @@ UX/UI понятности (D-036…D-043): docs-only нарезка на `main`
 | 2026-09-12 | PR #51 review canon    | `pnpm exec playwright test --workers=2` против `make dev` + seed                                                                                                                                                                                                                          | exit 0: 30 passed; D-040 снят запрет переноса штампа; `cursor: default` закреплён; «К заявке» `exact: true`                                                        |
 | 2026-09-12 | Merge main #50         | `git fetch origin` / `git merge origin/main`                                                                                                                                                                                                                                              | `main` `0e0dc42` UX задача 14 (#50); конфликт индекса/e2e/status — оставлены D-044/D-045                                                                           |
 | 2026-09-12 | Merge #50 e2e          | `pnpm exec playwright test --workers=2` против `make dev` + seed                                                                                                                                                                                                                          | exit 0: 30 passed                                                                                                                                                  |
+| 2026-09-12 | UX-15 TDD red          | `pnpm test:e2e`                                                                                                                                                                                                                                                                           | exit 1: 31 passed, 2 failed; шаблоны `103.828px 215.188px …` vs `19.25px 299.766px …`; имя X 106.69 vs 163.83 (Δ 57.14px)                                           |
+| 2026-09-12 | UX-15 TDD green        | `pnpm exec playwright test e2e/request-cabinet.spec.ts --workers=2` против `make dev` + seed                                                                                                                                                                                              | exit 0: 25 passed; З-10044 имена/даты в одном X; `grid-template-columns` идентичны; З-10043 hint + имя-ссылка + ритм                                               |
+| 2026-09-12 | UX-15 gates            | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-12 | UX-15 format           | `pnpm exec prettier --write e2e/request-cabinet.spec.ts apps/web/app/pages/r/[accessSecret]/index.vue` затем `prettier --check` и `git diff --check`                                                                                                                                      | exit 0                                                                                                                                                             |
