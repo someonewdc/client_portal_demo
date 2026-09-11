@@ -10,6 +10,7 @@ import {
   formatRequestUpdatedAt,
   requestFileHref,
 } from '~/utils/request-file-display';
+import { requestNextStepPhrase } from '~/utils/request-next-step';
 
 const { accessSecret, error, errorTraceId, isNotFound, request, status } = await useRequestPortal();
 
@@ -95,6 +96,7 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
           </time>
         </dd>
       </dl>
+      <p class="mt-4 text-ink">{{ requestNextStepPhrase(request.status) }}</p>
 
       <ol class="mt-8 space-y-3" aria-label="Этапы заявки" role="list">
         <li

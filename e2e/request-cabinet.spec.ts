@@ -21,6 +21,33 @@ const calculationCabinet = {
   statusLabel: 'В расчёте',
 } as const;
 
+const nextStepCabinets = [
+  {
+    accessSecret: 'seed-z10041-accepted-severenergo',
+    publicNumber: 'З-10041',
+    statusLabel: 'Принят',
+    phrase: 'Заявку приняли. Сейчас готовят расчёт.',
+  },
+  {
+    accessSecret: calculationCabinet.accessSecret,
+    publicNumber: calculationCabinet.publicNumber,
+    statusLabel: calculationCabinet.statusLabel,
+    phrase: 'Идёт расчёт. Коммерческое предложение ещё не готово.',
+  },
+  {
+    accessSecret: quoteCabinet.accessSecret,
+    publicNumber: quoteCabinet.publicNumber,
+    statusLabel: quoteCabinet.statusLabel,
+    phrase: 'Коммерческое предложение готово. Счёт ещё не выставлен.',
+  },
+  {
+    accessSecret: 'seed-z10044-invoice-teplitsy',
+    publicNumber: 'З-10044',
+    statusLabel: 'Счёт выставлен',
+    phrase: 'Счёт выставлен. Оплата в этом окне не принимается.',
+  },
+] as const;
+
 async function expectCabinetStatusHeader(page: Page, publicNumber: string, statusLabel: string) {
   await expect(
     page.getByRole('heading', { level: 1, name: statusLabel, exact: true }),
@@ -64,6 +91,22 @@ async function expectCabinetFieldLabels(
   const updatedValue = updatedLabel.locator('xpath=following-sibling::dd[1]');
   await expect(updatedValue.locator(`time[datetime="${fields.updatedAt}"]`)).toBeVisible();
   await expect(updatedValue.getByText(fields.statusLabel, { exact: true })).toHaveCount(0);
+}
+
+async function expectCabinetNextStepPhrase(page: Page, phrase: string) {
+  const nextStep = page.getByText(phrase, { exact: true });
+  await expect(nextStep).toBeVisible();
+  await expect(nextStep).toHaveCount(1);
+  await expect(nextStep).toHaveJSProperty('tagName', 'P');
+  await expect(page.locator('main dl + p')).toHaveText(phrase);
+  await expect(page.locator('main dl + p + ol[aria-label="Этапы заявки"]')).toBeVisible();
+  await expect(page.getByRole('banner').getByText(phrase, { exact: true })).toHaveCount(0);
+  await expect(page.getByRole('alert').getByText(phrase, { exact: true })).toHaveCount(0);
+
+  await expect(page.getByRole('button')).toHaveCount(0);
+  await expect(page.locator('a[href="#"]')).toHaveCount(0);
+  await expect(page.getByRole('link', { name: /оплатить/i })).toHaveCount(0);
+  await expect(page.getByText(/оплатить/i)).toHaveCount(0);
 }
 
 const unknownSecret = 'this-secret-does-not-exist';
@@ -159,6 +202,22 @@ test('quote cabinet labels customer, product, and updated date', async ({ page }
   await expectCabinetStatusHeader(page, quoteCabinet.publicNumber, quoteCabinet.statusLabel);
   await expectCabinetFieldLabels(page, quoteCabinet);
 });
+
+for (const cabinet of nextStepCabinets) {
+  test(`${cabinet.publicNumber} tells the viewer what happens next`, async ({ page }) => {
+    const response = await page.goto(`/r/${cabinet.accessSecret}`);
+
+    expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
+    expect(response?.ok()).toBe(true);
+
+    await expectCabinetStatusHeader(page, cabinet.publicNumber, cabinet.statusLabel);
+    await expectCabinetNextStepPhrase(page, cabinet.phrase);
+
+    if (cabinet.publicNumber === quoteCabinet.publicNumber) {
+      await expectCabinetFieldLabels(page, quoteCabinet);
+    }
+  });
+}
 
 test('quote cabinet lists files as records and keeps the comment column', async ({ page }) => {
   const response = await page.goto(`/r/${quoteCabinet.accessSecret}`);
