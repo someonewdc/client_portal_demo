@@ -144,6 +144,81 @@ async function expectCurrentProcessStep(
   await expect(future.locator('span.sr-only')).toHaveCount(0);
 }
 
+async function expectProcessRibbonStacksOnNarrowPhone(page: Page) {
+  const stageRibbon = page.getByRole('list', { name: 'Этапы заявки' });
+  const stageItems = stageRibbon.getByRole('listitem');
+  await expect(stageItems).toHaveCount(4);
+
+  let previousBottom = Number.NEGATIVE_INFINITY;
+
+  for (const label of quoteCabinet.stages) {
+    const item = stageItems.filter({ hasText: label });
+    await expect(item.getByText(label, { exact: true })).toBeVisible();
+
+    const layout = await item.evaluate((li, stageLabel) => {
+      const stampLabel = [...li.querySelectorAll('span')].find((element) => {
+        const text = element.textContent?.replace(/\s*сейчас\s*$/u, '').trim();
+        return text === stageLabel && element.children.length === 0;
+      });
+      const dateEl =
+        li.querySelector('time') ??
+        [...li.querySelectorAll('span')].find(
+          (element) => element.textContent?.trim() === 'ещё нет',
+        );
+
+      if (stampLabel == null || dateEl == null) {
+        return null;
+      }
+
+      const stampRect = stampLabel.getBoundingClientRect();
+      const dateRect = dateEl.getBoundingClientRect();
+      const itemRect = li.getBoundingClientRect();
+
+      return {
+        bottom: itemRect.y + itemRect.height,
+        clientWidth: li.clientWidth,
+        dateClientWidth: dateEl.clientWidth,
+        dateScrollWidth: dateEl.scrollWidth,
+        dateY: dateRect.y,
+        flexDirection: getComputedStyle(li).flexDirection,
+        scrollWidth: li.scrollWidth,
+        stampClientWidth: stampLabel.clientWidth,
+        stampScrollWidth: stampLabel.scrollWidth,
+        stampY: stampRect.y,
+        top: itemRect.y,
+      };
+    }, label);
+
+    expect(layout, `${label}: stamp and date exist`).not.toBeNull();
+    if (layout == null) {
+      continue;
+    }
+
+    expect(layout.scrollWidth, `${label} step must not clip horizontally`).toBeLessThanOrEqual(
+      layout.clientWidth + 1,
+    );
+    expect(layout.stampScrollWidth, `${label} stamp must not clip`).toBeLessThanOrEqual(
+      layout.stampClientWidth + 1,
+    );
+    expect(layout.dateScrollWidth, `${label} date must not clip`).toBeLessThanOrEqual(
+      layout.dateClientWidth + 1,
+    );
+
+    expect(
+      layout.dateY,
+      `${label}: date/ещё нет (y=${layout.dateY}) must sit below the stamp (y=${layout.stampY})`,
+    ).toBeGreaterThan(layout.stampY + 4);
+    expect(layout.flexDirection, `${label}: item stacks as a column below 40rem`).toBe('column');
+
+    expect(layout.top, `${label} must not overlap the previous step`).toBeGreaterThanOrEqual(
+      previousBottom - 1,
+    );
+    previousBottom = layout.bottom;
+  }
+
+  await expect(stageRibbon.getByText('ещё нет', { exact: true })).toBeVisible();
+}
+
 const unknownSecret = 'this-secret-does-not-exist';
 
 test('quote cabinet shows Z-10043 seed payload from GET /requests/{accessSecret}', async ({
@@ -250,6 +325,24 @@ test('quote cabinet marks the current process step for assistive tech', async ({
     page,
     'Коммерческое предложение готово. Счёт ещё не выставлен.',
   );
+  await expectCurrentProcessStep(page, {
+    currentLabel: quoteCabinet.statusLabel,
+    pastLabels: ['Принят', 'В расчёте'],
+    futureLabel: 'Счёт выставлен',
+  });
+});
+
+test('quote cabinet process list stays readable on a 390px messenger viewport', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const response = await page.goto(`/r/${quoteCabinet.accessSecret}`);
+
+  expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expectCabinetStatusHeader(page, quoteCabinet.publicNumber, quoteCabinet.statusLabel);
+  await expectProcessRibbonStacksOnNarrowPhone(page);
   await expectCurrentProcessStep(page, {
     currentLabel: quoteCabinet.statusLabel,
     pastLabels: ['Принят', 'В расчёте'],

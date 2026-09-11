@@ -2,7 +2,10 @@
 
 ## Текущее состояние
 
-Текущий шаг ленты (ветка `fix/ux-process-current`): у пункта
+Лента на 390px (ветка `fix/ux-process-narrow`): пункт `< 40rem` — колонка
+(счётчик+штамп / дата или `ещё нет`); от `40rem` строка как в задаче 6;
+`aria-current="step"` сохранён (D-038, UX задача 7).
+Текущий шаг ленты на `main` (#40): у пункта
 `stage.status === request.status` стоит `aria-current="step"` и внутри штампа
 `span.sr-only` «сейчас»; будущие по-прежнему `ещё нет` (D-038, UX задача 6).
 Фраза «что дальше» на `main` (#39): один `<p>` после подписей полей, до ленты;
@@ -26,7 +29,8 @@
 
 UX/UI понятности (D-036…D-040): docs-only нарезка на `main` (#19); задача 1 на
 `main` (#35); задача 2 на `main` (#36); задача 3 на `main` (#37); задача 4 на
-`main` (#38); задача 5 на `main` (#39); задача 6 — этот PR. Оператор
+`main` (#38); задача 5 на `main` (#39); задача 6 на `main` (#40); задача 7 —
+этот PR. Оператор
 `выполни ux задачу N` → `docs/ux/README.md`. Без `ux` фраза
 `выполни задачу N` не ведёт в
 `docs/ux/`. Не класть UX-промпты в `docs/llm/feature-NN.md`.
@@ -81,7 +85,8 @@ UX/UI понятности (D-036…D-040): docs-only нарезка на `main`
 | UX задача 4 cabinet field labels      | проверен                          |
 | UX задача 5 cabinet next-step phrase  | проверен                          |
 | UX задача 6 process current step      | проверен                          |
-| UX задачи 7–12                        | не начаты                         |
+| UX задача 7 process list 390px        | проверен                          |
+| UX задачи 8–12                        | не начаты                         |
 
 ## Журнал проверки
 
@@ -463,3 +468,8 @@ UX/UI понятности (D-036…D-040): docs-only нарезка на `main`
 | 2026-09-11 | UX-6 TDD green         | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 21 passed; текущий `li` = `aria-current="step"` и `span.sr-only` «сейчас»                                                                                  |
 | 2026-09-11 | UX-6 gates             | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
 | 2026-09-11 | UX-6 format            | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
+| 2026-09-11 | Merge main #40         | `git fetch origin` / `git merge --ff-only origin/main`                                                                                                                                                                                                                                    | `main` `6658d6e` UX задача 6 (#40)                                                                                                                                 |
+| 2026-09-11 | UX-7 TDD red           | `pnpm test:e2e`                                                                                                                                                                                                                                                                           | exit 1: 21 passed, 1 failed; на 390px у «Принят» date.y 571 не ниже stamp.y 572, `flex-direction` `row`                                                            |
+| 2026-09-11 | UX-7 TDD green         | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 22 passed; лента колонка на 390px, desktop e2e задачи 6 зелёный                                                                                            |
+| 2026-09-11 | UX-7 gates             | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, 5 tarballs                                                                                                                                 |
+| 2026-09-11 | UX-7 format            | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0                                                                                                                                                             |
