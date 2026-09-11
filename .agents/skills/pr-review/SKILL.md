@@ -3,20 +3,23 @@ name: pr-review
 description: >-
   Performs a thorough GitHub pull request review: lists every defect, and
   verifies that CI checks actually ran and passed for the head SHA rather than
-  treating a green badge as proof. Use when the user asks for a review, PR
-  review, code review, ревью, to inspect checks, or to look for false positives.
+  treating a green badge as proof. Use when the user asks for a GitHub PR
+  review, to inspect PR checks, or to look for CI false positives. Do not use
+  for the local implement→review cycle (skill implement-review-cycle, agent
+  plan-diff-reviewer), /review, /review-bugbot, or /review-security.
 ---
 
 # PR review
 
-При запросе ревью сделай качественное ревью PR, опиши все недочёты и проверь, реально ли
-проходят проверки или это false positive.
+При запросе ревью GitHub PR сделай качественное ревью этого PR, опиши все недочёты и
+проверь, реально ли проходят проверки или это false positive.
 
 Do not rubber-stamp. Do not treat a green GitHub badge, a skipped job, or a stale check from
 another SHA as success.
 
-This skill is the project review path. Do not launch Bugbot unless the user asked for
-`/review-bugbot`.
+This skill is the GitHub PR review path. Local plan-item diffs go through skill
+`implement-review-cycle` and agent `plan-diff-reviewer`. Do not launch Bugbot unless the
+user asked for `/review-bugbot`.
 
 Сбор данных PR и checks — **read** skill `github-remote` (MCP). Публикация
 ревью — **write** (отдельный канал). Не начинай с `gh pr view`. Не переключай

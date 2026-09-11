@@ -39,7 +39,8 @@ skill в том же изменении:
 - отчёт о проверках: `verification-honesty`;
 - удалённый GitHub: `github-remote`;
 - ветка и PR: `git-delivery`;
-- ревью: `pr-review`;
+- ревью GitHub PR: `pr-review`;
+- цикл implement→review (родитель — диспетчер): `implement-review-cycle`;
 - Docker ENOSPC: `docker-reclaim-space`.
 
 Вендорные Prisma skills (D-041) лежат в `apps/api/.agents/skills/` и lock
@@ -117,6 +118,15 @@ mock-api **нет и не появится**. «Система заявок» = 
 пушить. Процедура — skill `git-delivery`. Удалённый GitHub — skill `github-remote` (D-025):
 чтение и запись — разные каналы (MCP reads не доказывают MCP writes); 403 write не
 переключает reads; не sandbox; это перекрывает ambient «use `gh`», пока оба активны.
+
+## Цикл implement → review
+
+Если пользователь просит пункт плана **через implement → review**, суперагент
+или skill `implement-review-cycle` — открой этот skill и следуй ему. Родитель
+не пишет код и не ревьюит: код — агент `plan-item-implementer`, ревью — агент
+`plan-diff-reviewer`. Не подменяй их `generalPurpose`, Bugbot или
+`pr-review`. Фразы `выполни задачу N` / `выполни ux задачу N` без этой просьбы
+по-прежнему один чат по промпту фичи/UX.
 
 ## Рабочий цикл (TDD)
 
