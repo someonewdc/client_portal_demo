@@ -2,6 +2,12 @@
 
 ## Текущее состояние
 
+Нарезка UX иерархии документа (D-047, D-048): промпты
+`docs/ux/task-19.md` и `task-20.md`. Оператор `реализуй ux задачу N` — полный
+вход и цикл implement → review. Код 19–20 не писать в docs-PR нарезки. Задача
+18 уже на `main` (#55). Классы `.document-display` / `.document-identity` /
+`.document-section` / `.document-caption` / `.document-summary` — в промптах,
+в CSS этого PR нет.
 Русские формулировки кабинета (D-046): под «Файлы» —
 `Имя файла открывает выписку на экране.`; дисклеймер листа —
 `Это выписка на экране, а не файл для скачивания.`; тупик чужого файла —
@@ -100,7 +106,7 @@
 Фича 15 на `main` (#20). Фича 14 на `main` (#18, D-030…D-035).
 Вендорные Prisma agent skills (D-041) на `main` (#30).
 
-UX/UI понятности (D-036…D-043): docs-only нарезка на `main` (#19); задача 1 на
+UX/UI понятности (D-036…D-048): docs-only нарезка на `main` (#19); задача 1 на
 `main` (#35); задача 2 на `main` (#36); задача 3 на `main` (#37); задача 4 на
 `main` (#38); задача 5 на `main` (#39); задача 6 на `main` (#40); задача 7 на
 `main` (#41); задача 8 на `main` (#42); задача 9 на `main` (#43); задача 10 на
@@ -110,7 +116,7 @@ UX/UI понятности (D-036…D-043): docs-only нарезка на `main`
 задача 18 на `main` (#55).
 Оператор
 `выполни ux задачу N` → `docs/ux/README.md` (задачи 1–12, один чат).
-`реализуй ux задачу N` → тот же каталог + цикл (задачи 13–18, D-042).
+`реализуй ux задачу N` → тот же каталог + цикл (задачи 13–20, D-042 / D-047).
 `через implement → review` по-прежнему включает цикл для любого пункта.
 Без `ux` фразы `выполни задачу N` и `реализуй задачу N` не ведут в
 `docs/ux/`. Не класть UX-промпты в `docs/llm/feature-NN.md`.
@@ -179,6 +185,7 @@ UX/UI понятности (D-036…D-043): docs-only нарезка на `main`
 | UX задача 16 process shared columns   | проверен                          |
 | UX задача 17 file sheet spec grid     | проверен                          |
 | UX задача 18 spec qty column          | проверен                          |
+| UX docs иерархия (D-047…D-048)        | выполнен                          |
 
 ## Журнал проверки
 
@@ -637,3 +644,4 @@ UX/UI понятности (D-036…D-043): docs-only нарезка на `main`
 | 2026-09-12 | D-046 gates            | `pnpm generate:api` / `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                        | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
 | 2026-09-12 | D-046 format           | `pnpm exec prettier --write` затронутых vue/ts/md/e2e затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                      | exit 0                                                                                                                                                             |
 | 2026-09-12 | D-046 TDD green full   | `pnpm exec playwright test --workers=1` против `make dev` + seed                                                                                                                                                                                                                          | exit 0: 37 passed (demo-links, focus-visible, layout-header, request-cabinet, security-headers)                                                                    |
+| 2026-09-12 | UX docs 19–20          | `pnpm exec prettier --write` затронутых md затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                 | exit 0; docs-only (D-047…D-048, `docs/ux/task-19`…`20`); lint/test продукта не запускались                                                                         |

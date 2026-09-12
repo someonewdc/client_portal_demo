@@ -72,7 +72,7 @@ LLM часто пишет код, затем тесты «под него». Т�
 - F25 пишет source-контракт `NuxtLink` **до** Vue (F16 уже в `main`).
 - F26 пишет source-контракт `USER node` **до** Dockerfile.
 - F27 пишет source-контракт `127.0.0.1:` в compose **до** правки портов.
-- UX docs-нарезка (D-036 / D-042, `docs/ux/`, вход `выполни ux задачу N` /
+- UX docs-нарезка (D-036 / D-042 / D-047, `docs/ux/`, вход `выполни ux задачу N` /
   `реализуй ux задачу N`) — отдельного red продукта нет.
 - UX задача 1 пишет e2e `:focus-visible` outline **до** CSS.
 - UX задача 2 пишет e2e «бренд не heading / смысловой h1 / title» **до** layout.
@@ -93,6 +93,10 @@ LLM часто пишет код, затем тесты «под него». Т�
 - UX задача 17 пишет e2e общих X qty на листе **до** таблицы листа.
 - UX задача 18 пишет e2e одной текстовой строки «Кол-во» (`Range` по текстовому
   узлу, не `th.getClientRects()`) **до** ширин колонок.
+- UX задача 19 пишет e2e `fontSize`/`color` ролей (h1 24px, номер 18px, секции
+  18px, caption 13px muted, `dd` изделия ink) **до** CSS классов.
+- UX задача 20 пишет e2e общих Y подписи и значения `dl` на 1280px **до**
+  `.document-summary`.
 - Селекторы: role / label / осмысленный `data-testid`, не CSS-хрупкость. Без
   `waitForTimeout` как синхронизации (`verification-honesty`).
 - Scenario-mutating e2e — serial. Этот демо read-only, мутаций нет.
