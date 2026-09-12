@@ -1,3 +1,6 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { expect, type Locator, type Page, test } from '@playwright/test';
 
 const quoteCabinet = {
@@ -390,6 +393,21 @@ async function expectFilesSheetHint(page: Page) {
 const documentLinkAccentRgb = 'rgb(61, 90, 115)';
 const statusStampInkRgb = 'rgb(28, 25, 23)';
 const statusStampPlateRgb = 'rgb(214, 208, 196)';
+const documentInkRgb = 'rgb(28, 25, 23)';
+const documentMutedRgb = 'rgb(92, 86, 78)';
+
+async function computedTypeMetrics(target: Locator) {
+  return target.evaluate(async (element) => {
+    await document.fonts.ready;
+    const computed = getComputedStyle(element);
+    return {
+      color: computed.color,
+      fontSize: computed.fontSize,
+      fontWeight: computed.fontWeight,
+      marginTop: computed.marginTop,
+    };
+  });
+}
 
 async function expectStatusStampLooksLikeTag(target: Locator, label: string) {
   const style = await target.evaluate((node) => {
@@ -1436,4 +1454,137 @@ test('unknown secret is a Russian dead-end without login and API 404', async ({
   expect(detail.toLowerCase()).not.toMatch(/select |from |stack|prisma/i);
   expect(instance).toContain('/api/v1/requests/');
   expect(traceId.length).toBeGreaterThan(0);
+});
+
+test('quote cabinet uses document type roles for heading, number, and sections', async ({
+  page,
+}) => {
+  const response = await page.goto(`/r/${quoteCabinet.accessSecret}`);
+
+  expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expectCabinetStatusHeader(page, quoteCabinet.publicNumber, quoteCabinet.statusLabel);
+  await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+
+  const statusHeading = page.getByRole('heading', {
+    exact: true,
+    level: 1,
+    name: quoteCabinet.statusLabel,
+  });
+  const statusMetrics = await computedTypeMetrics(statusHeading);
+  expect(statusMetrics.fontSize, 'cabinet h1 must be display 24px').toBe('24px');
+  expect(statusMetrics.fontWeight, 'cabinet h1 must be semibold 600').toBe('600');
+
+  const publicNumber = page.getByText(quoteCabinet.publicNumber, { exact: true });
+  const numberMetrics = await computedTypeMetrics(publicNumber);
+  expect(numberMetrics.fontSize, 'cabinet publicNumber must be identity 18px').toBe('18px');
+
+  const filesHeading = page.getByRole('heading', { exact: true, level: 2, name: 'Файлы' });
+  const filesMetrics = await computedTypeMetrics(filesHeading);
+  expect(filesMetrics.fontSize, 'files heading must be section 18px').toBe('18px');
+  expect(filesMetrics.fontWeight, 'files heading must be semibold 600').toBe('600');
+  expect(filesMetrics.marginTop, 'files heading must sit 40px below the previous block').toBe(
+    '40px',
+  );
+
+  const specTable = page.getByRole('table', { name: 'Спецификация' });
+  const specCaption = specTable.locator('caption');
+  const captionMetrics = await computedTypeMetrics(specCaption);
+  expect(captionMetrics.fontSize, 'spec caption must be section 18px').toBe('18px');
+  expect(captionMetrics.fontWeight, 'spec caption must be semibold 600').toBe('600');
+  expect(captionMetrics.marginTop, 'spec caption must sit 40px below the previous block').toBe(
+    '40px',
+  );
+
+  const tableMetrics = await computedTypeMetrics(specTable);
+  expect(tableMetrics.marginTop, 'spec table must not add mt-8 on top of the caption').toBe('0px');
+
+  const customerDt = page.locator('dt', { hasText: /^Заказчик$/ });
+  const dtMetrics = await computedTypeMetrics(customerDt);
+  expect(dtMetrics.fontSize, 'field labels must be caption 13px').toBe('13px');
+  expect(dtMetrics.color, 'field labels must be muted').toBe(documentMutedRgb);
+
+  const productDd = page
+    .locator('dt', { hasText: /^Изделие$/ })
+    .locator('xpath=following-sibling::dd[1]');
+  const productMetrics = await computedTypeMetrics(productDd);
+  expect(productMetrics.color, 'product value must be ink, not muted').toBe(documentInkRgb);
+
+  await expectCabinetFieldLabels(page, quoteCabinet);
+  await expectCabinetNextStepPhrase(
+    page,
+    'Коммерческое предложение готово. Счёт ещё не выставлен.',
+  );
+});
+
+test('quote file sheet uses document type roles for heading, number, and specification', async ({
+  page,
+}) => {
+  const sheetPath = `/r/${quoteCabinet.accessSecret}/d/${encodeURIComponent(quoteCabinet.quoteFileName)}`;
+  const response = await page.goto(sheetPath);
+
+  expect(response, 'GET /r/{secret}/d/{fileName} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+  await expect(
+    page.getByRole('heading', { exact: true, name: quoteCabinet.publicNumber }),
+  ).toHaveCount(0);
+
+  const heading = page.getByRole('heading', { level: 1, name: quoteCabinet.quoteFileName });
+  const headingMetrics = await computedTypeMetrics(heading);
+  expect(headingMetrics.fontSize, 'file sheet h1 must be display 24px').toBe('24px');
+  expect(headingMetrics.fontWeight, 'file sheet h1 must be semibold 600').toBe('600');
+
+  const publicNumber = page.getByText(quoteCabinet.publicNumber, { exact: true });
+  const numberMetrics = await computedTypeMetrics(publicNumber);
+  expect(numberMetrics.fontSize, 'file sheet publicNumber must be identity 18px').toBe('18px');
+
+  const specTable = page.getByRole('table', { name: 'Спецификация' });
+  const captionMetrics = await computedTypeMetrics(specTable.locator('caption'));
+  expect(captionMetrics.marginTop, 'file sheet spec caption must sit 40px below').toBe('40px');
+
+  const tableMetrics = await computedTypeMetrics(specTable);
+  expect(tableMetrics.marginTop, 'file sheet spec table must not add extra top margin').toBe('0px');
+});
+
+test('unknown secret dead-end heading uses document display type role', async ({ page }) => {
+  const response = await page.goto(`/r/${unknownSecret}`);
+
+  expect(response, 'GET /r/{unknown} must receive a response from :3000').toBeTruthy();
+  expect(response?.status()).toBe(404);
+
+  const heading = page.getByRole('heading', { level: 1, name: 'Ссылка недействительна' });
+  await expect(heading).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+
+  const metrics = await computedTypeMetrics(heading);
+  expect(metrics.fontSize, 'unknown-secret 404 h1 must be display 24px').toBe('24px');
+  expect(metrics.fontWeight, 'unknown-secret 404 h1 must be semibold 600').toBe('600');
+});
+
+test('unknown file name dead-end heading uses document display type role', async ({ page }) => {
+  const response = await page.goto(
+    `/r/${quoteCabinet.accessSecret}/d/${encodeURIComponent('нет-такого.pdf')}`,
+  );
+
+  expect(response, 'GET /r/{secret}/d/{unknown} must receive a response from :3000').toBeTruthy();
+  expect(response?.status()).toBe(404);
+
+  const heading = page.getByRole('heading', { level: 1, name: 'Ссылка недействительна' });
+  await expect(heading).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+
+  const metrics = await computedTypeMetrics(heading);
+  expect(metrics.fontSize, 'missing-file 404 h1 must be display 24px').toBe('24px');
+  expect(metrics.fontWeight, 'missing-file 404 h1 must be semibold 600').toBe('600');
+});
+
+test('document type role class names are declared in main.css', () => {
+  const css = readFileSync(join(process.cwd(), 'apps/web/app/assets/css/main.css'), 'utf8');
+  expect(css, 'D-048 display class').toContain('.document-display');
+  expect(css, 'D-048 identity class').toContain('.document-identity');
+  expect(css, 'D-048 section class').toContain('.document-section');
+  expect(css, 'D-048 caption class').toContain('.document-caption');
 });
