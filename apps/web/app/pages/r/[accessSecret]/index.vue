@@ -4,6 +4,7 @@ import { computed } from 'vue';
 
 import { useRequestPortal } from '~/composables/useRequestPortal';
 import { documentStatusFromAsyncData } from '~/utils/async-data-problem';
+import { LIVE_CABINET_POLL_HINT, shouldPollLiveCabinet } from '~/utils/live-cabinet-poll';
 import {
   fileKindLabel,
   formatByteSize,
@@ -48,6 +49,8 @@ const hasSpecComments = computed(
   () => request.value?.specLines.some((line) => Boolean(line.comment)) === true,
 );
 
+const showLivePollHint = computed(() => shouldPollLiveCabinet(request.value));
+
 function stampClass(stage: { reachedAt: string | null; status: string }, currentStatus: string) {
   if (stage.status === currentStatus) {
     return 'status-stamp text-sm';
@@ -81,6 +84,7 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
       <h1 class="document-display mt-1">{{ currentStatusLabel }}</h1>
       <p class="document-identity mt-2 tabular-nums">{{ request.publicNumber }}</p>
       <p class="mt-4 text-ink">Менеджер отправил вам эту ссылку. Вход не нужен.</p>
+      <p v-if="showLivePollHint" class="mt-4 text-ink">{{ LIVE_CABINET_POLL_HINT }}</p>
       <dl class="document-summary mt-4">
         <dt class="document-caption">Заказчик</dt>
         <dd class="mt-1 text-ink sm:mt-0">{{ request.counterpartyName }}</dd>

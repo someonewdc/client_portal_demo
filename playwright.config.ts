@@ -12,6 +12,8 @@ const webServer = {
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: true,
+  // One worker: F31–33 mutate the same З-10046 row (testing.md serial) and share the F24 GET bucket.
+  workers: 1,
   forbidOnly: Boolean(process.env.CI),
   retries: 0,
   reporter: 'list',

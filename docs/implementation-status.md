@@ -14,7 +14,10 @@ seed пяти каталожных + живая З-10046; `GET /demo/links` — 
 Фича 32: пульт `/c/{conductorSecret}` (кнопки «Продвинуть по статусу» /
 «Сбросить» через POST с секретом из path, не `NUXT_PUBLIC_*`); индекс —
 ссылка «Пульт смены шага»; чужой секрет — тупик 404 как у кабинета.
-Фича 33 (poll кабинета) не начата. Каталог пяти и
+Фича 33: кабинет живой З-10046 поллит `GET /requests/{secret}` раз в 4 с
+только при `demoLive === true`; фраза D-052 про обновление на глазах;
+каталожный З-10043 без фразы и без poll; `/r/**` без SWR/ISR; кнопок
+пульта на кабинете нет. Каталог пяти и
 UX-задачи 1–20 на `main` не откатывались.
 Summary list реквизитов (UX задача 20): класс `.document-summary` на одном
 `dl` кабинета (Заказчик / Изделие / Обновлено) и одном листа (Заказчик /
@@ -212,7 +215,7 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | Фича 30 conductor API                 | проверен                          |
 | Фича 31 экран /start                  | проверен                          |
 | Фича 32 экран пульта                  | проверен                          |
-| Фича 33 poll кабинета живой заявки    | не начат                          |
+| Фича 33 poll кабинета живой заявки    | проверен                          |
 
 ## Журнал проверки
 
@@ -712,3 +715,6 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | 2026-09-12 | Фича 32 TDD red        | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 1: 5 failed, 1 did not run, 55 passed; GET `/c/{fixture}` не ok; на индексе нет «Пульт смены шага»; `/c/nope` без h1 «Ссылка недействительна»                 |
 | 2026-09-12 | Фича 32 TDD green      | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 61 passed; `/c/nope` 404 D-039; `/c/{fixture}` «Пульт показа»; advance → «В расчёте»; reset → «Принят»; индекс «Пульт смены шага»; capability `/c/**`      |
 | 2026-09-12 | Фича 32 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 58, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-12 | Фича 33 TDD red        | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 1: 2 failed, 1 did not run, 62 passed; нет `apps/web/app/utils/live-cabinet-poll.ts`; на живом кабинете нет фразы D-052                                       |
+| 2026-09-12 | Фича 33 TDD green      | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 65 passed; POST advance → h1 «В расчёте» без новой навигации; фраза D-052 на З-10046; З-10043 без фразы; `/r/**` без swr/isr; workers 1                    |
+| 2026-09-12 | Фича 33 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 58, web 18, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
