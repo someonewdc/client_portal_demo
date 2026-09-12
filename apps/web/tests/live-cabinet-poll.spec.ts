@@ -4,6 +4,7 @@ import { describe, it } from 'node:test';
 import {
   LIVE_CABINET_POLL_HINT,
   LIVE_CABINET_POLL_INTERVAL_MS,
+  shouldApplyLiveCabinetPollResult,
   shouldPollLiveCabinet,
 } from '../app/utils/live-cabinet-poll.ts';
 
@@ -15,6 +16,23 @@ describe('live cabinet poll', () => {
     assert.equal(shouldPollLiveCabinet({ demoLive: false }), false);
     assert.equal(shouldPollLiveCabinet(null), false);
     assert.equal(shouldPollLiveCabinet(undefined), false);
+  });
+
+  it('drops a poll result when the access secret has changed', () => {
+    assert.equal(
+      shouldApplyLiveCabinetPollResult(
+        'seed-z10046-live-severnaya-duga',
+        'seed-z10046-live-severnaya-duga',
+      ),
+      true,
+    );
+    assert.equal(
+      shouldApplyLiveCabinetPollResult(
+        'seed-z10046-live-severnaya-duga',
+        'seed-z10043-quote-kuznetsov',
+      ),
+      false,
+    );
   });
 
   it('keeps the D-052 live cabinet phrase exact', () => {

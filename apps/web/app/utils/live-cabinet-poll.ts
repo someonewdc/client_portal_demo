@@ -8,3 +8,10 @@ export function shouldPollLiveCabinet(
 ): boolean {
   return portal?.demoLive === true;
 }
+
+export function shouldApplyLiveCabinetPollResult(
+  requestedAccessSecret: string,
+  currentAccessSecret: string,
+): boolean {
+  return requestedAccessSecret === currentAccessSecret;
+}

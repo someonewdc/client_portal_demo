@@ -1,5 +1,5 @@
 import { createError, useAsyncData, useNuxtApp, useRoute } from 'nuxt/app';
-import { computed, onScopeDispose, watch } from 'vue';
+import { computed, getCurrentScope } from 'vue';
 
 import {
   asyncDataProblemPayload,
@@ -7,7 +7,12 @@ import {
   statusCodeFromThrown,
   traceIdFromAsyncDataError,
 } from '~/utils/async-data-problem';
-import { LIVE_CABINET_POLL_INTERVAL_MS, shouldPollLiveCabinet } from '~/utils/live-cabinet-poll';
+import { bindLiveCabinetPoll } from '~/utils/bind-live-cabinet-poll';
+import {
+  LIVE_CABINET_POLL_INTERVAL_MS,
+  shouldApplyLiveCabinetPollResult,
+  shouldPollLiveCabinet,
+} from '~/utils/live-cabinet-poll';
 import { requestPortalCacheKey } from '~/utils/request-portal-cache-key';
 import { routeParamValue } from '~/utils/route-param-value';
 
@@ -15,6 +20,7 @@ export async function useRequestPortal() {
   const { $api } = useNuxtApp();
   const route = useRoute();
   const accessSecret = computed(() => routeParamValue(route.params.accessSecret));
+  const liveCabinetScope = import.meta.client ? getCurrentScope() : undefined;
 
   const { data, error, status } = await useAsyncData(
     () => requestPortalCacheKey(accessSecret.value),
@@ -48,55 +54,36 @@ export async function useRequestPortal() {
   const errorTraceId = computed(() => traceIdFromAsyncDataError(error.value));
   const isNotFound = computed(() => statusCodeFromAsyncDataError(error.value, 0) === 404);
 
-  let pollTimer: ReturnType<typeof setInterval> | undefined;
+  if (import.meta.client && liveCabinetScope) {
+    liveCabinetScope.run(() => {
+      bindLiveCabinetPoll<NonNullable<typeof data.value>>({
+        applyPortal: (secret, portal) => {
+          if (!shouldApplyLiveCabinetPollResult(secret, accessSecret.value)) {
+            return;
+          }
 
-  function stopLiveCabinetPoll() {
-    if (pollTimer === undefined) {
-      return;
-    }
+          data.value = portal;
+        },
+        fetchPortal: async (secret) => {
+          try {
+            const response = await $api.GET('/requests/{accessSecret}', {
+              params: { path: { accessSecret: secret } },
+            });
+            return response.data?.data;
+          } catch (caught) {
+            if (data.value != null) {
+              return undefined;
+            }
 
-    clearInterval(pollTimer);
-    pollTimer = undefined;
-  }
-
-  async function pollLiveCabinet() {
-    if (!shouldPollLiveCabinet(data.value)) {
-      stopLiveCabinetPoll();
-      return;
-    }
-
-    const secret = accessSecret.value;
-    try {
-      const response = await $api.GET('/requests/{accessSecret}', {
-        params: { path: { accessSecret: secret } },
+            throw caught;
+          }
+        },
+        getAccessSecret: () => accessSecret.value,
+        getDemoLive: () => (shouldPollLiveCabinet(data.value) ? true : undefined),
+        getReady: () => status.value === 'success',
+        intervalMs: LIVE_CABINET_POLL_INTERVAL_MS,
       });
-      const portal = response.data?.data;
-      if (portal) {
-        data.value = portal;
-      }
-    } catch (caught) {
-      if (data.value != null) {
-        return;
-      }
-
-      throw caught;
-    }
-  }
-
-  function syncLiveCabinetPoll() {
-    stopLiveCabinetPoll();
-    if (!import.meta.client || !shouldPollLiveCabinet(data.value)) {
-      return;
-    }
-
-    pollTimer = setInterval(() => {
-      void pollLiveCabinet();
-    }, LIVE_CABINET_POLL_INTERVAL_MS);
-  }
-
-  if (import.meta.client) {
-    watch(() => data.value?.demoLive, syncLiveCabinetPoll, { immediate: true });
-    onScopeDispose(stopLiveCabinetPoll);
+    });
   }
 
   return {

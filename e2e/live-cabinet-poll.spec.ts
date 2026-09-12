@@ -70,10 +70,18 @@ test('live cabinet poll interval is 4s, gated on demoLive, and /r/** has no swr/
   const pollSource = repoFile('apps/web/app/utils/live-cabinet-poll.ts');
   expect(pollSource).toMatch(/export const LIVE_CABINET_POLL_INTERVAL_MS = 4000;/);
   expect(pollSource).toContain('demoLive === true');
+  expect(pollSource).toContain('shouldApplyLiveCabinetPollResult');
 
   const portal = repoFile('apps/web/app/composables/useRequestPortal.ts');
   expect(portal).toContain('LIVE_CABINET_POLL_INTERVAL_MS');
   expect(portal).toContain('shouldPollLiveCabinet');
+  expect(portal).toContain('shouldApplyLiveCabinetPollResult');
+  expect(portal).toContain('bindLiveCabinetPoll');
+  const scopeAt = portal.indexOf('getCurrentScope()');
+  const awaitAt = portal.indexOf('await useAsyncData');
+  expect(scopeAt, 'capture the page scope before await useAsyncData').toBeGreaterThanOrEqual(0);
+  expect(awaitAt, 'useAsyncData must stay async').toBeGreaterThan(scopeAt);
+  expect(portal).toContain('liveCabinetScope.run');
 
   const nuxtConfig = repoFile('apps/web/nuxt.config.ts');
   const liveCabinetRule = routeRuleBlock(nuxtConfig, '/r/**');
