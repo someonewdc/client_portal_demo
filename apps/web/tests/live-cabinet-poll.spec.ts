@@ -35,10 +35,10 @@ describe('live cabinet poll', () => {
     );
   });
 
-  it('keeps the D-052 live cabinet phrase exact', () => {
+  it('keeps the D-055 live cabinet phrase exact', () => {
     assert.equal(
       LIVE_CABINET_POLL_HINT,
-      'Эта заявка обновляется на глазах. Обновится сама через несколько секунд.',
+      'Эта заявка обновляется на глазах. Страница обновится сама через несколько секунд.',
     );
   });
 });

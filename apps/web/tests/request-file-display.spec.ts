@@ -37,7 +37,7 @@ describe('request file display', () => {
   it('maps catalog kinds to document sheet lead sentences', () => {
     assert.equal(fileSheetLead('questionnaire'), 'Исходные требования.');
     assert.equal(fileSheetLead('quote'), 'Коммерческое предложение.');
-    assert.equal(fileSheetLead('invoice'), 'Счёт.');
+    assert.equal(fileSheetLead('invoice'), 'Выставленный счёт.');
   });
 
   it('throws on an unknown kind instead of an empty sheet lead', () => {
@@ -64,14 +64,14 @@ describe('request file display', () => {
       'Ниже — позиции коммерческого предложения. Это не счёт и не исходный опросный лист.',
     );
     assert.equal(quote.tableCaption, 'Спецификация');
-    assert.equal(quote.closing, 'Это предложение, не счёт. Счёт выставляется отдельно.');
+    assert.equal(quote.closing, 'Это предложение, а не счёт. Счёт выставляется отдельно.');
 
     assert.equal(
       invoice.followOn,
       'Ниже — позиции выставленного счёта. Это не коммерческое предложение и не опросный лист.',
     );
     assert.equal(invoice.tableCaption, 'Позиции счёта');
-    assert.equal(invoice.closing, 'Счёт выставлен. Оплата в этом окне не принимается.');
+    assert.equal(invoice.closing, 'Счёт выставлен. Оплата на этой странице не принимается.');
 
     assert.notEqual(questionnaire.followOn, quote.followOn);
     assert.notEqual(questionnaire.followOn, invoice.followOn);

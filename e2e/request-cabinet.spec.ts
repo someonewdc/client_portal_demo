@@ -57,7 +57,7 @@ const invoiceFileSheetKinds = [
     lead: 'Коммерческое предложение.',
     followOn: 'Ниже — позиции коммерческого предложения. Это не счёт и не исходный опросный лист.',
     tableCaption: 'Спецификация',
-    closing: 'Это предложение, не счёт. Счёт выставляется отдельно.',
+    closing: 'Это предложение, а не счёт. Счёт выставляется отдельно.',
     titlePrefix: 'КП',
     specLines: [
       { name: 'Щит управления теплицами', quantity: '1', unit: 'комплект' },
@@ -69,11 +69,11 @@ const invoiceFileSheetKinds = [
     kind: 'invoice',
     fileName: invoiceCabinet.fileNames[2],
     kindLabel: 'Счёт',
-    lead: 'Счёт.',
+    lead: 'Выставленный счёт.',
     followOn:
       'Ниже — позиции выставленного счёта. Это не коммерческое предложение и не опросный лист.',
     tableCaption: 'Позиции счёта',
-    closing: 'Счёт выставлен. Оплата в этом окне не принимается.',
+    closing: 'Счёт выставлен. Оплата на этой странице не принимается.',
     titlePrefix: 'Счёт',
     specLines: [
       { name: 'Щит управления теплицами', quantity: '1', unit: 'комплект' },
@@ -105,7 +105,7 @@ const nextStepCabinets = [
     accessSecret: 'seed-z10044-invoice-teplitsy',
     publicNumber: 'З-10044',
     statusLabel: 'Счёт выставлен',
-    phrase: 'Счёт выставлен. Оплата в этом окне не принимается.',
+    phrase: 'Счёт выставлен. Оплата на этой странице не принимается.',
   },
 ] as const;
 
@@ -429,7 +429,7 @@ async function countColumnHeaderTextLineBoxes(header: Locator): Promise<number> 
   });
 }
 
-const filesSheetHint = 'Имя файла открывает выписку на экране.';
+const filesSheetHint = 'Нажмите имя файла — откроется выписка на экране.';
 
 async function expectFilesSheetHint(page: Page) {
   await expect(page.getByRole('heading', { level: 2, name: 'Файлы', exact: true })).toBeVisible();

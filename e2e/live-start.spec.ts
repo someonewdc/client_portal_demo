@@ -14,14 +14,15 @@ const startCopy = {
   heading: 'Подать заявку',
   title: 'Подать заявку — ПК «Нордщит»',
   firstParagraph:
-    'Щит, НКУ или комплект нельзя купить карточкой с полки. На заводе заявку принимают письмом или от менеджера. Здесь одна кнопка заменяет этот вход, чтобы сразу открыть ссылку заказчика.',
-  secondParagraph: 'После отправки откроется ссылка, которую менеджер отправил бы в мессенджер.',
+    'Щит, НКУ или комплект с полки не купить. Заявку на заводе принимают письмом или через менеджера. Эта кнопка заменяет такой вход и сразу открывает ссылку заказчика.',
+  secondParagraph:
+    'После отправки откроется та же ссылка, которую менеджер отправил бы в мессенджер.',
   button: 'Подать заявку',
 } as const;
 
 const conductorCopy = {
   heading: 'Пульт показа',
-  advance: 'Продвинуть по статусу',
+  advance: 'Продвинуть заявку',
   reset: 'Сбросить',
 } as const;
 
@@ -149,7 +150,7 @@ test('index live block links to /start and keeps the four D-027 phrases exact', 
   ).toBeVisible();
 
   await expect(page.getByRole('heading', { exact: true, name: 'Живой показ' })).toBeVisible();
-  const startLink = page.getByRole('link', { exact: true, name: 'Как заказчик начинает' });
+  const startLink = page.getByRole('link', { exact: true, name: 'Как заказчик подаёт заявку' });
   await expect(startLink).toBeVisible();
   await expect(startLink).toHaveAttribute('href', '/start');
   await expect(page.getByRole('button')).toHaveCount(0);
