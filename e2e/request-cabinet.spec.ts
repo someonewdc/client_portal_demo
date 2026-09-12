@@ -409,6 +409,76 @@ async function computedTypeMetrics(target: Locator) {
   });
 }
 
+type SummaryPairValue = 'dd' | 'time';
+
+type SummaryPairLayout = {
+  alignItems: string;
+  dtBottom: number;
+  dtRight: number;
+  dtTop: number;
+  valueBottom: number;
+  valueTop: number;
+  valueX: number;
+};
+
+async function summaryPairLayout(
+  page: Page,
+  label: string,
+  value: SummaryPairValue = 'dd',
+): Promise<SummaryPairLayout> {
+  return page.locator('main dl').evaluate(
+    async (dl, args) => {
+      await document.fonts.ready;
+      const dt = [...dl.querySelectorAll('dt')].find((el) => el.textContent?.trim() === args.label);
+      if (dt == null) {
+        throw new Error(`missing dt «${args.label}»`);
+      }
+
+      const dd = dt.nextElementSibling;
+      if (dd == null || dd.tagName !== 'DD') {
+        throw new Error(`missing following-sibling dd for «${args.label}»`);
+      }
+
+      const valueEl = args.value === 'time' ? dd.querySelector('time') : dd;
+      if (valueEl == null) {
+        throw new Error(`missing ${args.value} for «${args.label}»`);
+      }
+
+      const dtRect = dt.getBoundingClientRect();
+      const valueRect = valueEl.getBoundingClientRect();
+      return {
+        alignItems: getComputedStyle(dl).alignItems,
+        dtBottom: dtRect.bottom,
+        dtRight: dtRect.right,
+        dtTop: dtRect.top,
+        valueBottom: valueRect.bottom,
+        valueTop: valueRect.top,
+        valueX: valueRect.x,
+      };
+    },
+    { label, value },
+  );
+}
+
+function expectSummaryPairSideBySide(layout: SummaryPairLayout, label: string) {
+  expect(
+    layout.valueX,
+    `${label}: value x=${layout.valueX} must sit beside dt right=${layout.dtRight}`,
+  ).toBeGreaterThanOrEqual(layout.dtRight - 2);
+  expect(
+    layout.dtTop < layout.valueBottom && layout.valueTop < layout.dtBottom,
+    `${label}: dt [${layout.dtTop}, ${layout.dtBottom}] must overlap value [${layout.valueTop}, ${layout.valueBottom}] vertically`,
+  ).toBe(true);
+  expect(layout.alignItems, `${label}: dl align-items must be baseline`).toBe('baseline');
+}
+
+function expectSummaryPairStacked(layout: SummaryPairLayout, label: string) {
+  expect(
+    layout.dtBottom,
+    `${label}: dt bottom=${layout.dtBottom} must sit above value top=${layout.valueTop}`,
+  ).toBeLessThanOrEqual(layout.valueTop);
+}
+
 async function expectStatusStampLooksLikeTag(target: Locator, label: string) {
   const style = await target.evaluate((node) => {
     const stamp = node.closest('.status-stamp') ?? node;
@@ -1587,4 +1657,102 @@ test('document type role class names are declared in main.css', () => {
   expect(css, 'D-048 identity class').toContain('.document-identity');
   expect(css, 'D-048 section class').toContain('.document-section');
   expect(css, 'D-048 caption class').toContain('.document-caption');
+});
+
+test('quote cabinet metadata reads as a summary list at 1280px', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const response = await page.goto(`/r/${quoteCabinet.accessSecret}`);
+
+  expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expectCabinetStatusHeader(page, quoteCabinet.publicNumber, quoteCabinet.statusLabel);
+
+  const heading = page.getByRole('heading', {
+    exact: true,
+    level: 1,
+    name: quoteCabinet.statusLabel,
+  });
+  const headingMetrics = await computedTypeMetrics(heading);
+  expect(headingMetrics.fontSize, 'cabinet h1 must stay display 24px').toBe('24px');
+
+  expectSummaryPairSideBySide(await summaryPairLayout(page, 'Заказчик'), 'cabinet Заказчик');
+  expectSummaryPairSideBySide(await summaryPairLayout(page, 'Изделие'), 'cabinet Изделие');
+  await expect(page.locator('main dl')).toHaveClass(/document-summary/);
+
+  await expectCabinetNextStepPhrase(
+    page,
+    'Коммерческое предложение готово. Счёт ещё не выставлен.',
+  );
+});
+
+test('quote file sheet metadata reads as a summary list at 1280px', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const sheetPath = `/r/${quoteCabinet.accessSecret}/d/${encodeURIComponent(quoteCabinet.quoteFileName)}`;
+  const response = await page.goto(sheetPath);
+
+  expect(response, 'GET /r/{secret}/d/{fileName} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expect(
+    page.getByRole('heading', { level: 1, name: quoteCabinet.quoteFileName }),
+  ).toBeVisible();
+
+  expectSummaryPairSideBySide(await summaryPairLayout(page, 'Заказчик'), 'sheet Заказчик');
+  expectSummaryPairSideBySide(
+    await summaryPairLayout(page, 'Загружено', 'time'),
+    'sheet Загружено',
+  );
+  await expect(page.locator('main dl')).toHaveClass(/document-summary/);
+});
+
+test('quote cabinet and file sheet metadata stack on a 390px messenger viewport', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const cabinetResponse = await page.goto(`/r/${quoteCabinet.accessSecret}`);
+
+  expect(cabinetResponse, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
+  expect(cabinetResponse?.ok()).toBe(true);
+
+  await expectCabinetStatusHeader(page, quoteCabinet.publicNumber, quoteCabinet.statusLabel);
+  expectSummaryPairStacked(await summaryPairLayout(page, 'Заказчик'), 'cabinet Заказчик');
+  expectSummaryPairStacked(await summaryPairLayout(page, 'Изделие'), 'cabinet Изделие');
+  expectSummaryPairStacked(await summaryPairLayout(page, 'Обновлено', 'time'), 'cabinet Обновлено');
+
+  const cabinetScrollWidth = await page.evaluate(async () => {
+    await document.fonts.ready;
+    return document.documentElement.scrollWidth;
+  });
+  expect(cabinetScrollWidth, '390px cabinet must not scroll horizontally').toBeLessThanOrEqual(390);
+
+  const sheetPath = `/r/${quoteCabinet.accessSecret}/d/${encodeURIComponent(quoteCabinet.quoteFileName)}`;
+  const sheetResponse = await page.goto(sheetPath);
+
+  expect(
+    sheetResponse,
+    'GET /r/{secret}/d/{fileName} must receive a response from :3000',
+  ).toBeTruthy();
+  expect(sheetResponse?.ok()).toBe(true);
+
+  await expect(
+    page.getByRole('heading', { level: 1, name: quoteCabinet.quoteFileName }),
+  ).toBeVisible();
+  expectSummaryPairStacked(await summaryPairLayout(page, 'Заказчик'), 'sheet Заказчик');
+  expectSummaryPairStacked(await summaryPairLayout(page, 'Изделие'), 'sheet Изделие');
+  expectSummaryPairStacked(await summaryPairLayout(page, 'Загружено', 'time'), 'sheet Загружено');
+  expectSummaryPairStacked(await summaryPairLayout(page, 'Размер'), 'sheet Размер');
+
+  const sheetScrollWidth = await page.evaluate(async () => {
+    await document.fonts.ready;
+    return document.documentElement.scrollWidth;
+  });
+  expect(sheetScrollWidth, '390px file sheet must not scroll horizontally').toBeLessThanOrEqual(
+    390,
+  );
+});
+
+test('document summary list class name is declared in main.css', () => {
+  const css = readFileSync(join(process.cwd(), 'apps/web/app/assets/css/main.css'), 'utf8');
+  expect(css, 'D-048 summary class').toContain('.document-summary');
 });

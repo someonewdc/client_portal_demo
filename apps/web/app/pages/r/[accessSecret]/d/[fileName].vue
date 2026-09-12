@@ -82,19 +82,19 @@ useSeoMeta({
       <p class="document-caption">{{ fileKindLabel(file.kind) }}</p>
       <h1 class="document-display mt-1">{{ file.fileName }}</h1>
       <p class="document-identity mt-2 tabular-nums">{{ request.publicNumber }}</p>
-      <dl class="mt-4">
+      <dl class="document-summary mt-4">
         <dt class="document-caption">Заказчик</dt>
-        <dd class="mt-1 text-ink">{{ request.counterpartyName }}</dd>
-        <dt class="mt-2 document-caption">Изделие</dt>
-        <dd class="mt-1 text-ink">{{ request.title }}</dd>
-        <dt class="mt-4 document-caption">Загружено</dt>
-        <dd class="mt-1">
+        <dd class="mt-1 text-ink sm:mt-0">{{ request.counterpartyName }}</dd>
+        <dt class="mt-2 document-caption sm:mt-0">Изделие</dt>
+        <dd class="mt-1 text-ink sm:mt-0">{{ request.title }}</dd>
+        <dt class="mt-4 document-caption sm:mt-0">Загружено</dt>
+        <dd class="mt-1 sm:mt-0">
           <time class="text-sm tabular-nums text-ink-muted" :datetime="file.uploadedAt">
             {{ formatRequestUpdatedAt(file.uploadedAt) }}
           </time>
         </dd>
-        <dt class="mt-2 document-caption">Размер</dt>
-        <dd class="mt-1 tabular-nums text-sm text-ink-muted">
+        <dt class="mt-2 document-caption sm:mt-0">Размер</dt>
+        <dd class="mt-1 tabular-nums text-sm text-ink-muted sm:mt-0">
           {{ formatByteSize(file.byteSize) }}
         </dd>
       </dl>
