@@ -2,12 +2,18 @@
 
 ## Текущее состояние
 
-Спека HTML-листа (UX задача 17): на `/r/{secret}/d/{fileName}` от `40rem`
-таблица `Спецификация` с общей колонкой qty; ниже `40rem` — подписанные
-блоки `Наименование` / `Кол-во` / `Ед.` / `Комментарий`, `thead` скрыт,
-страница без горизонтального скролла. На КП З-10043 X «1» совпадают
-(≤ 2px). Не `inline` + `ml-*`. Дисклеймер, зачин D-029, «К заявке З-10043»
-и `.document-link` не ослаблены. Кабинет не менялся (задача 18).
+Колонка «Кол-во» кабинета (UX задача 18): на З-10043 при 1280px заголовок
+«Кол-во» — одна текстовая строка (`Range` по текстовому узлу, 1 line-box).
+От `40rem` у «Кол-во» `whitespace-nowrap` и `min-w-[4.75rem]`, у «Ед.»
+`whitespace-nowrap` и `min-w-12`. Desktop `table-row` задачи 8 сохранён.
+На 390px подписанные блоки и `scrollWidth <= 390` живы. Лента, файлы и лист
+не менялись.
+Спека HTML-листа (UX задача 17) на `main` (#54): на `/r/{secret}/d/{fileName}`
+от `40rem` таблица `Спецификация` с общей колонкой qty; ниже `40rem` —
+подписанные блоки `Наименование` / `Кол-во` / `Ед.` / `Комментарий`,
+`thead` скрыт, страница без горизонтального скролла. На КП З-10043 X «1»
+совпадают (≤ 2px). Не `inline` + `ml-*`. Дисклеймер, зачин D-029,
+«К заявке З-10043» и `.document-link` не ослаблены.
 Колонки ленты на desktop (UX задача 16): от `40rem` пункт
 `<ol aria-label="Этапы заявки">` — три общие колонки
 счётчик / штамп / дата (`2rem | 1fr | 12rem`), `sm:contents` на обёртке
@@ -95,8 +101,8 @@ UX/UI понятности (D-036…D-043): docs-only нарезка на `main`
 `main` (#41); задача 8 на `main` (#42); задача 9 на `main` (#43); задача 10 на
 `main` (#45); задача 11 на `main` (#46); задача 12 на `main` (#47);
 задача 13 на `main` (#49); задача 14 на `main` (#50); задача 15 на
-`main` (#52); задача 16 на `main` (#53); задача 17 на ветке
-`fix/ux-file-sheet-spec-grid`.
+`main` (#52); задача 16 на `main` (#53); задача 17 на `main` (#54);
+задача 18 на ветке `fix/ux-spec-qty-column`.
 Оператор
 `выполни ux задачу N` → `docs/ux/README.md` (задачи 1–12, один чат).
 `реализуй ux задачу N` → тот же каталог + цикл (задачи 13–18, D-042).
@@ -167,7 +173,7 @@ UX/UI понятности (D-036…D-043): docs-only нарезка на `main`
 | UX задача 15 files shared grid        | проверен                          |
 | UX задача 16 process shared columns   | проверен                          |
 | UX задача 17 file sheet spec grid     | проверен                          |
-| UX задача 18 spec qty column          | не начата                         |
+| UX задача 18 spec qty column          | проверен                          |
 
 ## Журнал проверки
 
@@ -616,3 +622,8 @@ UX/UI понятности (D-036…D-043): docs-only нарезка на `main`
 | 2026-09-12 | UX-17 TDD green        | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 36 passed; qty в одном X на 1280px; блоки с подписями на 390px; клик «К заявке З-10043» жив                                                                |
 | 2026-09-12 | UX-17 gates            | `pnpm --filter @client-portal/web test` / `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                    | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
 | 2026-09-12 | UX-17 format           | `pnpm exec prettier --write e2e/request-cabinet.spec.ts apps/web/app/pages/r/[accessSecret]/d/[fileName].vue` затем `prettier --check` и `git diff --check`                                                                                                                               | exit 0                                                                                                                                                             |
+| 2026-09-12 | UX-18 TDD red          | `pnpm test:e2e`                                                                                                                                                                                                                                                                           | exit 1: 35 passed, 2 failed; «Кол-во» 2 line-box (Кол- / во); второй fail — flake rest-color `rgb(0, 0, 238)`                                                      |
+| 2026-09-12 | UX-18 TDD green        | `pnpm exec playwright test e2e/request-cabinet.spec.ts --grep "quantity header stays one text line\\                                                                                                                                                                                      | specification stays readable on a 390px messenger viewport" --workers=1`против`make dev` + seed                                                                    | exit 0: 2 passed; 1 line-box на 1280px; блоки задачи 8 на 390px |
+| 2026-09-12 | UX-18 gates            | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-12 | UX-18 format           | `pnpm exec prettier --write e2e/request-cabinet.spec.ts apps/web/app/pages/r/[accessSecret]/index.vue` затем `prettier --check` и `git diff --check`                                                                                                                                      | exit 0                                                                                                                                                             |
+| 2026-09-12 | UX-18 TDD green full   | `pnpm exec playwright test --workers=1` против `make dev` + seed                                                                                                                                                                                                                          | exit 0: 37 passed (demo-links, focus-visible, layout-header, request-cabinet, security-headers)                                                                    |
