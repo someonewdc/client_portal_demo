@@ -3,11 +3,14 @@ import { join } from 'node:path';
 
 import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 
+import { LIVE_CABINET_POLL_INTERVAL_MS } from '../apps/web/app/utils/live-cabinet-poll.ts';
+
 const CONDUCTOR_SECRET = 'seed-demo-conductor-nordshield';
 const LIVE_ACCESS_SECRET = 'seed-z10046-live-severnaya-duga';
 const LIVE_PORTAL_PATH = `/r/${LIVE_ACCESS_SECRET}`;
 const LIVE_PUBLIC_NUMBER = 'З-10046';
-const QUOTE_CABINET_PATH = '/r/seed-z10043-quote-kuznetsov';
+const QUOTE_ACCESS_SECRET = 'seed-z10043-quote-kuznetsov';
+const QUOTE_CABINET_PATH = `/r/${QUOTE_ACCESS_SECRET}`;
 const API_BASE_URL = 'http://localhost:3001/api/v1';
 
 const livePollHint = 'Эта заявка обновляется на глазах. Обновится сама через несколько секунд.';
@@ -33,6 +36,22 @@ async function conductorPost(request: APIRequestContext, action: 'advance' | 're
     `${API_BASE_URL}/demo/conductor/${CONDUCTOR_SECRET}/${action}`,
   );
   expect(response.ok(), `POST conductor ${action} must succeed against the stand API`).toBeTruthy();
+}
+
+function countPortalGets(page: Page, accessSecret: string): { count: () => number } {
+  let count = 0;
+  page.on('request', (request) => {
+    if (request.method() !== 'GET') {
+      return;
+    }
+    if (!request.url().includes(`/requests/${accessSecret}`)) {
+      return;
+    }
+    count += 1;
+  });
+  return {
+    count: () => count,
+  };
 }
 
 function countDocumentNavigations(page: Page): { count: () => number } {
@@ -62,7 +81,10 @@ test('live cabinet poll interval is 4s, gated on demoLive, and /r/** has no swr/
   expect(liveCabinetRule, '/r/** must not enable Nitro isr').not.toMatch(/\bisr\b/i);
 });
 
-test('quote cabinet Z-10043 does not show the live poll phrase', async ({ page }) => {
+test('quote cabinet Z-10043 does not show the live poll phrase and does not poll', async ({
+  page,
+}) => {
+  const portalGets = countPortalGets(page, QUOTE_ACCESS_SECRET);
   const response = await page.goto(QUOTE_CABINET_PATH);
 
   expect(response, 'GET quote cabinet must receive a response from :3000').toBeTruthy();
@@ -74,6 +96,23 @@ test('quote cabinet Z-10043 does not show the live poll phrase', async ({ page }
   await expect(page.getByText(livePollHint, { exact: true })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Продвинуть по статусу' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Сбросить' })).toHaveCount(0);
+
+  const quietStartedAt = Date.now();
+  await expect
+    .poll(() => Date.now() - quietStartedAt, { intervals: [100], timeout: 1_000 })
+    .toBeGreaterThan(500);
+  const getsAfterLoad = portalGets.count();
+  const startedAt = Date.now();
+  await expect
+    .poll(
+      () => {
+        const extraGets = portalGets.count() - getsAfterLoad;
+        expect(extraGets, 'catalog Z-10043 must not poll GET /requests/{secret}').toBe(0);
+        return Date.now() - startedAt;
+      },
+      { intervals: [250], timeout: LIVE_CABINET_POLL_INTERVAL_MS + 2_000 },
+    )
+    .toBeGreaterThan(LIVE_CABINET_POLL_INTERVAL_MS);
 });
 
 test.describe('live cabinet poll', () => {
