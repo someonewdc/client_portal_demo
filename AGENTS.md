@@ -4,8 +4,8 @@
 `nestjs-core`, `openapi-client-core`). Предметный продукт (фичи 1–27) реализуй
 **только** по промпту `docs/llm/feature-NN.md` в отдельном чате, один PR на фичу.
 Доработки UX/UI понятности — **только** по `docs/ux/task-NN.md` (вход:
-`выполни ux задачу N` для 1–12; `реализуй ux задачу N` для 13–18 — сразу
-цикл implement → review, D-042; не клади их в `docs/llm/`). Фраза
+`выполни ux задачу N` для 1–12; `реализуй ux задачу N` для 13–20 — сразу
+цикл implement → review, D-042 / D-047; не клади их в `docs/llm/`). Фраза
 `выполни задачу N` / `реализуй задачу N` без `ux` — только дефекты кода
 (`docs/remediation-plan.md`, D-030). Не копируй
 `apps/*` Вольтариса и не добавляй mock-api. Работай небольшими проверяемыми
@@ -75,7 +75,7 @@ workspace нет и в production API не добавляй. Новый skill «
   `make restart` = `down` + leftover `node` на портах стенда + `dev` (D-028, без kill Docker Desktop);
   нарезка дефектов после F13 — `docs/remediation-plan.md` (фичи 14–27, D-030);
   UX/UI понятности — `docs/ux/README.md` (задачи 1–12: `выполни ux задачу N`;
-  13–18: `реализуй ux задачу N` + цикл, D-036…D-043), не feature-NN;
+  13–20: `реализуй ux задачу N` + цикл, D-036…D-048), не feature-NN;
 - Playwright: `pnpm test:e2e` / `make e2e` (smoke шапки, индекс, кабинет З-10043, битая
   ссылка, D-021); CI job `e2e` против `make up`;
 - PostgreSQL в Docker (хост 5433), Prisma 7 в `apps/api`.
@@ -124,7 +124,7 @@ mock-api **нет и не появится**. «Система заявок» = 
 ## Цикл implement → review
 
 Если пользователь просит пункт плана **через implement → review** или пишет
-`реализуй ux задачу N` (D-042) — открой skill `implement-review-cycle` и
+`реализуй ux задачу N` (D-042, D-047) — открой skill `implement-review-cycle` и
 следуй ему. Родитель не пишет код и не ревьюит: код — агент
 `plan-item-implementer`, ревью — агент `plan-diff-reviewer`. Не подменяй их
 `generalPurpose`, Bugbot или `pr-review`. Голые «суперагент» / «следующий
