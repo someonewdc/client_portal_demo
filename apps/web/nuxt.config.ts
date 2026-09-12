@@ -31,6 +31,7 @@ export default defineNuxtConfig({
   routeRules: {
     '/': { headers: capabilityPageHeaders },
     '/start': { headers: capabilityPageHeaders },
+    '/c/**': { headers: capabilityPageHeaders },
     '/r/**': { headers: capabilityPageHeaders },
   },
   runtimeConfig: {

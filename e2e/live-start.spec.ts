@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { expect, test, type APIRequestContext, type Page } from '@playwright/test';
 
 const CONDUCTOR_SECRET = 'seed-demo-conductor-nordshield';
+const CONDUCTOR_PATH = `/c/${CONDUCTOR_SECRET}`;
 const LIVE_ACCESS_SECRET = 'seed-z10046-live-severnaya-duga';
 const LIVE_PORTAL_PATH = `/r/${LIVE_ACCESS_SECRET}`;
 const LIVE_PUBLIC_NUMBER = 'З-10046';
@@ -16,6 +17,12 @@ const startCopy = {
     'Щит, НКУ или комплект нельзя купить карточкой с полки. На заводе заявку принимают письмом или от менеджера. Здесь одна кнопка заменяет этот вход, чтобы сразу открыть ссылку заказчика.',
   secondParagraph: 'После отправки откроется ссылка, которую менеджер отправил бы в мессенджер.',
   button: 'Подать заявку',
+} as const;
+
+const conductorCopy = {
+  heading: 'Пульт показа',
+  advance: 'Продвинуть по статусу',
+  reset: 'Сбросить',
 } as const;
 
 function repoFile(relativePath: string): string {
@@ -38,6 +45,24 @@ async function conductorPost(request: APIRequestContext, action: 'advance' | 're
     `${API_BASE_URL}/demo/conductor/${CONDUCTOR_SECRET}/${action}`,
   );
   expect(response.ok(), `POST conductor ${action} must succeed against the stand API`).toBeTruthy();
+}
+
+async function clickConductorAction(page: Page, action: 'advance' | 'reset') {
+  const name = action === 'advance' ? conductorCopy.advance : conductorCopy.reset;
+  const button = page.getByRole('button', { exact: true, name });
+  await expect(button).toBeVisible();
+  const posted = page.waitForResponse((response) => {
+    const url = response.url();
+    return (
+      response.request().method() === 'POST' &&
+      url.includes(`/api/conductor/${CONDUCTOR_SECRET}/${action}`)
+    );
+  });
+  await button.click();
+  await posted;
+  await expect(
+    page.getByRole('heading', { exact: true, level: 1, name: conductorCopy.heading }),
+  ).toBeVisible();
 }
 
 async function advanceLiveToInvoiceIssued(request: APIRequestContext) {
@@ -127,7 +152,6 @@ test('index live block links to /start and keeps the four D-027 phrases exact', 
   const startLink = page.getByRole('link', { exact: true, name: 'Как заказчик начинает' });
   await expect(startLink).toBeVisible();
   await expect(startLink).toHaveAttribute('href', '/start');
-  await expect(page.getByRole('link', { name: 'Пульт смены шага' })).toHaveCount(0);
   await expect(page.getByRole('button')).toHaveCount(0);
 
   await startLink.click();
@@ -182,5 +206,49 @@ test.describe('live request start action', () => {
       page.getByRole('heading', { exact: true, level: 1, name: 'Счёт выставлен' }),
     ).toHaveCount(0);
     expect(leaked, 'browser must not call conductor API with the secret').toEqual([]);
+  });
+
+  test('advance from accepted then cabinet shows В расчёте', async ({ page, request }) => {
+    await conductorPost(request, 'reset');
+
+    const response = await page.goto(CONDUCTOR_PATH);
+    expect(response, 'GET /c/{fixture} must receive a response from :3000').toBeTruthy();
+    expect(response?.ok()).toBe(true);
+    await expect(
+      page.getByRole('heading', { exact: true, level: 1, name: conductorCopy.heading }),
+    ).toBeVisible();
+
+    await clickConductorAction(page, 'advance');
+
+    const cabinet = await page.goto(LIVE_PORTAL_PATH);
+    expect(cabinet, 'GET live cabinet must receive a response from :3000').toBeTruthy();
+    expect(cabinet?.ok()).toBe(true);
+    await expect(
+      page.getByRole('heading', { exact: true, level: 1, name: 'В расчёте' }),
+    ).toBeVisible();
+    await expect(page.getByRole('heading', { exact: true, level: 1, name: 'Принят' })).toHaveCount(
+      0,
+    );
+  });
+
+  test('reset then cabinet shows Принят', async ({ page }) => {
+    const response = await page.goto(CONDUCTOR_PATH);
+    expect(response, 'GET /c/{fixture} must receive a response from :3000').toBeTruthy();
+    expect(response?.ok()).toBe(true);
+    await expect(
+      page.getByRole('heading', { exact: true, level: 1, name: conductorCopy.heading }),
+    ).toBeVisible();
+
+    await clickConductorAction(page, 'reset');
+
+    const cabinet = await page.goto(LIVE_PORTAL_PATH);
+    expect(cabinet, 'GET live cabinet must receive a response from :3000').toBeTruthy();
+    expect(cabinet?.ok()).toBe(true);
+    await expect(
+      page.getByRole('heading', { exact: true, level: 1, name: 'Принят' }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole('heading', { exact: true, level: 1, name: 'В расчёте' }),
+    ).toHaveCount(0);
   });
 });
