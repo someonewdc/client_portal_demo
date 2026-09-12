@@ -22,16 +22,18 @@
 | Ядро packages                 | [`shared-core.md`](shared-core.md)                                                                       |
 | Версии toolchain              | [`toolchain.md`](toolchain.md)                                                                           |
 | Вендорные Prisma skills       | [`decisions.md`](decisions.md) D-041, `apps/api/.agents/skills/`                                         |
-| Копируемый промпт фичи N      | [`llm/feature-01.md`](llm/feature-01.md) … [`feature-27.md`](llm/feature-27.md)                          |
+| Копируемый промпт фичи N      | [`llm/feature-01.md`](llm/feature-01.md) … [`feature-33.md`](llm/feature-33.md)                          |
+| Live-сценарий: фича N         | [`llm/feature-28.md`](llm/feature-28.md) … [`feature-33.md`](llm/feature-33.md) (`выполни фичу N`)       |
 | Дефекты кода: задача N        | [`remediation-plan.md`](remediation-plan.md) (`выполни задачу N`)                                        |
 | UX/UI понятности: задача N    | [`ux/README.md`](ux/README.md) (`выполни ux задачу N` / `реализуй ux задачу N` → `ux/task-NN.md`)        |
 | Цикл implement→review         | skill `implement-review-cycle` (`через implement → review` или `реализуй ux задачу N`; не писать самому) |
 
-Предметный код (фичи 1–27) пишут отдельные чаты по `docs/llm/feature-NN.md`
-(`выполни задачу N`). Доработки UX/UI понятности — по `docs/ux/task-NN.md`
+Предметный код пишут отдельные чаты по `docs/llm/feature-NN.md`. Live-сценарий
+показа (фичи 28–33, D-049): `выполни фичу N`. Дефекты кода (фичи 15–27, D-030):
+`выполни задачу N`. Доработки UX/UI понятности — по `docs/ux/task-NN.md`
 (`выполни ux задачу N` / `реализуй ux задачу N`), не в общем скоупе фич. Без
 слова `ux` фразы `выполни задачу N` и `реализуй задачу N` не открывают
-`docs/ux/`.
+`docs/ux/`. `выполни фичу N` не открывает remediation и не открывает `docs/ux/`.
 В этом наборе документов
 кода продукта нет. Стенд — цели корневого Makefile (`bootstrap`, `up`, `down`, `dev`,
 `restart`, `verify`), не сырой `docker compose` (D-013, D-028). `verify` поднимает полный стенд, мигрирует,
