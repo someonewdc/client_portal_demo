@@ -140,7 +140,7 @@ export interface components {
             quantity: number;
             /** @example шт */
             unit: string;
-            /** @example IP54, навесной */
+            /** @example IP54, навесное */
             comment?: string;
         };
         RequestFileDto: {

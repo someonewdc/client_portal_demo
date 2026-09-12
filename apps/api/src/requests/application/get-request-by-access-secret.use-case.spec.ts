@@ -20,7 +20,7 @@ function quoteRecord(accessSecretHash: string): RequestRecord {
         name: 'Вводно-распределительное устройство 400 А',
         quantity: 1,
         unit: 'шт',
-        comment: 'IP54, навесной',
+        comment: 'IP54, навесное',
       },
       { name: 'Рубильник ввода', quantity: 1, unit: 'шт' },
     ],
