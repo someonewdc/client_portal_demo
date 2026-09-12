@@ -23,19 +23,26 @@ seed. Не эмулировать внешнюю шину.
 ## Доступ
 
 Секрет в URL — capability: кто знает путь `/r/{accessSecret}`, тот читает одну заявку.
-Это не пользователь, не сессия, не cookie-login. Route middleware Nuxt — UX, не security
-boundary. API сам отвечает 404, если хеш не найден. Cookie не форвардить (D-015).
+Это не пользователь, не сессия, не cookie-login. Тот же приём для пульта:
+`/c/{conductorSecret}` и `/demo/conductor/{conductorSecret}` — секрет из env
+`DEMO_CONDUCTOR_SECRET`, не строка БД (D-051). Route middleware Nuxt — UX, не security
+boundary. API сам отвечает 404, если хеш/секрет не найден; неизвестный секрет пульта —
+404, не 401. Cookie не форвардить (D-015).
 
 `GET /demo/links` отдаёт `portalPath` со секретом только потому, что это служебный экран
-ведущего. Не выдавать этот список за кабинет заказчика. Неполный или пустой каталог —
-500, не усечённый список (D-019, D-031; код — фича 18).
+ведущего. Не выдавать этот список за кабинет заказчика. Неполный или пустой каталог пяти —
+500, не усечённый список (D-019, D-031; код — фича 18). З-10046 в БД не ломает список
+(D-050; код — фича 29). Индекс может содержать ссылку `/c/{secret}`; HTML `/start` —
+нет.
 
 Логи и 404: D-014. Path с секретом в access-логе и в `instance` допустим; `detail` и
 отдельные поля лога — нет. `nestjs-core` serializer не трогать.
 
-Заголовки capability (D-032; код — фичи 20–21): HTML `/` и `/r/**` и JSON
-`/demo/links` + `/requests/{secret}` — `Cache-Control: private, no-store`; web ещё
-no-referrer / noindex / DENY / nosniff. Не включать SWR/ISR на `/r/**`.
+Заголовки capability (D-032, D-051; код — фичи 20–21 и 30–32): HTML `/`, `/r/**`,
+`/start`, `/c/**` и JSON `/demo/links` + `/requests/{secret}` + conductor —
+`Cache-Control: private, no-store`; web ещё no-referrer / noindex / DENY / nosniff.
+Не включать SWR/ISR на `/r/**`. CORS: `credentials: false`; methods с фичи 30 включают
+`POST`. Write статусов — только demo/conductor пути, не PATCH `/requests/{secret}`.
 
 ## Слои Nest
 

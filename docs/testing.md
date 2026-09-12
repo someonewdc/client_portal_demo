@@ -36,8 +36,10 @@ LLM часто пишет код, затем тесты «под него». Т�
   Postgres отвечает (`make verify` / CI-сервис, не сырой `pnpm test` без БД).
 - F2: `GET /demo/links` — envelope 1:1 (`data.items` + `meta.traceId`), поля сидов из
   `docs/domain-model.md` (включая `status`/`statusLabel`/`counterpartyName`/`updatedAt`);
-  лишняя строка в БД → 500; повторный seed удаляет её (D-019); `GET /requests/{secret}` 200
-  для fixture с датами, подписями шагов и полным `files`; 404 Problem Details: `detail` без
+  лишняя строка в БД → 500; повторный seed удаляет её (D-019). После F29 успех —
+  ровно пять каталожных items; строка З-10046 — разрешённый extra, не в `items`
+  (D-050); иная extra по-прежнему 500. `GET /requests/{secret}` 200 для fixture с
+  датами, подписями шагов и полным `files`; 404 Problem Details: `detail` без
   SQL/stack и без секрета; `instance`/path могут содержать секрет (D-014). HTTP-тесты
   фиксируют UTC ISO при `TZ=Europe/Moscow`; колонки дат — `timestamptz`.
 
@@ -72,6 +74,12 @@ LLM часто пишет код, затем тесты «под него». Т�
 - F25 пишет source-контракт `NuxtLink` **до** Vue (F16 уже в `main`).
 - F26 пишет source-контракт `USER node` **до** Dockerfile.
 - F27 пишет source-контракт `127.0.0.1:` в compose **до** правки портов.
+- F28 — docs-only (D-049…D-052, промпты 29–33): отдельного red продукта нет.
+- F29 пишет HTTP/application live fixture **до** schema/seed. Vue/CORS/POST не трогает.
+- F30 пишет HTTP/CORS conductor **до** роутов. UI нет. Снимает source-контракт F22 «нет POST».
+- F31 пишет e2e `/start` и ссылки индекса **до** Vue.
+- F32 пишет e2e пульта `/c/{secret}` **до** Vue. Poll не делает.
+- F33 пишет e2e poll кабинета живой заявки **до** poll-кода. Не SWR/ISR.
 - UX docs-нарезка (D-036 / D-042 / D-047, `docs/ux/`, вход `выполни ux задачу N` /
   `реализуй ux задачу N`) — отдельного red продукта нет.
 - UX задача 1 пишет e2e `:focus-visible` outline **до** CSS.
@@ -102,7 +110,8 @@ LLM часто пишет код, затем тесты «под него». Т�
   `.document-summary`.
 - Селекторы: role / label / осмысленный `data-testid`, не CSS-хрупкость. Без
   `waitForTimeout` как синхронизации (`verification-honesty`).
-- Scenario-mutating e2e — serial. Этот демо read-only, мутаций нет.
+- Scenario-mutating e2e — serial. Каталог пяти read-only; живая З-10046 мутирует
+  в F31–33 (reset/advance), тесты serial.
 
 **Compose-smoke (F8):** тот же `make up` после расширения (D-016) отвечает health и отдаёт
 индекс (`scripts/compose-smoke.mjs`).

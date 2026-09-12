@@ -2,6 +2,10 @@
 
 ## Текущее состояние
 
+Нарезка live-сценария показа (фича 28, D-049…D-052): копируемые промпты
+`docs/llm/feature-28.md` … `feature-33.md`. Оператор `выполни фичу N`. Кода
+продукта в F28 нет; этапы F29–33 не начаты. Каталог пяти и UX-задачи 1–20 на
+`main` не откатывались.
 Summary list реквизитов (UX задача 20): класс `.document-summary` на одном
 `dl` кабинета (Заказчик / Изделие / Обновлено) и одном листа (Заказчик /
 Изделие / Загружено / Размер). От `40rem` — `display: grid`,
@@ -123,7 +127,8 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 `реализуй ux задачу N` → тот же каталог + цикл (задачи 13–20, D-042 / D-047).
 `через implement → review` по-прежнему включает цикл для любого пункта.
 Без `ux` фразы `выполни задачу N` и `реализуй задачу N` не ведут в
-`docs/ux/`. Не класть UX-промпты в `docs/llm/feature-NN.md`.
+`docs/ux/`. Не класть UX-промпты в `docs/llm/feature-NN.md`. Live-сценарий:
+`выполни фичу N` → `docs/llm/feature-NN.md` (28–33, D-049). Это не `выполни задачу N`.
 
 ## Правила обновления
 
@@ -192,6 +197,12 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | UX docs иерархия (D-047…D-048)        | выполнен                          |
 | UX задача 19 document type roles      | проверен                          |
 | UX задача 20 document summary list    | проверен                          |
+| Фича 28 docs live-сценарий            | выполнен                          |
+| Фича 29 live fixture З-10046          | не начат                          |
+| Фича 30 conductor API                 | не начат                          |
+| Фича 31 экран /start                  | не начат                          |
+| Фича 32 экран пульта                  | не начат                          |
+| Фича 33 poll кабинета живой заявки    | не начат                          |
 
 ## Журнал проверки
 
@@ -662,3 +673,4 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | 2026-09-12 | UX-20 gates            | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
 | 2026-09-12 | UX-20 format           | `pnpm exec prettier --write` затронутых css/vue/e2e затем `prettier --check` и `git diff --check`                                                                                                                                                                                         | exit 0                                                                                                                                                             |
 | 2026-09-12 | UX-20 TDD green full   | `pnpm exec playwright test --workers=1` против `make dev` + seed                                                                                                                                                                                                                          | exit 0: 47 passed (demo-links, focus-visible, layout-header, request-cabinet, security-headers)                                                                    |
+| 2026-09-12 | Фича 28 docs           | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0; docs-only (D-049…D-052, промпты 28–33); lint/test продукта не запускались                                                                                  |
