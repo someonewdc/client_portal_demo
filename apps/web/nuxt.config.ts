@@ -30,10 +30,12 @@ export default defineNuxtConfig({
   },
   routeRules: {
     '/': { headers: capabilityPageHeaders },
+    '/start': { headers: capabilityPageHeaders },
     '/r/**': { headers: capabilityPageHeaders },
   },
   runtimeConfig: {
     apiBaseUrl: '',
+    demoConductorSecret: '',
     public: {
       apiBaseUrl: 'http://localhost:3001/api/v1',
     },

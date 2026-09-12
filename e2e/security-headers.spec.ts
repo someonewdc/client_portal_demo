@@ -36,3 +36,8 @@ test('quote cabinet HTML carries capability cache and embedding headers', async 
   const response = await page.goto(quoteCabinetPath);
   expectCapabilityHeaders(response, quoteCabinetPath);
 });
+
+test('start HTML carries capability cache and embedding headers', async ({ page }) => {
+  const response = await page.goto('/start');
+  expectCapabilityHeaders(response, '/start');
+});

@@ -60,6 +60,11 @@ function formatUpdatedAt(iso: string): string {
     <p class="mt-2 text-ink-muted">Так выглядит то, что вы отправили бы заказчику в мессенджер.</p>
     <p class="mt-2 text-ink">Нажмите строку — откроется экран заказчика по ссылке.</p>
 
+    <h2 class="document-section">Живой показ</h2>
+    <p>
+      <NuxtLink class="document-link" to="/start">Как заказчик начинает</NuxtLink>
+    </p>
+
     <p v-if="status === 'pending'" class="mt-8 text-ink-muted" role="status">
       Загрузка списка заявок…
     </p>
