@@ -1,6 +1,9 @@
 import { hashOpaqueToken } from '@client-portal/platform-core/opaque-token';
 
-import { LIVE_REQUEST_ACCESS_SECRET } from '../domain/live-request-fixture.js';
+import {
+  isAllowedLiveRequestExtra,
+  LIVE_REQUEST_ACCESS_SECRET,
+} from '../domain/live-request-fixture.js';
 import type { RequestRecord } from '../domain/request.js';
 import type { ConductorAuthPort } from './conductor-auth.port.js';
 import { RequestFixtureMismatchError } from './request-fixture-mismatch.error.js';
@@ -17,7 +20,7 @@ export async function loadLiveRequestForConductor(
   }
 
   const record = await requests.findByAccessSecretHash(hashOpaqueToken(LIVE_REQUEST_ACCESS_SECRET));
-  if (record === null) {
+  if (record === null || !isAllowedLiveRequestExtra(record)) {
     throw new RequestFixtureMismatchError();
   }
 

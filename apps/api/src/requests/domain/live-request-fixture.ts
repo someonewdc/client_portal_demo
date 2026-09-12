@@ -8,7 +8,7 @@ import { nextRequestStatus, REQUEST_STATUS_LABELS } from './request-status.js';
 export const LIVE_REQUEST_PUBLIC_NUMBER = 'З-10046';
 export const LIVE_REQUEST_ACCESS_SECRET = 'seed-z10046-live-severnaya-duga';
 
-const LIVE_ACCESS_SECRET_HASH = hashOpaqueToken(LIVE_REQUEST_ACCESS_SECRET);
+export const LIVE_ACCESS_SECRET_HASH = hashOpaqueToken(LIVE_REQUEST_ACCESS_SECRET);
 
 export const LIVE_QUESTIONNAIRE_FILE = {
   fileName: 'Опросный-лист-З-10046.pdf',

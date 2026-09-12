@@ -629,6 +629,75 @@ describe('request HTTP', () => {
     });
   });
 
+  it('fails closed when З-10046 and the live access-secret hash are split across rows', async () => {
+    const { PrismaService } = await import('../persistence/prisma.service.js');
+    const prisma = app!.get(PrismaService).asClient();
+    const liveBefore = await prisma.request.findUnique({
+      include: { files: true, stageHistory: true },
+      where: { publicNumber: 'З-10046' },
+    });
+    expect(liveBefore).not.toBeNull();
+
+    await prisma.request.update({
+      data: { accessSecretHash: hashOpaqueToken('desynced-z10046-secret') },
+      where: { publicNumber: 'З-10046' },
+    });
+    await prisma.request.create({
+      data: {
+        accessSecretHash: hashOpaqueToken(Z10046_SECRET),
+        counterpartyName: 'ООО «Лишнее»',
+        publicNumber: 'З-19999',
+        status: 'quote_ready',
+        title: 'Чужая заявка с живым хешем',
+        updatedAt: new Date('2026-09-09T00:00:00.000Z'),
+      },
+    });
+
+    const requests = [
+      { method: 'GET' as const, url: conductorUrl(CONDUCTOR_SECRET) },
+      { method: 'POST' as const, url: conductorUrl(CONDUCTOR_SECRET, 'advance') },
+      { method: 'POST' as const, url: conductorUrl(CONDUCTOR_SECRET, 'reset') },
+    ];
+
+    for (const request of requests) {
+      const response = await app!.inject(request);
+      const body: unknown = response.json();
+      const detail = problemDetail(body);
+      const payload = JSON.stringify(body);
+
+      expect(response.statusCode).toBe(500);
+      expect(response.statusCode).not.toBe(200);
+      expect(response.headers['content-type']).toContain('application/problem+json');
+      expect(isProblemDetails(body)).toBe(true);
+      expect(body).toMatchObject({
+        status: 500,
+        title: 'Internal server error',
+        detail: 'The server could not complete the request',
+      });
+      expect(detail).not.toContain(Z10046_SECRET);
+      expect(detail).not.toContain(CONDUCTOR_SECRET);
+      expect(detail.toLowerCase()).not.toMatch(/select |from |stack|prisma/i);
+      expect(payload.toLowerCase()).not.toMatch(/select |from |stack|prisma/i);
+      expect(body).not.toEqual(
+        expect.objectContaining({
+          data: expect.objectContaining({ publicNumber: 'З-19999' }),
+        }),
+      );
+    }
+
+    const liveAfter = await prisma.request.findUnique({
+      include: { files: true, stageHistory: true },
+      where: { publicNumber: 'З-10046' },
+    });
+    expect(liveAfter).toMatchObject({
+      accessSecretHash: hashOpaqueToken('desynced-z10046-secret'),
+      status: liveBefore!.status,
+      updatedAt: liveBefore!.updatedAt,
+    });
+    expect(liveAfter?.files).toEqual(liveBefore!.files);
+    expect(liveAfter?.stageHistory).toEqual(liveBefore!.stageHistory);
+  });
+
   it('returns 404 Problem Details for an unknown or empty conductor secret, not 401', async () => {
     const requests = [
       { method: 'GET' as const, url: conductorUrl(UNKNOWN_CONDUCTOR_SECRET) },

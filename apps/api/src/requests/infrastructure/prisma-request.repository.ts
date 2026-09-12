@@ -8,7 +8,10 @@ import type {
   RequestLiveCommandPort,
 } from '../application/request-live-command.port.js';
 import type { RequestQueryPort } from '../application/request-query.port.js';
-import { LIVE_REQUEST_PUBLIC_NUMBER } from '../domain/live-request-fixture.js';
+import {
+  LIVE_ACCESS_SECRET_HASH,
+  LIVE_REQUEST_PUBLIC_NUMBER,
+} from '../domain/live-request-fixture.js';
 import type { RequestRecord, RequestSummary } from '../domain/request.js';
 import { mapRequestRecord, mapRequestSummary } from './prisma-request.mapper.js';
 
@@ -85,11 +88,15 @@ async function lockLiveRequest(tx: LiveTransaction) {
   await tx.$queryRaw`
     SELECT id FROM "Request"
     WHERE "publicNumber" = ${LIVE_REQUEST_PUBLIC_NUMBER}
+      AND "accessSecretHash" = ${LIVE_ACCESS_SECRET_HASH}
     FOR UPDATE
   `;
-  return tx.request.findUnique({
+  return tx.request.findFirst({
     include: requestInclude,
-    where: { publicNumber: LIVE_REQUEST_PUBLIC_NUMBER },
+    where: {
+      accessSecretHash: LIVE_ACCESS_SECRET_HASH,
+      publicNumber: LIVE_REQUEST_PUBLIC_NUMBER,
+    },
   });
 }
 
