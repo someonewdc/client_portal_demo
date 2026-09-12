@@ -1,3 +1,7 @@
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import { describe, expect, it } from 'vitest';
 
 import {
@@ -6,6 +10,11 @@ import {
   generateOpaqueToken,
   hashOpaqueToken,
 } from './opaque-token.js';
+
+const opaqueTokenSource = readFileSync(
+  resolve(dirname(fileURLToPath(import.meta.url)), 'opaque-token.ts'),
+  'utf8',
+);
 
 describe('opaque token primitives', () => {
   it('creates a base64url CSPRNG token from 32 bytes by default', () => {
@@ -26,5 +35,14 @@ describe('opaque token primitives', () => {
     expect(constantTimeTextEqual('same-value', 'same-value')).toBe(true);
     expect(constantTimeTextEqual('same-value', 'same-Value')).toBe(false);
     expect(constantTimeTextEqual('same-value', 'short')).toBe(false);
+    expect(constantTimeTextEqual('', 'seed-demo-conductor-nordshield')).toBe(false);
+  });
+
+  it('does not skip timingSafeEqual when the compared texts have different lengths', () => {
+    expect(opaqueTokenSource).toMatch(/timingSafeEqual\(/);
+    expect(opaqueTokenSource).not.toMatch(
+      /byteLength\s*===\s*rightBytes\.byteLength\s*&&\s*timingSafeEqual/,
+    );
+    expect(constantTimeTextEqual('short', 'seed-demo-conductor-nordshield')).toBe(false);
   });
 });

@@ -38,6 +38,57 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/demo/conductor/{conductorSecret}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Снимок живой заявки для пульта ведущего */
+        get: operations["DemoConductorController_show"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/demo/conductor/{conductorSecret}/advance": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Один переход автомата живой заявки */
+        post: operations["DemoConductorController_advance"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/demo/conductor/{conductorSecret}/reset": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Сброс живой заявки к принятой */
+        post: operations["DemoConductorController_reset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/demo/links": {
         parameters: {
             query?: never;
@@ -89,6 +140,30 @@ export interface components {
         };
         HealthResponseDto: {
             data: components["schemas"]["HealthDataDto"];
+            meta: components["schemas"]["TraceMetaDto"];
+        };
+        ConductorSnapshotDataDto: {
+            /** @example З-10046 */
+            publicNumber: string;
+            /**
+             * @example accepted
+             * @enum {string}
+             */
+            status: "accepted" | "in_calculation" | "quote_ready" | "invoice_issued";
+            /** @example Принят */
+            statusLabel: string;
+            /** @example /r/seed-z10046-live-severnaya-duga */
+            portalPath: string;
+            /**
+             * @example in_calculation
+             * @enum {string|null}
+             */
+            nextStatus: "accepted" | "in_calculation" | "quote_ready" | "invoice_issued" | null;
+            /** @example В расчёте */
+            nextStatusLabel: string | null;
+        };
+        ConductorSnapshotResponseDto: {
+            data: components["schemas"]["ConductorSnapshotDataDto"];
             meta: components["schemas"]["TraceMetaDto"];
         };
         DemoLinkItemDto: {
@@ -265,6 +340,105 @@ export interface operations {
             };
             /** @description API ещё не слушает, уже останавливается или база данных недоступна */
             503: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    DemoConductorController_show: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conductorSecret: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConductorSnapshotResponseDto"];
+                };
+            };
+            /** @description Секрет пульта неизвестен */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    DemoConductorController_advance: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conductorSecret: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConductorSnapshotResponseDto"];
+                };
+            };
+            /** @description Секрет пульта неизвестен */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+            /** @description Живая заявка уже на последнем шаге */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["ProblemDetailsDto"];
+                };
+            };
+        };
+    };
+    DemoConductorController_reset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conductorSecret: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConductorSnapshotResponseDto"];
+                };
+            };
+            /** @description Секрет пульта неизвестен */
+            404: {
                 headers: {
                     [name: string]: unknown;
                 };

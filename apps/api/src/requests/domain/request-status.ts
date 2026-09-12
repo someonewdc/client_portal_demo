@@ -27,3 +27,14 @@ export function isRequestStatus(value: string): value is RequestStatus {
 export function isRequestFileKind(value: string): value is RequestFileKind {
   return (REQUEST_FILE_KINDS as readonly string[]).includes(value);
 }
+
+const NEXT_REQUEST_STATUS: Record<RequestStatus, RequestStatus | null> = {
+  accepted: 'in_calculation',
+  in_calculation: 'quote_ready',
+  quote_ready: 'invoice_issued',
+  invoice_issued: null,
+};
+
+export function nextRequestStatus(status: RequestStatus): RequestStatus | null {
+  return NEXT_REQUEST_STATUS[status];
+}

@@ -22,6 +22,7 @@ export const apiEnvSchema = z.object({
     }
   }),
   WEB_ORIGIN: exactHttpBaseUrlSchema('/'),
+  DEMO_CONDUCTOR_SECRET: z.string().min(1),
 });
 
 export type ApiEnv = z.infer<typeof apiEnvSchema>;
