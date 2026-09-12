@@ -531,16 +531,18 @@ async function expectQuoteFileSheetExtract(page: Page) {
     sizeLabel.locator('xpath=following-sibling::dd[1]').getByText('240 КБ', { exact: true }),
   ).toBeVisible();
 
-  const specItems = page.getByRole('listitem');
-  await expect(specItems).toHaveCount(2);
+  const specTable = page.getByRole('table', { name: 'Спецификация' });
+  await expect(specTable).toBeVisible();
 
-  const firstLine = specItems.filter({ hasText: quoteCabinet.specLine });
+  const firstLine = specTable.locator('tbody tr').filter({ hasText: quoteCabinet.specLine });
   await expect(firstLine.getByText(quoteCabinet.specLine, { exact: true })).toBeVisible();
   await expect(firstLine.getByText('1', { exact: true })).toBeVisible();
   await expect(firstLine.getByText('шт', { exact: true })).toBeVisible();
   await expect(firstLine.getByText('IP54, навесной', { exact: true })).toBeVisible();
 
-  const secondLine = specItems.filter({ hasText: quoteCabinet.specLineSecondary });
+  const secondLine = specTable
+    .locator('tbody tr')
+    .filter({ hasText: quoteCabinet.specLineSecondary });
   await expect(secondLine.getByText(quoteCabinet.specLineSecondary, { exact: true })).toBeVisible();
   await expect(secondLine.getByText('1', { exact: true })).toBeVisible();
   await expect(secondLine.getByText('шт', { exact: true })).toBeVisible();
@@ -660,6 +662,28 @@ function expectSharedXs(xs: readonly number[], label: string) {
       `${label} X ${x} must match ${first} within 2px`,
     ).toBeLessThanOrEqual(2);
   }
+}
+
+async function sheetSpecQuantityXs(page: Page): Promise<number[]> {
+  const names = [quoteCabinet.specLine, quoteCabinet.specLineSecondary];
+  return page.evaluate(async (lineNames) => {
+    await document.fonts.ready;
+    return lineNames.map((name) => {
+      const row = [...document.querySelectorAll('tr, li')].find((el) =>
+        [...el.querySelectorAll('span')].some((node) => node.textContent?.trim() === name),
+      );
+      if (row == null) {
+        throw new Error(`missing spec row ${name}`);
+      }
+
+      const qty = [...row.querySelectorAll('span')].find((el) => el.textContent?.trim() === '1');
+      if (qty == null) {
+        throw new Error(`missing qty 1 for ${name}`);
+      }
+
+      return qty.getBoundingClientRect().x;
+    });
+  }, names);
 }
 
 async function fileNameLinkXs(page: Page, fileNames: readonly string[]): Promise<number[]> {
@@ -1141,6 +1165,72 @@ test('quote file sheet is a labelled on-screen extract with a full specification
   expect(response?.ok()).toBe(true);
 
   await expectQuoteFileSheetExtract(page);
+});
+
+test('quote file sheet specification keeps a shared qty column at 1280px', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const sheetPath = `/r/${quoteCabinet.accessSecret}/d/${encodeURIComponent(quoteCabinet.quoteFileName)}`;
+  const response = await page.goto(sheetPath);
+
+  expect(response, 'GET /r/{secret}/d/{fileName} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expect(page.getByText(fileSheetDisclaimer, { exact: true })).toBeVisible();
+  await expect(page.getByText('Коммерческое предложение.', { exact: true })).toBeVisible();
+  await expect(page).toHaveTitle('КП — З-10043 — ПК «Нордщит»');
+  await expect(page.getByText('шт', { exact: true }).first()).toBeVisible();
+  await expect(page.getByText('IP54, навесной', { exact: true })).toBeVisible();
+  await expect(page.getByRole('link', { name: /скачать/i })).toHaveCount(0);
+  await expect(page.locator('[download]')).toHaveCount(0);
+  await expect(page.locator('a[href="#"]')).toHaveCount(0);
+
+  expectSharedXs(await sheetSpecQuantityXs(page), 'file sheet spec qty');
+  await expectSpecTableDesktopColumns(page);
+
+  const backLink = page.getByRole('link', {
+    exact: true,
+    name: `К заявке ${quoteCabinet.publicNumber}`,
+  });
+  await expect(backLink).toBeVisible();
+  await backLink.click();
+  await expect(page).toHaveURL(new RegExp(`/r/${quoteCabinet.accessSecret}$`));
+  await expectCabinetStatusHeader(page, quoteCabinet.publicNumber, quoteCabinet.statusLabel);
+});
+
+test('quote file sheet specification stays labelled blocks on a 390px messenger viewport', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const sheetPath = `/r/${quoteCabinet.accessSecret}/d/${encodeURIComponent(quoteCabinet.quoteFileName)}`;
+  const response = await page.goto(sheetPath);
+
+  expect(response, 'GET /r/{secret}/d/{fileName} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expect(page.getByText(fileSheetDisclaimer, { exact: true })).toBeVisible();
+  await expect(page.getByText('Коммерческое предложение.', { exact: true })).toBeVisible();
+  await expect(page).toHaveTitle('КП — З-10043 — ПК «Нордщит»');
+
+  const specTable = page.getByRole('table', { name: 'Спецификация' });
+  const firstRow = specTable.locator('tbody tr').filter({ hasText: quoteCabinet.specLine });
+  await expectSpecLineBlockLabels(firstRow, specColumnLabels);
+
+  const pageWidth = await page.evaluate(() => document.documentElement.scrollWidth);
+  expect(pageWidth, 'file sheet must not scroll horizontally on 390px').toBeLessThanOrEqual(390);
+
+  await expectSpecTableStacksOnNarrowPhone(page);
+  await expect(page.getByRole('link', { name: /скачать/i })).toHaveCount(0);
+  await expect(page.locator('[download]')).toHaveCount(0);
+  await expect(page.locator('a[href="#"]')).toHaveCount(0);
+
+  const backLink = page.getByRole('link', {
+    exact: true,
+    name: `К заявке ${quoteCabinet.publicNumber}`,
+  });
+  await expect(backLink).toBeVisible();
+  await backLink.click();
+  await expect(page).toHaveURL(new RegExp(`/r/${quoteCabinet.accessSecret}$`));
+  await expectCabinetStatusHeader(page, quoteCabinet.publicNumber, quoteCabinet.statusLabel);
 });
 
 test('quote cabinet file sheet returns to the request', async ({ page }) => {

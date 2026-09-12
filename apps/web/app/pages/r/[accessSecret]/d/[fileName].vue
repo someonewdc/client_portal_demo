@@ -31,6 +31,10 @@ if (documentStatus !== 200) {
   setResponseStatus(documentStatus);
 }
 
+const hasSpecComments = computed(
+  () => request.value?.specLines.some((line) => Boolean(line.comment)) === true,
+);
+
 useSeoMeta({
   title: computed(() => {
     if (isNotFound.value || isMissingFile.value) {
@@ -96,14 +100,43 @@ useSeoMeta({
       </dl>
       <p class="mt-4 text-ink">Это выписка на экране, не файл для скачивания.</p>
       <p class="mt-8 text-ink">{{ fileSheetLead(file.kind) }}</p>
-      <ul class="mt-4 space-y-2">
-        <li v-for="line in request.specLines" :key="line.name" class="text-ink">
-          <span>{{ line.name }}</span>
-          <span class="ml-3 tabular-nums">{{ line.quantity }}</span>
-          <span class="ml-2">{{ line.unit }}</span>
-          <span v-if="line.comment" class="ml-3 text-ink-muted">{{ line.comment }}</span>
-        </li>
-      </ul>
+      <table class="mt-4 w-full min-w-0 max-w-full border-collapse text-left">
+        <caption class="mb-3 text-left font-semibold text-ink">
+          Спецификация
+        </caption>
+        <thead class="max-sm:hidden">
+          <tr class="border-b border-rule text-sm text-ink-muted">
+            <th class="py-2 pr-4 font-semibold">Наименование</th>
+            <th class="py-2 pr-4 font-semibold">Кол-во</th>
+            <th class="py-2 pr-4 font-semibold">Ед.</th>
+            <th v-if="hasSpecComments" class="py-2 font-semibold">Комментарий</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="line in request.specLines"
+            :key="line.name"
+            class="block border-b border-rule py-3 sm:table-row sm:py-0"
+          >
+            <td class="block py-1 text-ink sm:table-cell sm:py-3 sm:pr-4">
+              <span class="block text-sm text-ink-muted sm:hidden">Наименование</span>
+              <span class="break-words">{{ line.name }}</span>
+            </td>
+            <td class="block py-1 text-ink sm:table-cell sm:py-3 sm:pr-4">
+              <span class="block text-sm text-ink-muted sm:hidden">Кол-во</span>
+              <span class="tabular-nums">{{ line.quantity }}</span>
+            </td>
+            <td class="block py-1 text-ink sm:table-cell sm:py-3 sm:pr-4">
+              <span class="block text-sm text-ink-muted sm:hidden">Ед.</span>
+              <span>{{ line.unit }}</span>
+            </td>
+            <td v-if="hasSpecComments" class="block py-1 text-ink-muted sm:table-cell sm:py-3">
+              <span class="block text-sm sm:hidden">Комментарий</span>
+              <span class="break-words">{{ line.comment }}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
       <p class="mt-8">
         <NuxtLink class="document-link" :to="`/r/${accessSecret}`">
           <span aria-hidden="true">← </span>К заявке {{ request.publicNumber }}
