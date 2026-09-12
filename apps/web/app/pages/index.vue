@@ -64,6 +64,11 @@ function formatUpdatedAt(iso: string): string {
     <p>
       <NuxtLink class="document-link" to="/start">Как заказчик начинает</NuxtLink>
     </p>
+    <p class="mt-2">
+      <NuxtLink class="document-link" to="/c/seed-demo-conductor-nordshield">
+        Пульт смены шага
+      </NuxtLink>
+    </p>
 
     <p v-if="status === 'pending'" class="mt-8 text-ink-muted" role="status">
       Загрузка списка заявок…

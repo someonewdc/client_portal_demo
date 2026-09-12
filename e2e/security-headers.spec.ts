@@ -1,6 +1,7 @@
 import { expect, test, type Response } from '@playwright/test';
 
 const quoteCabinetPath = '/r/seed-z10043-quote-kuznetsov';
+const conductorPath = '/c/seed-demo-conductor-nordshield';
 
 const capabilityHeaderTokens = {
   'cache-control': 'no-store',
@@ -40,4 +41,9 @@ test('quote cabinet HTML carries capability cache and embedding headers', async 
 test('start HTML carries capability cache and embedding headers', async ({ page }) => {
   const response = await page.goto('/start');
   expectCapabilityHeaders(response, '/start');
+});
+
+test('conductor HTML carries capability cache and embedding headers', async ({ page }) => {
+  const response = await page.goto(conductorPath);
+  expectCapabilityHeaders(response, conductorPath);
 });

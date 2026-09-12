@@ -11,7 +11,10 @@ seed пяти каталожных + живая З-10046; `GET /demo/links` — 
 `DEMO_CONDUCTOR_SECRET`. Фича 31: экран `/start` (кнопка «Подать заявку» →
 сброс живой З-10046 через server-only `NUXT_DEMO_CONDUCTOR_SECRET` и кабинет
 «Принят»); индекс — блок «Живой показ» и ссылка «Как заказчик начинает».
-Фичи 32–33 не начаты. Каталог пяти и
+Фича 32: пульт `/c/{conductorSecret}` (кнопки «Продвинуть по статусу» /
+«Сбросить» через POST с секретом из path, не `NUXT_PUBLIC_*`); индекс —
+ссылка «Пульт смены шага»; чужой секрет — тупик 404 как у кабинета.
+Фича 33 (poll кабинета) не начата. Каталог пяти и
 UX-задачи 1–20 на `main` не откатывались.
 Summary list реквизитов (UX задача 20): класс `.document-summary` на одном
 `dl` кабинета (Заказчик / Изделие / Обновлено) и одном листа (Заказчик /
@@ -208,7 +211,7 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | Фича 29 live fixture З-10046          | проверен                          |
 | Фича 30 conductor API                 | проверен                          |
 | Фича 31 экран /start                  | проверен                          |
-| Фича 32 экран пульта                  | не начат                          |
+| Фича 32 экран пульта                  | проверен                          |
 | Фича 33 poll кабинета живой заявки    | не начат                          |
 
 ## Журнал проверки
@@ -706,3 +709,6 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | 2026-09-12 | Фича 31 TDD red        | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 1: 7 failed, 1 did not run, 46 passed; нет `NUXT_DEMO_CONDUCTOR_SECRET` в `.env.example`; GET `/start` не ok; на индексе нет «Живой показ»                    |
 | 2026-09-12 | Фича 31 TDD green      | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 54 passed; `/start` D-052, клик → З-10046 «Принят», reset после счёта, индекс «Как заказчик начинает», секрет не в HTML, capability-заголовки              |
 | 2026-09-12 | Фича 31 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 58, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-12 | Фича 32 TDD red        | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 1: 5 failed, 1 did not run, 55 passed; GET `/c/{fixture}` не ok; на индексе нет «Пульт смены шага»; `/c/nope` без h1 «Ссылка недействительна»                 |
+| 2026-09-12 | Фича 32 TDD green      | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 61 passed; `/c/nope` 404 D-039; `/c/{fixture}` «Пульт показа»; advance → «В расчёте»; reset → «Принят»; индекс «Пульт смены шага»; capability `/c/**`      |
+| 2026-09-12 | Фича 32 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 58, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
