@@ -11,6 +11,7 @@ import {
 } from '@nestjs/common';
 import {
   ApiConflictResponse,
+  ApiExcludeEndpoint,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -41,6 +42,32 @@ export class DemoConductorController {
     @Inject(ResetLiveRequestUseCase)
     private readonly resetLiveRequest: ResetLiveRequestUseCase,
   ) {}
+
+  @Get()
+  @ApiExcludeEndpoint()
+  async showEmpty(
+    @Req() request: FastifyRequest,
+  ): Promise<{ data: ConductorSnapshot; meta: { traceId: string } }> {
+    return this.show('', request);
+  }
+
+  @Post('advance')
+  @HttpCode(200)
+  @ApiExcludeEndpoint()
+  async advanceEmpty(
+    @Req() request: FastifyRequest,
+  ): Promise<{ data: ConductorSnapshot; meta: { traceId: string } }> {
+    return this.advance('', request);
+  }
+
+  @Post('reset')
+  @HttpCode(200)
+  @ApiExcludeEndpoint()
+  async resetEmpty(
+    @Req() request: FastifyRequest,
+  ): Promise<{ data: ConductorSnapshot; meta: { traceId: string } }> {
+    return this.reset('', request);
+  }
 
   @Get(':conductorSecret')
   @ApiOperation({ summary: 'Снимок живой заявки для пульта ведущего' })

@@ -18,6 +18,9 @@ export interface LiveRequestStateWrite {
   }[];
 }
 
+export type LiveAdvanceApply = (current: RequestRecord) => LiveRequestStateWrite | 'conflict';
+
 export interface RequestLiveCommandPort {
   replaceLive(write: LiveRequestStateWrite): Promise<RequestRecord | null>;
+  applyLiveAdvance(apply: LiveAdvanceApply): Promise<RequestRecord | null | 'conflict'>;
 }

@@ -630,6 +630,7 @@ describe('request HTTP', () => {
 
       expect(response.statusCode).toBe(404);
       expect(response.statusCode).not.toBe(401);
+      expectPrivateNoStore(response.headers);
       expect(response.headers['content-type']).toContain('application/problem+json');
       expect(isProblemDetails(body)).toBe(true);
       expect(body).toMatchObject({
@@ -833,6 +834,45 @@ describe('request HTTP', () => {
     });
     expect(afterConflictPortal.json().data.files).toHaveLength(3);
     expect(afterConflictPortal.json().data.status).toBe('invoice_issued');
+  });
+
+  it('serializes concurrent advances so two POSTs from accepted take two D-052 steps', async () => {
+    const [first, second] = await Promise.all([
+      app!.inject({ method: 'POST', url: conductorUrl(CONDUCTOR_SECRET, 'advance') }),
+      app!.inject({ method: 'POST', url: conductorUrl(CONDUCTOR_SECRET, 'advance') }),
+    ]);
+    const snapshot = await app!.inject({
+      method: 'GET',
+      url: conductorUrl(CONDUCTOR_SECRET),
+    });
+    const portal = await app!.inject({
+      method: 'GET',
+      url: `/api/v1/requests/${Z10046_SECRET}`,
+    });
+    const statuses = [first.json().data.status, second.json().data.status].sort();
+
+    expect(first.statusCode).toBe(200);
+    expect(second.statusCode).toBe(200);
+    expect(statuses).toEqual(['in_calculation', 'quote_ready']);
+    expect(snapshot.json().data).toEqual({
+      publicNumber: 'З-10046',
+      status: 'quote_ready',
+      statusLabel: 'КП готово',
+      portalPath: '/r/seed-z10046-live-severnaya-duga',
+      nextStatus: 'invoice_issued',
+      nextStatusLabel: 'Счёт выставлен',
+    });
+    expect(portal.json().data.files).toEqual([
+      expect.objectContaining({
+        fileName: 'Опросный-лист-З-10046.pdf',
+        kind: 'questionnaire',
+      }),
+      expect.objectContaining({
+        fileName: 'КП-З-10046.pdf',
+        kind: 'quote',
+        byteSize: 240000,
+      }),
+    ]);
   });
 
   it('does not mutate catalog request З-10043 when the conductor advances or resets', async () => {

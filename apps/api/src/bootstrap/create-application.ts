@@ -24,6 +24,16 @@ export async function createApplication(): Promise<NestFastifyApplication> {
     methods: ['GET', 'HEAD', 'OPTIONS', 'POST'],
     origin: corsOriginsFromWebOrigin(config.get('WEB_ORIGIN', { infer: true })),
   });
+  app
+    .getHttpAdapter()
+    .getInstance()
+    .addHook('onRequest', (request, reply, done) => {
+      const path = request.url.split('?')[0] ?? request.url;
+      if (path === '/api/v1/demo/conductor' || path.startsWith('/api/v1/demo/conductor/')) {
+        void reply.header('Cache-Control', 'private, no-store');
+      }
+      done();
+    });
   const readiness = app.get(ReadinessService);
   app
     .getHttpAdapter()
