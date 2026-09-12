@@ -62,11 +62,11 @@ function formatUpdatedAt(iso: string): string {
 
     <h2 class="document-section">Живой показ</h2>
     <p>
-      <NuxtLink class="document-link" to="/start">Как заказчик начинает</NuxtLink>
+      <NuxtLink class="document-link" to="/start">Как заказчик подаёт заявку</NuxtLink>
     </p>
     <p class="mt-2">
       <NuxtLink class="document-link" to="/c/seed-demo-conductor-nordshield">
-        Пульт смены шага
+        Пульт показа
       </NuxtLink>
     </p>
 

@@ -13,7 +13,7 @@ const QUOTE_ACCESS_SECRET = 'seed-z10043-quote-kuznetsov';
 const QUOTE_CABINET_PATH = `/r/${QUOTE_ACCESS_SECRET}`;
 const API_BASE_URL = 'http://localhost:3001/api/v1';
 
-const livePollHint = 'Эта заявка обновляется на глазах. Обновится сама через несколько секунд.';
+const livePollHint = 'Эта заявка обновляется на глазах. Страница обновится сама через несколько секунд.';
 
 function repoFile(relativePath: string): string {
   return readFileSync(join(process.cwd(), relativePath), 'utf8');
@@ -102,7 +102,7 @@ test('quote cabinet Z-10043 does not show the live poll phrase and does not poll
     { timeout: 5_000 },
   );
   await expect(page.getByText(livePollHint, { exact: true })).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Продвинуть по статусу' })).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Продвинуть заявку' })).toHaveCount(0);
   await expect(page.getByRole('button', { name: 'Сбросить' })).toHaveCount(0);
 
   const quietStartedAt = Date.now();
@@ -141,7 +141,7 @@ test.describe('live cabinet poll', () => {
     });
     await expect(page.getByText(LIVE_PUBLIC_NUMBER, { exact: true })).toBeVisible();
     await expect(page.getByText(livePollHint, { exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Продвинуть по статусу' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Продвинуть заявку' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Сбросить' })).toHaveCount(0);
     await expect(page.getByRole('button')).toHaveCount(0);
   });
@@ -178,7 +178,7 @@ test.describe('live cabinet poll', () => {
       'cabinet must not load a new document after conductor advance',
     ).toBe(navigationsAfterLoad);
     await expect(page.getByText(livePollHint, { exact: true })).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Продвинуть по статусу' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Продвинуть заявку' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Сбросить' })).toHaveCount(0);
   });
 

@@ -98,7 +98,7 @@ useSeoMeta({
       <p class="mt-3 text-ink">Этот экран не показывается заказчику.</p>
       <div class="mt-8 flex flex-wrap gap-3">
         <form method="post" :action="advanceAction">
-          <button class="live-control" type="submit">Продвинуть по статусу</button>
+          <button class="live-control" type="submit">Продвинуть заявку</button>
         </form>
         <form method="post" :action="resetAction">
           <button class="live-control" type="submit">Сбросить</button>

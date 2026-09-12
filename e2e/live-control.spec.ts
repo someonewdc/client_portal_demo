@@ -122,7 +122,7 @@ test('conductor actions are pointer controls with hover and active feedback', as
   expect(response, 'GET /c/{fixture} must receive a response from :3000').toBeTruthy();
   expect(response?.ok()).toBe(true);
 
-  const advance = page.getByRole('button', { exact: true, name: 'Продвинуть по статусу' });
+  const advance = page.getByRole('button', { exact: true, name: 'Продвинуть заявку' });
   const reset = page.getByRole('button', { exact: true, name: 'Сбросить' });
   await expectLiveControlLooksPressable(page, advance, 'conductor advance');
   await expectLiveControlLooksPressable(page, reset, 'conductor reset');

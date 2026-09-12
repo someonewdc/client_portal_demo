@@ -16,7 +16,7 @@ describe('request next-step phrase', () => {
     );
     assert.equal(
       requestNextStepPhrase('invoice_issued'),
-      'Счёт выставлен. Оплата в этом окне не принимается.',
+      'Счёт выставлен. Оплата на этой странице не принимается.',
     );
   });
 

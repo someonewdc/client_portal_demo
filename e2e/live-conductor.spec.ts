@@ -10,7 +10,7 @@ const conductorCopy = {
   heading: 'Пульт показа',
   title: 'Пульт показа — ПК «Нордщит»',
   disclaimer: 'Этот экран не показывается заказчику.',
-  advance: 'Продвинуть по статусу',
+  advance: 'Продвинуть заявку',
   reset: 'Сбросить',
 } as const;
 
@@ -91,7 +91,7 @@ test('index live block links to the conductor fixture and keeps D-027 phrases ex
   ).toBeVisible();
 
   await expect(page.getByRole('heading', { exact: true, name: 'Живой показ' })).toBeVisible();
-  const conductorLink = page.getByRole('link', { exact: true, name: 'Пульт смены шага' });
+  const conductorLink = page.getByRole('link', { exact: true, name: 'Пульт показа' });
   await expect(conductorLink).toBeVisible();
   await expect(conductorLink).toHaveAttribute('href', CONDUCTOR_PATH);
   await expect(page.getByRole('button')).toHaveCount(0);

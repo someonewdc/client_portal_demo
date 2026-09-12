@@ -2,6 +2,14 @@
 
 ## Текущее состояние
 
+Русские формулировки UI (D-055): зрительские фразы без оборванного подлежащего
+и канцелярита. Под «Файлы» — `Нажмите имя файла — откроется выписка на экране.`;
+`/start` — «с полки не купить» / «через менеджера»; poll —
+`Страница обновится сама через несколько секунд.`; кнопка пульта `Продвинуть заявку`;
+индекс live `Как заказчик подаёт заявку` / `Пульт показа`; closing КП
+«а не счёт»; оплата «на этой странице»; зачин счёта `Выставленный счёт.`.
+Четыре фразы индекса D-027, штампы D-007, дисклеймер листа и тупики 404 не
+менялись. API / OpenAPI / Prisma / seed не трогали.
 Нарезка live-сценария показа (фича 28, D-049…D-052): копируемые промпты
 `docs/llm/feature-28.md` … `feature-33.md`. Оператор `выполни фичу N`. Фича 29:
 seed пяти каталожных + живая З-10046; `GET /demo/links` — ровно пять items
@@ -231,6 +239,7 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | Live-кнопки cursor/hover              | проверен                          |
 | Листы по kind (D-053)                 | проверен                          |
 | Состав листа по kind (D-054)          | проверен                          |
+| Русский UI (D-055)                    | проверен                          |
 
 ## Журнал проверки
 
@@ -770,3 +779,8 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | 2026-09-12 | File-spec e2e green    | `pnpm exec playwright test e2e/request-cabinet.spec.ts e2e/live-cabinet-poll.spec.ts --grep "distinct spec tables" --workers=1` против `make restart`                                                                                                                                     | exit 0: 2 passed; З-10044 и живая З-10046 на `invoice_issued`                                                                                                       |
 | 2026-09-12 | File-spec cabinet e2e  | `pnpm exec playwright test e2e/request-cabinet.spec.ts --grep "invoice cabinet keeps the order spec" --workers=1` против `make restart`                                                                                                                                                   | exit 0: 1 passed; кабинет З-10044 — спека заказа                                                                                                                   |
 | 2026-09-12 | File-spec gates        | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `git diff --check`                                                                                                                                                                                                             | exit 0                                                                                                                                                             |
+| 2026-09-13 | D-055 TDD red          | `pnpm --filter @client-portal/web test`                                                                                                                                                                                                                                                   | exit 1: 4 failed; poll без подлежащего; зачин `Счёт.`; closing КП без «а не»; «оплата в этом окне»                                                                 |
+| 2026-09-13 | D-055 TDD green        | `pnpm --filter @client-portal/web test`                                                                                                                                                                                                                                                   | exit 0: 25 passed                                                                                                                                                  |
+| 2026-09-13 | D-055 e2e              | `pnpm exec playwright test e2e/live-start.spec.ts e2e/live-conductor.spec.ts e2e/live-cabinet-poll.spec.ts e2e/live-control.spec.ts e2e/request-cabinet.spec.ts --workers=1` против `make restart`                                                                                         | 57 passed, 3 failed HTTP 429 throttle F24 на GET `/requests/{secret}` после пачки кабинета                                                                         |
+| 2026-09-13 | D-055 e2e retry        | `pnpm exec playwright test e2e/request-cabinet.spec.ts --grep "summary list" --workers=1` затем `--grep "metadata stack on a 390px"`                                                                                      | exit 0: 3 + 1 passed после паузы rate-limit                                                                                                                            |
+| 2026-09-13 | D-055 gates            | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `git diff --check`                                                                                                                                                                                                             | exit 0                                                                                                                                                             |
