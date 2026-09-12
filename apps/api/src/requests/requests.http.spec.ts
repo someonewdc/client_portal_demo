@@ -28,6 +28,14 @@ function expectPrivateNoStore(headers: Record<string, unknown>): void {
   expect(value).toMatch(/no-store/i);
 }
 
+function expectLiveStandNow(value: unknown, after: number): void {
+  const parsed = Date.parse(String(value));
+  expect(Number.isNaN(parsed)).toBe(false);
+  expect(after - parsed).toBeLessThan(120_000);
+  expect(parsed).toBeLessThanOrEqual(after + 5_000);
+  expect(value).not.toBe('2026-09-01T10:00:00.000Z');
+}
+
 const EXPECTED_DEMO_LINKS = [
   {
     publicNumber: 'З-10041',
@@ -356,28 +364,24 @@ describe('request HTTP', () => {
     );
     expect(data).toHaveProperty('demoLive', true);
     expect(data?.demoLive).not.toBe(false);
-    expect(data?.files).toEqual([
+    const files = data?.files as Array<{ uploadedAt: string }> | undefined;
+    const stages = data?.stages as Array<{ reachedAt: string | null }> | undefined;
+    expect(files).toEqual([
       expect.objectContaining({
         fileName: 'Опросный-лист-З-10046.pdf',
         kind: 'questionnaire',
         byteSize: 100000,
       }),
     ]);
-    expect(data?.stages).toEqual([
+    expect(stages).toEqual([
       { status: 'accepted', label: 'Принят', reachedAt: expect.any(String) },
       { status: 'in_calculation', label: 'В расчёте', reachedAt: null },
       { status: 'quote_ready', label: 'КП готово', reachedAt: null },
       { status: 'invoice_issued', label: 'Счёт выставлен', reachedAt: null },
     ]);
-    const updatedAt = Date.parse(String(data?.updatedAt));
-    const acceptedReachedAt = Date.parse(
-      String((data?.stages as Array<{ reachedAt: string }>)[0]?.reachedAt),
-    );
-    expect(Number.isNaN(updatedAt)).toBe(false);
-    expect(Number.isNaN(acceptedReachedAt)).toBe(false);
-    expect(after - updatedAt).toBeLessThan(120_000);
-    expect(updatedAt).toBeLessThanOrEqual(after + 5_000);
-    expect(data?.updatedAt).not.toBe('2026-09-01T10:00:00.000Z');
+    expectLiveStandNow(data?.updatedAt, after);
+    expectLiveStandNow(stages?.[0]?.reachedAt, after);
+    expectLiveStandNow(files?.[0]?.uploadedAt, after);
     expect(JSON.stringify(body)).not.toContain(hashOpaqueToken(Z10046_SECRET));
   });
 
