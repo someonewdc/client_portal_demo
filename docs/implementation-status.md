@@ -2,19 +2,16 @@
 
 ## Текущее состояние
 
-Шкала ролей документа (UX задача 19): в `main.css` классы `.document-display`
-(h1 24px / 600), `.document-identity` (номер 18px / 400, `tabular-nums`),
-`.document-section` (caption `Спецификация` и `h2` `Файлы` — 18px / 600,
-`margin-top` 40px без `mt-8` на `<table>`), `.document-caption` (кикер, тип
-листа, `dt` — 13px muted). `dd` заказчика и изделия — ink; дата и размер
-могут остаться muted. Индекс и оба 404 (`this-secret-does-not-exist`,
-`нет-такого.pdf`) — тот же display. Кластер кабинета 0.25 / 0.5 / 1rem; на
-листе между номером и дисклеймером остаётся `dl`. Бренд шапки классом не
-красили. `.document-summary` и двухколоночный `dl` — задача 20, не здесь.
-Лента, файлы, колонки спеки, `.document-link`, штамп не менялись.
-Нарезка UX иерархии (D-047, D-048) на `main` (#57). Задача 18 на `main` (#55).
-Контракт пары реквизитов — baseline + пересечение по вертикали, не равенство
-`top`.
+Summary list реквизитов (UX задача 20): класс `.document-summary` на одном
+`dl` кабинета (Заказчик / Изделие / Обновлено) и одном листа (Заказчик /
+Изделие / Загружено / Размер). От `40rem` — `display: grid`,
+`grid-template-columns: 9rem minmax(0, 1fr)`, `column-gap: 1rem`,
+`row-gap: 0.75rem`, `align-items: baseline`; ниже `40rem` — столбец,
+`scrollWidth <= 390`. Vue `mt-*` пар сброшены на desktop (`sm:mt-0`).
+Типографика задачи 19 не откатывалась: `dt` — `.document-caption`, имена ink,
+дата и размер muted. Индекс `/` не трогали. Лента, файлы, колонки спеки,
+`.document-link`, штамп не менялись. Контракт пары — бок о бок + пересечение
+по вертикали, не равенство `top`. Задача 19 на `main` (#58).
 Русские формулировки кабинета (D-046): под «Файлы» —
 `Имя файла открывает выписку на экране.`; дисклеймер листа —
 `Это выписка на экране, а не файл для скачивания.`; тупик чужого файла —
@@ -194,6 +191,7 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | UX задача 18 spec qty column          | проверен                          |
 | UX docs иерархия (D-047…D-048)        | выполнен                          |
 | UX задача 19 document type roles      | проверен                          |
+| UX задача 20 document summary list    | проверен                          |
 
 ## Журнал проверки
 
@@ -659,3 +657,8 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | 2026-09-12 | UX-19 gates            | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
 | 2026-09-12 | UX-19 format           | `pnpm exec prettier --write` затронутых css/vue/e2e/md затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                     | exit 0                                                                                                                                                             |
 | 2026-09-12 | UX-19 TDD green full   | `pnpm exec playwright test --workers=1` против `make dev` + seed                                                                                                                                                                                                                          | exit 0: 43 passed (demo-links, focus-visible, layout-header, request-cabinet, security-headers)                                                                    |
+| 2026-09-12 | UX-20 TDD red          | `pnpm exec playwright test e2e/request-cabinet.spec.ts --grep "summary list at 1280px" --workers=1` против `make dev` + seed                                                                                                                                                              | exit 1: 2 failed; кабинет/лист `Заказчик` value x=352 vs dt right=928 (`dd` ниже, не бок о бок); нет `.document-summary`                                           |
+| 2026-09-12 | UX-20 TDD green        | `pnpm exec playwright test e2e/request-cabinet.spec.ts --grep "summary list\|metadata stack\|document summary list class" --workers=1` против `make dev` + seed                                                                                                                           | exit 0: 4 passed; 1280px baseline + пересечение; 390px столбец и `scrollWidth <= 390`; h1 24px; `main dl + p` «что дальше»                                         |
+| 2026-09-12 | UX-20 gates            | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-12 | UX-20 format           | `pnpm exec prettier --write` затронутых css/vue/e2e затем `prettier --check` и `git diff --check`                                                                                                                                                                                         | exit 0                                                                                                                                                             |
+| 2026-09-12 | UX-20 TDD green full   | `pnpm exec playwright test --workers=1` против `make dev` + seed                                                                                                                                                                                                                          | exit 0: 47 passed (demo-links, focus-visible, layout-header, request-cabinet, security-headers)                                                                    |
