@@ -17,9 +17,7 @@ useSeoMeta({
       После отправки откроется ссылка, которую менеджер отправил бы в мессенджер.
     </p>
     <form action="/api/start-request" class="mt-8" method="post">
-      <button class="border border-accent bg-sheet px-4 py-2 text-ink" type="submit">
-        Подать заявку
-      </button>
+      <button class="live-control" type="submit">Подать заявку</button>
     </form>
   </main>
 </template>

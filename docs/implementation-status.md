@@ -17,7 +17,11 @@ seed пяти каталожных + живая З-10046; `GET /demo/links` — 
 Фича 33: кабинет живой З-10046 поллит `GET /requests/{secret}` раз в 4 с
 только при `demoLive === true`; фраза D-052 про обновление на глазах;
 каталожный З-10043 без фразы и без poll; `/r/**` без SWR/ISR; кнопок
-пульта на кабинете нет. Каталог пяти и
+пульта на кабинете нет. Live-кнопки `/start` и `/c/{secret}`: класс
+`.live-control` в `@layer components` — computed `cursor: pointer` в покое
+и на hover; hover заполняет `--color-accent` / `--color-sheet`, `:active` —
+`--color-ink` / `--color-paper`; не underline `.document-link` и не штамп
+`.status-stamp`. Тексты, action форм и POST не менялись. Каталог пяти и
 UX-задачи 1–20 на `main` не откатывались.
 Summary list реквизитов (UX задача 20): класс `.document-summary` на одном
 `dl` кабинета (Заказчик / Изделие / Обновлено) и одном листа (Заказчик /
@@ -216,6 +220,7 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | Фича 31 экран /start                  | проверен                          |
 | Фича 32 экран пульта                  | проверен                          |
 | Фича 33 poll кабинета живой заявки    | проверен                          |
+| Live-кнопки cursor/hover              | проверен                          |
 
 ## Журнал проверки
 
@@ -722,3 +727,7 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | 2026-09-12 | Фича 33 review green   | `pnpm exec playwright test e2e/live-cabinet-poll.spec.ts` против `make dev` + seed                                                                                                                                                                                                        | exit 0: 4 passed; З-10043 без фразы и без extra GET дольше одного интервала 4 с                                                                                    |
 | 2026-09-12 | Фича 33 review2 red    | `pnpm --filter @client-portal/web exec node --experimental-strip-types --test tests/bind-live-cabinet-poll.spec.ts`                                                                                                                                                                       | exit 1: нет `bind-live-cabinet-poll.ts`; watch/onScopeDispose после `await`                                                                                        |
 | 2026-09-12 | Фича 33 review2 green  | `pnpm --filter @client-portal/web test` затем `pnpm exec playwright test e2e/live-cabinet-poll.spec.ts` против `make dev` + seed                                                                                                                                                          | exit 0: web 21; e2e 4; scope.run до dispose; stale secret не apply                                                                                                 |
+| 2026-09-12 | Live-control TDD red   | `pnpm exec playwright test e2e/live-control.spec.ts --workers=1` против `make dev` + seed                                                                                                                                                                                                 | exit 1: 2 failed; rest cursor `default` у «Подать заявку» и «Продвинуть по статусу»                                                                                |
+| 2026-09-12 | Live-control TDD green | `pnpm exec playwright test e2e/live-control.spec.ts --workers=1` против `make dev` + seed                                                                                                                                                                                                 | exit 0: 2 passed; computed `pointer` покой/hover; hover/active из theme tokens                                                                                     |
+| 2026-09-12 | Live-control gates     | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck`                                                                                                                                                                                                                                  | exit 0                                                                                                                                                             |
+| 2026-09-12 | Live-control format    | `pnpm exec prettier --write` затронутых css/vue/e2e/md затем `prettier --check` и `git diff --check`                                                                                                                                                                                      | exit 0                                                                                                                                                             |
