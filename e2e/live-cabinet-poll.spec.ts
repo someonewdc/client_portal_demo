@@ -181,4 +181,65 @@ test.describe('live cabinet poll', () => {
     await expect(page.getByRole('button', { name: 'Продвинуть по статусу' })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Сбросить' })).toHaveCount(0);
   });
+
+  test('live invoice_issued file sheets show distinct spec tables by kind', async ({
+    page,
+    request,
+  }) => {
+    await conductorPost(request, 'reset');
+    await conductorPost(request, 'advance');
+    await conductorPost(request, 'advance');
+    await conductorPost(request, 'advance');
+
+    const cabinetResponse = await page.goto(LIVE_PORTAL_PATH);
+    expect(cabinetResponse, 'GET live cabinet must receive a response from :3000').toBeTruthy();
+    expect(cabinetResponse?.ok()).toBe(true);
+    await expect(
+      page.getByRole('heading', { exact: true, level: 1, name: 'Счёт выставлен' }),
+    ).toBeVisible({ timeout: 5_000 });
+
+    const cabinetSpec = page.getByRole('table', { name: 'Спецификация' });
+    await expect(cabinetSpec.getByText('Щит ЩО-70 800 А IP54', { exact: true })).toBeVisible();
+    await expect(cabinetSpec.getByText('Комплект автоматики ввода', { exact: true })).toBeVisible();
+
+    const liveSheets = [
+      { caption: 'Состав заявки', fileName: 'Опросный-лист-З-10046.pdf' },
+      { caption: 'Спецификация', fileName: 'КП-З-10046.pdf' },
+      { caption: 'Позиции счёта', fileName: 'Счёт-З-10046.pdf' },
+    ] as const;
+
+    const identities: string[] = [];
+    for (const sheet of liveSheets) {
+      const response = await page.goto(
+        `${LIVE_PORTAL_PATH}/d/${encodeURIComponent(sheet.fileName)}`,
+      );
+      expect(response, `GET live ${sheet.fileName} must receive a response`).toBeTruthy();
+      expect(response?.ok(), `${sheet.fileName} must be HTTP 200`).toBe(true);
+
+      const table = page.getByRole('table', { name: sheet.caption });
+      await expect(table).toBeVisible();
+      const identity = await table.locator('tbody tr').evaluateAll((rows) =>
+        rows
+          .map((row) => {
+            const values = [...row.querySelectorAll('td')].map((cell) => {
+              const spans = [...cell.querySelectorAll('span')];
+              const valueSpan = spans.at(-1);
+              return (valueSpan?.textContent ?? cell.textContent ?? '').trim();
+            });
+            return `${values[0] ?? ''}|${values[1] ?? ''}|${values[2] ?? ''}`;
+          })
+          .sort()
+          .join('||'),
+      );
+      expect(identity.length, `${sheet.fileName} spec identity`).toBeGreaterThan(0);
+      identities.push(identity);
+    }
+
+    expect(
+      new Set(identities).size,
+      `live questionnaire/quote/invoice tables must not be copies, got ${identities.join(' ;; ')}`,
+    ).toBe(3);
+
+    await conductorPost(request, 'reset');
+  });
 });

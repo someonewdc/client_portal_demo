@@ -6,7 +6,9 @@ import { useRequestPortal } from '~/composables/useRequestPortal';
 import { documentStatusFromAsyncData } from '~/utils/async-data-problem';
 import {
   fileKindLabel,
+  fileSheetExtractCopy,
   fileSheetLead,
+  fileSheetSpecLines,
   formatByteSize,
   formatRequestUpdatedAt,
 } from '~/utils/request-file-display';
@@ -31,8 +33,12 @@ if (documentStatus !== 200) {
   setResponseStatus(documentStatus);
 }
 
+const fileSheetLines = computed(() =>
+  file.value == null ? [] : [...fileSheetSpecLines(file.value)],
+);
+
 const hasSpecComments = computed(
-  () => request.value?.specLines.some((line) => Boolean(line.comment)) === true,
+  () => fileSheetLines.value.some((line) => Boolean(line.comment)) === true,
 );
 
 useSeoMeta({
@@ -100,9 +106,12 @@ useSeoMeta({
       </dl>
       <p class="mt-4 text-ink">Это выписка на экране, а не файл для скачивания.</p>
       <p class="mt-8 text-ink">{{ fileSheetLead(file.kind) }}</p>
+      <p class="mt-4 text-ink">{{ fileSheetExtractCopy(file.kind).followOn }}</p>
       <table class="w-full min-w-0 max-w-full border-collapse text-left">
         <caption class="document-section text-left">
-          Спецификация
+          {{
+            fileSheetExtractCopy(file.kind).tableCaption
+          }}
         </caption>
         <thead class="max-sm:hidden">
           <tr class="border-b border-rule text-sm text-ink-muted">
@@ -114,7 +123,7 @@ useSeoMeta({
         </thead>
         <tbody>
           <tr
-            v-for="line in request.specLines"
+            v-for="line in fileSheetLines"
             :key="line.name"
             class="block border-b border-rule py-3 sm:table-row sm:py-0"
           >
@@ -137,6 +146,7 @@ useSeoMeta({
           </tr>
         </tbody>
       </table>
+      <p class="mt-8 text-ink">{{ fileSheetExtractCopy(file.kind).closing }}</p>
       <p class="mt-8">
         <NuxtLink class="document-link" :to="`/r/${accessSecret}`">
           <span aria-hidden="true">← </span>К заявке {{ request.publicNumber }}

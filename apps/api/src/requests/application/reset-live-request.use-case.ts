@@ -28,6 +28,7 @@ export class ResetLiveRequestUseCase {
         kind: file.kind,
         byteSize: file.byteSize,
         uploadedAt: new Date(file.uploadedAt),
+        specLines: file.specLines,
       })),
       stageHistory: fixture.stageHistory.map((entry) => ({
         status: entry.status,

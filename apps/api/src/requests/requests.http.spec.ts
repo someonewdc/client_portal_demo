@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -125,12 +125,29 @@ const EXPECTED_Z10043 = {
       kind: 'questionnaire',
       byteSize: 120400,
       uploadedAt: '2026-09-01T09:05:00.000Z',
+      specLines: [
+        { name: 'ВРУ 400 А', quantity: 1, unit: 'шт', comment: 'опросный лист' },
+        { name: 'Учёт на вводе', quantity: 1, unit: 'шт' },
+      ],
     },
     {
       fileName: 'КП-З-10043.pdf',
       kind: 'quote',
       byteSize: 240000,
       uploadedAt: '2026-09-04T12:00:00.000Z',
+      specLines: [
+        {
+          name: 'Вводно-распределительное устройство 400 А',
+          quantity: 1,
+          unit: 'шт',
+          comment: 'IP54, навесное',
+        },
+        {
+          name: 'Рубильник ввода',
+          quantity: 1,
+          unit: 'шт',
+        },
+      ],
     },
   ],
 } as const;
@@ -148,6 +165,75 @@ function expectedPortalFromCatalog(entry: (typeof REQUEST_CATALOG)[number]) {
     specLines: entry.specLines,
     files: entry.files,
   };
+}
+
+type PortalFileSpec = {
+  kind: string;
+  specLines?: unknown;
+};
+
+function specLineIdentity(lines: unknown): string {
+  if (!Array.isArray(lines)) {
+    return '';
+  }
+
+  return [...lines]
+    .map((line) => {
+      if (typeof line !== 'object' || line === null) {
+        return '';
+      }
+
+      const rec = line as Record<string, unknown>;
+      return `${String(rec.name)}|${String(rec.quantity)}|${String(rec.unit)}`;
+    })
+    .sort()
+    .join('||');
+}
+
+function expectDistinctKindSpecLines(files: readonly PortalFileSpec[]): void {
+  const identities = (['questionnaire', 'quote', 'invoice'] as const).map((kind) => {
+    const file = files.find((item) => item.kind === kind);
+    expect(file, `${kind} file`).toBeDefined();
+    const identity = specLineIdentity(file?.specLines);
+    expect(identity.length, `${kind} specLines must be a non-empty table`).toBeGreaterThan(0);
+    return identity;
+  });
+
+  expect(
+    new Set(identities).size,
+    'questionnaire/quote/invoice spec tables must not be copies of one another',
+  ).toBe(3);
+}
+
+function requestFileSpecLineMigrationsDir(): string {
+  return resolve(dirname(fileURLToPath(import.meta.url)), '../../prisma/migrations');
+}
+
+function requestFileSpecLineMigrationSqlFiles(): string[] {
+  return readdirSync(requestFileSpecLineMigrationsDir())
+    .filter((name) => name.includes('request_file_spec_line'))
+    .sort()
+    .map((name) =>
+      readFileSync(resolve(requestFileSpecLineMigrationsDir(), name, 'migration.sql'), 'utf8'),
+    );
+}
+
+function requestFileSpecLineBackfillStatements(): string[] {
+  const statements = requestFileSpecLineMigrationSqlFiles().flatMap((sql) =>
+    sql
+      .split(';')
+      .map((part) => part.trim())
+      .filter(
+        (part) =>
+          part.includes('INSERT INTO "RequestFileSpecLine"') ||
+          part.includes('DELETE FROM "RequestFileSpecLine"'),
+      ),
+  );
+  expect(
+    statements.some((part) => part.includes('INSERT INTO "RequestFileSpecLine"')),
+    'migrations must INSERT RequestFileSpecLine for existing RequestFile',
+  ).toBe(true);
+  return statements;
 }
 
 function applyEnv(databaseUrl: string): void {
@@ -223,6 +309,22 @@ async function insertOrphanRequest(app: NestFastifyApplication): Promise<void> {
       },
     });
 }
+
+describe('RequestFileSpecLine migration SQL', () => {
+  it('inserts spec lines for existing RequestFile rows from RequestSpecLine', () => {
+    const sql = requestFileSpecLineMigrationSqlFiles().join('\n');
+    expect(sql).toMatch(/INSERT INTO "RequestFileSpecLine"/);
+    expect(sql).toMatch(/FROM "RequestFile"/);
+    expect(sql).toMatch(/"RequestSpecLine"/);
+    expect(sql).toMatch(/Опросный-лист-З-10044\.pdf/);
+    expect(sql).toMatch(/КП-З-10044\.pdf/);
+    expect(sql).toMatch(/Частотники полива/);
+    expect(sql).toMatch(/Пульт диспетчера/);
+    const statements = requestFileSpecLineBackfillStatements();
+    expect(statements.some((part) => part.includes('JOIN "RequestSpecLine"'))).toBe(true);
+    expect(statements.some((part) => part.includes('Опросный-лист-З-10044.pdf'))).toBe(true);
+  });
+});
 
 describe('request HTTP', () => {
   let app: NestFastifyApplication | undefined;
@@ -339,6 +441,67 @@ describe('request HTTP', () => {
     expect(body).not.toMatchObject({ data: { accessSecretHash: hash } });
     expect(body).not.toMatchObject({ data: { demoLive: false } });
     expect(payload).not.toContain('"demoLive"');
+  });
+
+  it('returns distinct questionnaire, quote and invoice spec lines for Z-10044 and keeps cabinet specLines', async () => {
+    const response = await app!.inject({
+      method: 'GET',
+      url: '/api/v1/requests/seed-z10044-invoice-teplitsy',
+    });
+    const data = response.json().data as {
+      files: PortalFileSpec[];
+      specLines: unknown;
+    };
+
+    expect(response.statusCode).toBe(200);
+    expect(data.specLines).toEqual([
+      { name: 'Щит управления теплицами', quantity: 1, unit: 'комплект' },
+      { name: 'Шкаф частотников', quantity: 1, unit: 'шт' },
+    ]);
+    expectDistinctKindSpecLines(data.files);
+  });
+
+  it('backfills RequestFileSpecLine so migrate-only keeps Z-10044 kind tables distinct and 2–5 lines', async () => {
+    const sql = requestFileSpecLineMigrationSqlFiles().join('\n');
+    expect(sql).toMatch(/INSERT INTO "RequestFileSpecLine"/);
+    expect(sql).toMatch(/FROM "RequestFile"/);
+    expect(sql).toMatch(/"RequestSpecLine"/);
+
+    const { PrismaService } = await import('../persistence/prisma.service.js');
+    const prisma = app!.get(PrismaService).asClient();
+    await prisma.$executeRaw`DELETE FROM "RequestFileSpecLine"`;
+
+    const emptied = await app!.inject({
+      method: 'GET',
+      url: '/api/v1/requests/seed-z10044-invoice-teplitsy',
+    });
+    const emptiedData = emptied.json().data as { files: Array<{ specLines: unknown[] }> };
+    expect(emptied.statusCode).toBe(200);
+    expect(emptiedData.files.map((file) => file.specLines)).toEqual([[], [], []]);
+
+    for (const statement of requestFileSpecLineBackfillStatements()) {
+      await prisma.$executeRawUnsafe(`${statement};`);
+    }
+
+    const restored = await app!.inject({
+      method: 'GET',
+      url: '/api/v1/requests/seed-z10044-invoice-teplitsy',
+    });
+    const restoredData = restored.json().data as {
+      files: PortalFileSpec[];
+      specLines: unknown;
+    };
+    expect(restored.statusCode).toBe(200);
+    expect(restoredData.specLines).toEqual([
+      { name: 'Щит управления теплицами', quantity: 1, unit: 'комплект' },
+      { name: 'Шкаф частотников', quantity: 1, unit: 'шт' },
+    ]);
+    expect(restoredData.files).toHaveLength(3);
+    for (const file of restoredData.files) {
+      expect(Array.isArray(file.specLines) ? file.specLines.length : 0).toBeGreaterThanOrEqual(2);
+      expect(Array.isArray(file.specLines) ? file.specLines.length : 0).toBeLessThanOrEqual(5);
+    }
+    expectDistinctKindSpecLines(restoredData.files);
   });
 
   it('omits demoLive on every catalog fixture portal payload', async () => {
@@ -910,6 +1073,27 @@ describe('request HTTP', () => {
       thirdPortalData.files.find((file) => file.kind === 'invoice')?.uploadedAt,
       afterThird,
     );
+
+    const liveInvoicePortal = await app!.inject({
+      method: 'GET',
+      url: `/api/v1/requests/${Z10046_SECRET}`,
+    });
+    const liveInvoiceData = liveInvoicePortal.json().data as {
+      files: PortalFileSpec[];
+      specLines: unknown;
+      status: string;
+    };
+    expect(liveInvoiceData.status).toBe('invoice_issued');
+    expect(liveInvoiceData.specLines).toEqual([
+      {
+        name: 'Щит ЩО-70 800 А IP54',
+        quantity: 1,
+        unit: 'шт',
+        comment: 'навесной, показ',
+      },
+      { name: 'Комплект автоматики ввода', quantity: 1, unit: 'шт' },
+    ]);
+    expectDistinctKindSpecLines(liveInvoiceData.files);
 
     const fourth = await app!.inject({
       method: 'POST',

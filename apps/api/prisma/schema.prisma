@@ -51,19 +51,35 @@ model RequestSpecLine {
 }
 
 model RequestFile {
-  id         String          @id @default(cuid())
+  id         String                @id @default(cuid())
   requestId  String
-  request    Request         @relation(fields: [requestId], references: [id], onDelete: Cascade)
+  request    Request               @relation(fields: [requestId], references: [id], onDelete: Cascade)
   position   Int
   fileName   String
   kind       RequestFileKind
   byteSize   Int
-  uploadedAt DateTime        @db.Timestamptz
-  createdAt  DateTime        @default(now()) @db.Timestamptz
-  updatedAt  DateTime        @updatedAt @db.Timestamptz
+  uploadedAt DateTime              @db.Timestamptz
+  createdAt  DateTime              @default(now()) @db.Timestamptz
+  updatedAt  DateTime              @updatedAt @db.Timestamptz
+  specLines  RequestFileSpecLine[]
 
   @@unique([requestId, position])
   @@unique([requestId, fileName])
+}
+
+model RequestFileSpecLine {
+  id        String      @id @default(cuid())
+  fileId    String
+  file      RequestFile @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  position  Int
+  name      String
+  quantity  Int
+  unit      String
+  comment   String?
+  createdAt DateTime    @default(now()) @db.Timestamptz
+  updatedAt DateTime    @updatedAt @db.Timestamptz
+
+  @@unique([fileId, position])
 }
 
 model RequestStageHistory {

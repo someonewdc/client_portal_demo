@@ -233,6 +233,7 @@ export interface components {
              * @example 2026-09-04T12:00:00.000Z
              */
             uploadedAt: string;
+            specLines: components["schemas"]["RequestSpecLineDto"][];
         };
         RequestPortalDataDto: {
             /** @example З-10043 */

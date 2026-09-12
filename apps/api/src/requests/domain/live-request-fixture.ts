@@ -1,7 +1,12 @@
 import { hashOpaqueToken } from '@client-portal/platform-core/opaque-token';
 
 import type { RequestCatalogEntry } from './request-catalog.js';
-import type { ConductorSnapshot, RequestFileMeta, RequestRecord } from './request.js';
+import type {
+  ConductorSnapshot,
+  RequestFileMeta,
+  RequestRecord,
+  RequestSpecLine,
+} from './request.js';
 import type { RequestFileKind, RequestStatus } from './request-status.js';
 import { nextRequestStatus, REQUEST_STATUS_LABELS } from './request-status.js';
 
@@ -10,22 +15,45 @@ export const LIVE_REQUEST_ACCESS_SECRET = 'seed-z10046-live-severnaya-duga';
 
 export const LIVE_ACCESS_SECRET_HASH = hashOpaqueToken(LIVE_REQUEST_ACCESS_SECRET);
 
+const LIVE_ORDER_SPEC: readonly RequestSpecLine[] = [
+  {
+    name: 'Щит ЩО-70 800 А IP54',
+    quantity: 1,
+    unit: 'шт',
+    comment: 'навесной, показ',
+  },
+  { name: 'Комплект автоматики ввода', quantity: 1, unit: 'шт' },
+];
+
 export const LIVE_QUESTIONNAIRE_FILE = {
   fileName: 'Опросный-лист-З-10046.pdf',
   kind: 'questionnaire' as const satisfies RequestFileKind,
   byteSize: 100000,
+  specLines: [
+    { name: 'Щит ЩО-70 800 А IP54', quantity: 1, unit: 'шт', comment: 'навесной' },
+    { name: 'АВР на вводе', quantity: 1, unit: 'комплект' },
+  ] as const satisfies readonly RequestSpecLine[],
 };
 
 export const LIVE_QUOTE_FILE = {
   fileName: 'КП-З-10046.pdf',
   kind: 'quote' as const satisfies RequestFileKind,
   byteSize: 240000,
+  specLines: [
+    { name: 'Щит ЩО-70 800 А IP54', quantity: 1, unit: 'шт' },
+    { name: 'Комплект автоматики ввода', quantity: 1, unit: 'шт' },
+    { name: 'Рубильник ввода', quantity: 1, unit: 'шт' },
+  ] as const satisfies readonly RequestSpecLine[],
 };
 
 export const LIVE_INVOICE_FILE = {
   fileName: 'Счёт-З-10046.pdf',
   kind: 'invoice' as const satisfies RequestFileKind,
   byteSize: 180000,
+  specLines: [
+    { name: 'Щит ЩО-70 800 А IP54', quantity: 1, unit: 'шт', comment: 'к оплате, показ' },
+    { name: 'Комплект автоматики ввода', quantity: 1, unit: 'шт' },
+  ] as const satisfies readonly RequestSpecLine[],
 };
 
 export function isLiveRequestPublicNumber(publicNumber: string): boolean {
@@ -88,15 +116,7 @@ export function liveRequestAcceptedFixture(now: Date): RequestCatalogEntry {
     accessSecret: LIVE_REQUEST_ACCESS_SECRET,
     updatedAt: iso,
     stageHistory: [{ status: 'accepted', reachedAt: iso }],
-    specLines: [
-      {
-        name: 'Щит ЩО-70 800 А IP54',
-        quantity: 1,
-        unit: 'шт',
-        comment: 'навесной, показ',
-      },
-      { name: 'Комплект автоматики ввода', quantity: 1, unit: 'шт' },
-    ],
+    specLines: LIVE_ORDER_SPEC,
     files: [...liveFilesForStatus('accepted', now)],
   };
 }

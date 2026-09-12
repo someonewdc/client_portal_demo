@@ -25,14 +25,23 @@ function quoteRecord(accessSecretHash: string): RequestRecord {
       },
       { name: 'Рубильник ввода', quantity: 1, unit: 'шт' },
     ],
-    files: [
-      {
-        fileName: 'КП-З-10043.pdf',
-        kind: 'quote',
-        byteSize: 240000,
-        uploadedAt: '2026-09-04T12:00:00.000Z',
-      },
-    ],
+      files: [
+        {
+          fileName: 'КП-З-10043.pdf',
+          kind: 'quote',
+          byteSize: 240000,
+          uploadedAt: '2026-09-04T12:00:00.000Z',
+          specLines: [
+            {
+              name: 'Вводно-распределительное устройство 400 А',
+              quantity: 1,
+              unit: 'шт',
+              comment: 'IP54, навесное',
+            },
+            { name: 'Рубильник ввода', quantity: 1, unit: 'шт' },
+          ],
+        },
+      ],
     stageHistory: [
       { status: 'accepted', reachedAt: '2026-09-01T09:00:00.000Z' },
       { status: 'in_calculation', reachedAt: '2026-09-02T11:00:00.000Z' },
@@ -88,14 +97,23 @@ describe('GetRequestByAccessSecretUseCase', () => {
                 },
                 { name: 'Комплект автоматики ввода', quantity: 1, unit: 'шт' },
               ],
-              files: [
-                {
-                  fileName: 'Опросный-лист-З-10046.pdf',
-                  kind: 'questionnaire',
-                  byteSize: 100000,
-                  uploadedAt: '2026-09-12T12:00:00.000Z',
-                },
-              ],
+                files: [
+                  {
+                    fileName: 'Опросный-лист-З-10046.pdf',
+                    kind: 'questionnaire',
+                    byteSize: 100000,
+                    uploadedAt: '2026-09-12T12:00:00.000Z',
+                    specLines: [
+                      {
+                        name: 'Щит ЩО-70 800 А IP54',
+                        quantity: 1,
+                        unit: 'шт',
+                        comment: 'навесной',
+                      },
+                      { name: 'АВР на вводе', quantity: 1, unit: 'комплект' },
+                    ],
+                  },
+                ],
               stageHistory: [{ status: 'accepted', reachedAt: '2026-09-12T12:00:00.000Z' }],
             }
           : null,

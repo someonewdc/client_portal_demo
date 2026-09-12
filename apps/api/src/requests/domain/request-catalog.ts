@@ -15,6 +15,52 @@ export interface RequestCatalogEntry {
   readonly files: readonly RequestFileMeta[];
 }
 
+const Z10041_SPEC: readonly RequestSpecLine[] = [
+  { name: 'Щит ЩО-70 800 А IP54', quantity: 1, unit: 'шт', comment: 'навесной' },
+  { name: 'Комплект автоматики ввода', quantity: 1, unit: 'шт' },
+];
+
+const Z10042_SPEC: readonly RequestSpecLine[] = [
+  { name: 'НКУ освещения причала', quantity: 1, unit: 'шт' },
+  { name: 'Шкаф учёта', quantity: 2, unit: 'шт' },
+];
+
+const Z10043_ORDER_SPEC: readonly RequestSpecLine[] = [
+  {
+    name: 'Вводно-распределительное устройство 400 А',
+    quantity: 1,
+    unit: 'шт',
+    comment: 'IP54, навесное',
+  },
+  { name: 'Рубильник ввода', quantity: 1, unit: 'шт' },
+];
+
+const Z10043_QUESTIONNAIRE_SPEC: readonly RequestSpecLine[] = [
+  { name: 'ВРУ 400 А', quantity: 1, unit: 'шт', comment: 'опросный лист' },
+  { name: 'Учёт на вводе', quantity: 1, unit: 'шт' },
+];
+
+const Z10044_ORDER_SPEC: readonly RequestSpecLine[] = [
+  { name: 'Щит управления теплицами', quantity: 1, unit: 'комплект' },
+  { name: 'Шкаф частотников', quantity: 1, unit: 'шт' },
+];
+
+const Z10044_QUESTIONNAIRE_SPEC: readonly RequestSpecLine[] = [
+  { name: 'Щит управления теплицами', quantity: 1, unit: 'шт', comment: 'IP54' },
+  { name: 'Частотники полива', quantity: 3, unit: 'шт' },
+];
+
+const Z10044_QUOTE_SPEC: readonly RequestSpecLine[] = [
+  { name: 'Щит управления теплицами', quantity: 1, unit: 'комплект' },
+  { name: 'Шкаф частотников', quantity: 1, unit: 'шт' },
+  { name: 'Пульт диспетчера', quantity: 1, unit: 'шт' },
+];
+
+const Z10045_SPEC: readonly RequestSpecLine[] = [
+  { name: 'Шкаф управления наружным освещением', quantity: 3, unit: 'шт' },
+  { name: 'Блок учёта', quantity: 1, unit: 'шт' },
+];
+
 export const REQUEST_CATALOG: readonly RequestCatalogEntry[] = [
   {
     publicNumber: 'З-10041',
@@ -24,16 +70,14 @@ export const REQUEST_CATALOG: readonly RequestCatalogEntry[] = [
     accessSecret: 'seed-z10041-accepted-severenergo',
     updatedAt: '2026-09-01T10:00:00.000Z',
     stageHistory: [{ status: 'accepted', reachedAt: '2026-09-01T09:00:00.000Z' }],
-    specLines: [
-      { name: 'Щит ЩО-70 800 А IP54', quantity: 1, unit: 'шт', comment: 'навесной' },
-      { name: 'Комплект автоматики ввода', quantity: 1, unit: 'шт' },
-    ],
+    specLines: Z10041_SPEC,
     files: [
       {
         fileName: 'Опросный-лист-З-10041.pdf',
         kind: 'questionnaire',
         byteSize: 98000,
         uploadedAt: '2026-09-01T09:05:00.000Z',
+        specLines: Z10041_SPEC,
       },
     ],
   },
@@ -48,16 +92,14 @@ export const REQUEST_CATALOG: readonly RequestCatalogEntry[] = [
       { status: 'accepted', reachedAt: '2026-09-01T09:00:00.000Z' },
       { status: 'in_calculation', reachedAt: '2026-09-02T11:00:00.000Z' },
     ],
-    specLines: [
-      { name: 'НКУ освещения причала', quantity: 1, unit: 'шт' },
-      { name: 'Шкаф учёта', quantity: 2, unit: 'шт' },
-    ],
+    specLines: Z10042_SPEC,
     files: [
       {
         fileName: 'Опросный-лист-З-10042.pdf',
         kind: 'questionnaire',
         byteSize: 102000,
         uploadedAt: '2026-09-01T09:10:00.000Z',
+        specLines: Z10042_SPEC,
       },
     ],
   },
@@ -73,27 +115,21 @@ export const REQUEST_CATALOG: readonly RequestCatalogEntry[] = [
       { status: 'in_calculation', reachedAt: '2026-09-02T11:00:00.000Z' },
       { status: 'quote_ready', reachedAt: '2026-09-04T12:00:00.000Z' },
     ],
-    specLines: [
-      {
-        name: 'Вводно-распределительное устройство 400 А',
-        quantity: 1,
-        unit: 'шт',
-        comment: 'IP54, навесное',
-      },
-      { name: 'Рубильник ввода', quantity: 1, unit: 'шт' },
-    ],
+    specLines: Z10043_ORDER_SPEC,
     files: [
       {
         fileName: 'Опросный-лист-З-10043.pdf',
         kind: 'questionnaire',
         byteSize: 120400,
         uploadedAt: '2026-09-01T09:05:00.000Z',
+        specLines: Z10043_QUESTIONNAIRE_SPEC,
       },
       {
         fileName: 'КП-З-10043.pdf',
         kind: 'quote',
         byteSize: 240000,
         uploadedAt: '2026-09-04T12:00:00.000Z',
+        specLines: Z10043_ORDER_SPEC,
       },
     ],
   },
@@ -110,28 +146,28 @@ export const REQUEST_CATALOG: readonly RequestCatalogEntry[] = [
       { status: 'quote_ready', reachedAt: '2026-09-04T12:00:00.000Z' },
       { status: 'invoice_issued', reachedAt: '2026-09-06T15:00:00.000Z' },
     ],
-    specLines: [
-      { name: 'Щит управления теплицами', quantity: 1, unit: 'комплект' },
-      { name: 'Шкаф частотников', quantity: 1, unit: 'шт' },
-    ],
+    specLines: Z10044_ORDER_SPEC,
     files: [
       {
         fileName: 'Опросный-лист-З-10044.pdf',
         kind: 'questionnaire',
         byteSize: 110000,
         uploadedAt: '2026-09-01T09:05:00.000Z',
+        specLines: Z10044_QUESTIONNAIRE_SPEC,
       },
       {
         fileName: 'КП-З-10044.pdf',
         kind: 'quote',
         byteSize: 256000,
         uploadedAt: '2026-09-04T12:00:00.000Z',
+        specLines: Z10044_QUOTE_SPEC,
       },
       {
         fileName: 'Счёт-З-10044.pdf',
         kind: 'invoice',
         byteSize: 180000,
         uploadedAt: '2026-09-06T15:00:00.000Z',
+        specLines: Z10044_ORDER_SPEC,
       },
     ],
   },
@@ -146,16 +182,14 @@ export const REQUEST_CATALOG: readonly RequestCatalogEntry[] = [
       { status: 'accepted', reachedAt: '2026-09-01T09:00:00.000Z' },
       { status: 'in_calculation', reachedAt: '2026-09-03T14:00:00.000Z' },
     ],
-    specLines: [
-      { name: 'Шкаф управления наружным освещением', quantity: 3, unit: 'шт' },
-      { name: 'Блок учёта', quantity: 1, unit: 'шт' },
-    ],
+    specLines: Z10045_SPEC,
     files: [
       {
         fileName: 'Опросный-лист-З-10045.pdf',
         kind: 'questionnaire',
         byteSize: 99000,
         uploadedAt: '2026-09-01T09:20:00.000Z',
+        specLines: Z10045_SPEC,
       },
     ],
   },

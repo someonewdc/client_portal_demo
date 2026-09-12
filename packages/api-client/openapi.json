@@ -550,13 +550,22 @@
             "type": "string",
             "example": "2026-09-04T12:00:00.000Z",
             "format": "date-time"
+          },
+          "specLines": {
+            "maxItems": 5,
+            "minItems": 2,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RequestSpecLineDto"
+            }
           }
         },
         "required": [
           "fileName",
           "kind",
           "byteSize",
-          "uploadedAt"
+          "uploadedAt",
+          "specLines"
         ]
       },
       "RequestPortalDataDto": {
