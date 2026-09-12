@@ -60,10 +60,13 @@ capability-секрету из env. CORS допускает POST. UI нет.
 
 ## TDD (тесты до кода)
 
-1. HTTP/CORS тесты **до** роутов: GET fixture 200; bad/empty secret 404 не 401;
-   POST reset → accepted + 1 file; POST advance ×3 по таблице D-052; четвёртый
-   advance 409; POST не меняет З-10043; CORS methods включают POST, credentials
-   false; `validateApiEnv` требует `DEMO_CONDUCTOR_SECRET`.
+1. HTTP/CORS тесты **до** роутов: GET fixture 200 и снимок `nextStatus` /
+   `nextStatusLabel` (`accepted` → `in_calculation` / `В расчёте`; после
+   advance — следующая пара D-007; на `invoice_issued` оба `null`); bad/empty
+   secret 404 не 401; POST reset → accepted + 1 file + next `in_calculation` /
+   `В расчёте`; POST advance ×3 по таблице D-052 с теми же next-полями;
+   четвёртый advance 409; POST не меняет З-10043; CORS methods включают POST,
+   credentials false; `validateApiEnv` требует `DEMO_CONDUCTOR_SECRET`.
 2. `pnpm --filter @client-portal/api exec vitest run` — **red** (маршрутов нет /
    CORS без POST / env не требует секрет).
 3. Потом use cases, controller, CORS, env, `pnpm generate:api`.
@@ -86,14 +89,18 @@ capability-секрету из env. CORS допускает POST. UI нет.
 
 ## Критерии приёмки
 
-- Given fixture `seed-demo-conductor-nordshield`, When GET
-  `/demo/conductor/{secret}`, Then 200 с полями D-051 и `portalPath`
-  `/r/seed-z10046-live-severnaya-duga`.
+- Given fixture `seed-demo-conductor-nordshield` и seed (`accepted`), When GET
+  `/demo/conductor/{secret}`, Then 200 с полями D-051, `portalPath`
+  `/r/seed-z10046-live-severnaya-duga`, `nextStatus` `in_calculation`,
+  `nextStatusLabel` `В расчёте`.
 - Given неизвестный или пустой секрет, When GET/POST conductor, Then 404
   Problem Details, не 401; `detail` без SQL/stack/секрета.
-- Given POST reset, Then живая заявка `accepted`, один questionnaire file.
-- Given POST advance ×3, Then статусы и файлы по таблице D-052; четвёртый
-  advance — 409 без изменения.
+- Given POST reset, Then живая заявка `accepted`, один questionnaire file;
+  GET/тело POST: `nextStatus` `in_calculation`, `nextStatusLabel` `В расчёте`.
+- Given POST advance ×3, Then статусы и файлы по таблице D-052; next-поля:
+  после 1-го `quote_ready` / `КП готово`; после 2-го `invoice_issued` /
+  `Счёт выставлен`; после 3-го статус `invoice_issued` и оба next `null`;
+  четвёртый advance — 409 без изменения (next по-прежнему `null`).
 - Given POST conductor, Then З-10043 (и остальные каталожные) не меняются.
 - Given CORS, Then methods включают POST; `credentials: false`.
 - Given `validateApiEnv`, Then без `DEMO_CONDUCTOR_SECRET` — ошибка; в

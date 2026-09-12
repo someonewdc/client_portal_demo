@@ -28,6 +28,7 @@
 - `.agents/skills/verification-honesty/SKILL.md`
 - `apps/web/app/pages/index.vue`
 - `apps/web/nuxt.config.ts`
+- `.env.example`, `compose.yaml` (service `web`), `.github/workflows/ci.yml`
 - `e2e/demo-links.spec.ts`, `e2e/security-headers.spec.ts`
 
 ## Контекст продукта
@@ -58,7 +59,9 @@ server-only runtimeConfig (`NUXT_DEMO_CONDUCTOR_SECRET` / fixture
    счёте — после клика снова «Принят». Индекс: `Как заказчик начинает` →
    `/start`; четыре фразы D-027 `exact`. HTML `/start` не содержит
    `seed-demo-conductor-nordshield`. Capability-заголовки на GET `/start`.
-   `baseURL` `http://localhost:3000`.
+   Source-контракт: `.env.example`, `compose.yaml` `web` и CI содержат
+   `NUXT_DEMO_CONDUCTOR_SECRET` с fixture (иначе `make dev` / `make up` без
+   секрета в web). `baseURL` `http://localhost:3000`.
 2. `pnpm test:e2e` против `make dev` + seed — **red**. Не мокать API. Не
    стартовать второй Nuxt (D-021).
 3. Потом страница и хендлер.
@@ -68,7 +71,11 @@ server-only runtimeConfig (`NUXT_DEMO_CONDUCTOR_SECRET` / fixture
 
 - Страница `/start` и server handler reset по D-052 / D-051.
 - Блок «Живой показ» + ссылка с индекса.
-- `NUXT_DEMO_CONDUCTOR_SECRET` в server-only runtimeConfig (не public).
+- `NUXT_DEMO_CONDUCTOR_SECRET` в server-only runtimeConfig (не public) **и** в
+  стенде: `.env.example` (хост `make dev`), `compose.yaml` service `web`
+  (`make up` / CI job `e2e`), тот же fixture `seed-demo-conductor-nordshield`.
+  Без этого секрет не попадёт в web-процесс, серверный reset `/start` не
+  сработает. В `NUXT_PUBLIC_*` и HTML `/start` секрета нет.
 - Обнови `docs/implementation-status.md` (red и green).
 
 ## Что не делать
@@ -92,6 +99,9 @@ server-only runtimeConfig (`NUXT_DEMO_CONDUCTOR_SECRET` / fixture
   `/start`; четыре фразы D-027 дословны.
 - Given HTML `/start`, Then нет строки `seed-demo-conductor-nordshield`.
 - Given GET `/start`, Then capability-заголовки D-032/D-051.
+- Given `.env.example`, compose service `web` и CI, Then есть
+  `NUXT_DEMO_CONDUCTOR_SECRET=seed-demo-conductor-nordshield` (web видит секрет
+  в `make dev` и в контейнере `make up`).
 - Red evidence есть до green.
 
 ## Проверки

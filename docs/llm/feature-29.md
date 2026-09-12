@@ -64,8 +64,10 @@ D-050. Экранов Nuxt, CORS и POST ещё нет.
    `pnpm --filter @client-portal/api exec vitest run` на
    `get-demo-links.use-case.spec.ts`,
    `get-request-by-access-secret.use-case.spec.ts`, `requests.http.spec.ts`.
-2. Зафиксируй **red** (нет fixture / нет `demoLive` / З-10046 в items или 500 из-за
-   extra). Если сразу green — перепиши assert.
+2. Зафиксируй **red** (нет fixture / нет `demoLive: true` у живой / у каталожной
+   GET есть `demoLive` / З-10046 в items или 500 из-за extra). Если сразу green —
+   перепиши assert. Assert каталога: ключа `demoLive` нет (`undefined` / omit),
+   не `false`.
 3. Потом seed, mapping, `pnpm generate:api`.
 4. Не меняй title/спеку/fileName живой заявки и секреты пяти под другую выдумку.
 5. Не `skip`/`xit`.
@@ -91,6 +93,8 @@ D-050. Экранов Nuxt, CORS и POST ещё нет.
   в `items`.
 - Given seed, When GET `/requests/seed-z10046-live-severnaya-duga`, Then 200,
   `accepted`, `demoLive: true`, один questionnaire file, title/спека из D-050.
+- Given seed, When GET `/requests/seed-z10043-quote-kuznetsov` (и остальные
+  каталожные fixture), Then 200 и поля `demoLive` нет (omit, не `false`).
 - Given extra заявка не из {5 каталог + З-10046}, When GET `/demo/links`, Then 500.
 - Given это, When `applyRequestSeed` повторно, Then extra исчезла, З-10046 снова
   `accepted`.
