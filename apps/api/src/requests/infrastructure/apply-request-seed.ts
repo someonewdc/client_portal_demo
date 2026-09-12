@@ -2,6 +2,10 @@ import { hashOpaqueToken } from '@client-portal/platform-core/opaque-token';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 import { PrismaClient } from '../../generated/prisma/client.js';
+import {
+  LIVE_REQUEST_PUBLIC_NUMBER,
+  liveRequestAcceptedFixture,
+} from '../domain/live-request-fixture.js';
 import { REQUEST_CATALOG } from '../domain/request-catalog.js';
 
 function createPrisma(): PrismaClient {
@@ -22,15 +26,19 @@ export async function applyRequestSeed(): Promise<void> {
   const prisma = createPrisma();
   try {
     await prisma.$transaction(async (tx) => {
+      const fixtures = [...REQUEST_CATALOG, liveRequestAcceptedFixture(new Date())];
       await tx.request.deleteMany({
         where: {
           publicNumber: {
-            notIn: REQUEST_CATALOG.map((fixture) => fixture.publicNumber),
+            notIn: [
+              ...REQUEST_CATALOG.map((fixture) => fixture.publicNumber),
+              LIVE_REQUEST_PUBLIC_NUMBER,
+            ],
           },
         },
       });
 
-      for (const fixture of REQUEST_CATALOG) {
+      for (const fixture of fixtures) {
         const accessSecretHash = hashOpaqueToken(fixture.accessSecret);
         const request = await tx.request.upsert({
           create: {

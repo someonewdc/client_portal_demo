@@ -4,6 +4,7 @@ import type { NestFastifyApplication } from '@nestjs/platform-fastify';
 import { getOptionsToken, type ThrottlerModuleOptions } from '@nestjs/throttler';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+import { REQUEST_CATALOG } from './domain/request-catalog.js';
 import type * as portalThrottle from './http/portal-throttle.js';
 
 process.env.TZ = 'Europe/Moscow';
@@ -13,6 +14,7 @@ const intendedDatabaseUrl =
   'postgresql://client_portal:client_portal@127.0.0.1:5433/client_portal';
 
 const Z10043_SECRET = 'seed-z10043-quote-kuznetsov';
+const Z10046_SECRET = 'seed-z10046-live-severnaya-duga';
 const UNKNOWN_SECRET = 'unknown-secret-not-in-seed';
 const UNKNOWN_SECRET_A = 'unknown-secret-a';
 const UNKNOWN_SECRET_B = 'unknown-secret-b';
@@ -24,6 +26,14 @@ function expectPrivateNoStore(headers: Record<string, unknown>): void {
   const value = typeof cacheControl === 'string' ? cacheControl : '';
   expect(value).toMatch(/private/i);
   expect(value).toMatch(/no-store/i);
+}
+
+function expectLiveStandNow(value: unknown, after: number): void {
+  const parsed = Date.parse(String(value));
+  expect(Number.isNaN(parsed)).toBe(false);
+  expect(after - parsed).toBeLessThan(120_000);
+  expect(parsed).toBeLessThanOrEqual(after + 5_000);
+  expect(value).not.toBe('2026-09-01T10:00:00.000Z');
 }
 
 const EXPECTED_DEMO_LINKS = [
@@ -204,10 +214,12 @@ describe('request HTTP', () => {
 
     expect(response.statusCode).toBe(200);
     expectPrivateNoStore(response.headers);
-    expect(response.json()).toEqual({
+    const body: { data: { items: Array<{ publicNumber: string }> } } = response.json();
+    expect(body).toEqual({
       data: { items: [...EXPECTED_DEMO_LINKS] },
       meta: { traceId: expect.any(String) },
     });
+    expect(body.data.items.map((item) => item.publicNumber)).not.toContain('З-10046');
   });
 
   it('fails closed on an extra stored request, then seed restores the catalog envelope', async () => {
@@ -296,6 +308,141 @@ describe('request HTTP', () => {
     });
     expect(payload).not.toContain(hash);
     expect(body).not.toMatchObject({ data: { accessSecretHash: hash } });
+    expect(body).not.toMatchObject({ data: { demoLive: false } });
+    expect(payload).not.toContain('"demoLive"');
+  });
+
+  it('omits demoLive on every catalog fixture portal payload', async () => {
+    for (const entry of REQUEST_CATALOG) {
+      const response = await app!.inject({
+        method: 'GET',
+        url: `/api/v1/requests/${entry.accessSecret}`,
+      });
+      const body: unknown = response.json();
+      const data =
+        typeof body === 'object' && body !== null && 'data' in body ? body.data : undefined;
+
+      expect(response.statusCode).toBe(200);
+      expect(data).not.toHaveProperty('demoLive');
+      expect(JSON.stringify(body)).not.toContain('"demoLive"');
+    }
+  });
+
+  it('returns the live fixture with demoLive true, accepted catalog and stand now() dates', async () => {
+    const response = await app!.inject({
+      method: 'GET',
+      url: `/api/v1/requests/${Z10046_SECRET}`,
+    });
+    const after = Date.now();
+    const body: unknown = response.json();
+    const data =
+      typeof body === 'object' && body !== null && 'data' in body
+        ? (body.data as Record<string, unknown>)
+        : undefined;
+
+    expect(response.statusCode).toBe(200);
+    expectPrivateNoStore(response.headers);
+    expect(data).toEqual(
+      expect.objectContaining({
+        publicNumber: 'З-10046',
+        counterpartyName: 'ООО «Северная дуга»',
+        title: 'Щит ЩО-70 показа',
+        status: 'accepted',
+        statusLabel: 'Принят',
+        plantName: 'ПК «Нордщит»',
+        demoLive: true,
+        specLines: [
+          {
+            name: 'Щит ЩО-70 800 А IP54',
+            quantity: 1,
+            unit: 'шт',
+            comment: 'навесной, показ',
+          },
+          { name: 'Комплект автоматики ввода', quantity: 1, unit: 'шт' },
+        ],
+      }),
+    );
+    expect(data).toHaveProperty('demoLive', true);
+    expect(data?.demoLive).not.toBe(false);
+    const files = data?.files as Array<{ uploadedAt: string }> | undefined;
+    const stages = data?.stages as Array<{ reachedAt: string | null }> | undefined;
+    expect(files).toEqual([
+      expect.objectContaining({
+        fileName: 'Опросный-лист-З-10046.pdf',
+        kind: 'questionnaire',
+        byteSize: 100000,
+      }),
+    ]);
+    expect(stages).toEqual([
+      { status: 'accepted', label: 'Принят', reachedAt: expect.any(String) },
+      { status: 'in_calculation', label: 'В расчёте', reachedAt: null },
+      { status: 'quote_ready', label: 'КП готово', reachedAt: null },
+      { status: 'invoice_issued', label: 'Счёт выставлен', reachedAt: null },
+    ]);
+    expectLiveStandNow(data?.updatedAt, after);
+    expectLiveStandNow(stages?.[0]?.reachedAt, after);
+    expectLiveStandNow(files?.[0]?.uploadedAt, after);
+    expect(JSON.stringify(body)).not.toContain(hashOpaqueToken(Z10046_SECRET));
+  });
+
+  it('fails closed on an extra besides catalog and live, then seed resets З-10046 to accepted', async () => {
+    const { PrismaService } = await import('../persistence/prisma.service.js');
+    const prisma = app!.get(PrismaService).asClient();
+    const live = await prisma.request.findUnique({ where: { publicNumber: 'З-10046' } });
+    expect(live).not.toBeNull();
+
+    await prisma.request.update({
+      where: { publicNumber: 'З-10046' },
+      data: { status: 'invoice_issued' },
+    });
+    await prisma.requestFile.create({
+      data: {
+        byteSize: 240000,
+        fileName: 'КП-З-10046.pdf',
+        kind: 'quote',
+        position: 1,
+        requestId: live!.id,
+        uploadedAt: new Date(),
+      },
+    });
+    await prisma.requestStageHistory.create({
+      data: {
+        reachedAt: new Date(),
+        requestId: live!.id,
+        status: 'in_calculation',
+      },
+    });
+    await insertOrphanRequest(app!);
+
+    const dirty = await app!.inject({ method: 'GET', url: '/api/v1/demo/links' });
+    expect(dirty.statusCode).toBe(500);
+
+    const { applyRequestSeed } = await import('./infrastructure/apply-request-seed.js');
+    await applyRequestSeed();
+
+    const healed = await app!.inject({ method: 'GET', url: '/api/v1/demo/links' });
+    const healedBody: { data: { items: Array<{ publicNumber: string }> } } = healed.json();
+    expect(healed.statusCode).toBe(200);
+    expect(healedBody.data.items).toEqual([...EXPECTED_DEMO_LINKS]);
+    expect(healedBody.data.items.map((item) => item.publicNumber)).not.toContain('З-10046');
+
+    const restored = await app!.inject({
+      method: 'GET',
+      url: `/api/v1/requests/${Z10046_SECRET}`,
+    });
+    const restoredData = restored.json().data as {
+      demoLive?: unknown;
+      files: unknown[];
+      stages: Array<{ reachedAt: string | null; status: string }>;
+      status: string;
+    };
+    expect(restored.statusCode).toBe(200);
+    expect(restoredData.status).toBe('accepted');
+    expect(restoredData.demoLive).toBe(true);
+    expect(restoredData.files).toHaveLength(1);
+    expect(restoredData.stages.filter((stage) => stage.reachedAt !== null)).toEqual([
+      expect.objectContaining({ status: 'accepted' }),
+    ]);
   });
 
   it('stores catalog instants as timestamptz so UTC ISO does not depend on the host TZ', async () => {

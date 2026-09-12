@@ -1,6 +1,7 @@
 import { hashOpaqueToken } from '@client-portal/platform-core/opaque-token';
 import { Inject, Injectable } from '@nestjs/common';
 
+import { isLiveRequestPublicNumber } from '../domain/live-request-fixture.js';
 import type { RequestPortalView } from '../domain/request.js';
 import { PLANT_NAME, REQUEST_STATUS_LABELS } from '../domain/request-status.js';
 import { buildRequestStages } from '../domain/request-stages.js';
@@ -28,6 +29,7 @@ export class GetRequestByAccessSecretUseCase {
       stages: buildRequestStages(record.stageHistory),
       specLines: record.specLines,
       files: record.files,
+      ...(isLiveRequestPublicNumber(record.publicNumber) ? { demoLive: true as const } : {}),
     };
   }
 }

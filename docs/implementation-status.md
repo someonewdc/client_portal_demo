@@ -3,9 +3,11 @@
 ## Текущее состояние
 
 Нарезка live-сценария показа (фича 28, D-049…D-052): копируемые промпты
-`docs/llm/feature-28.md` … `feature-33.md`. Оператор `выполни фичу N`. Кода
-продукта в F28 нет; этапы F29–33 не начаты. Каталог пяти и UX-задачи 1–20 на
-`main` не откатывались.
+`docs/llm/feature-28.md` … `feature-33.md`. Оператор `выполни фичу N`. Фича 29:
+seed пяти каталожных + живая З-10046; `GET /demo/links` — ровно пять items
+З-10041…З-10045 (живая extra, не в `items`); `GET /requests/{secret}` живой —
+`demoLive: true`, у пяти поле omit. Фичи 30–33 не начаты. Каталог пяти и
+UX-задачи 1–20 на `main` не откатывались.
 Summary list реквизитов (UX задача 20): класс `.document-summary` на одном
 `dl` кабинета (Заказчик / Изделие / Обновлено) и одном листа (Заказчик /
 Изделие / Загружено / Размер). От `40rem` — `display: grid`,
@@ -198,7 +200,7 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | UX задача 19 document type roles      | проверен                          |
 | UX задача 20 document summary list    | проверен                          |
 | Фича 28 docs live-сценарий            | выполнен                          |
-| Фича 29 live fixture З-10046          | не начат                          |
+| Фича 29 live fixture З-10046          | проверен                          |
 | Фича 30 conductor API                 | не начат                          |
 | Фича 31 экран /start                  | не начат                          |
 | Фича 32 экран пульта                  | не начат                          |
@@ -675,3 +677,9 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | 2026-09-12 | UX-20 TDD green full   | `pnpm exec playwright test --workers=1` против `make dev` + seed                                                                                                                                                                                                                          | exit 0: 47 passed (demo-links, focus-visible, layout-header, request-cabinet, security-headers)                                                                    |
 | 2026-09-12 | Фича 28 docs           | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0; docs-only (D-049…D-052, промпты 28–33); lint/test продукта не запускались                                                                                  |
 | 2026-09-12 | Фича 28 review fix     | `pnpm format` затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                              | exit 0; must-fix F29 omit demoLive / F30 nextStatus / F31 web env; lint/test продукта не запускались                                                               |
+| 2026-09-12 | Фича 29 TDD red        | `pnpm --filter @client-portal/api exec vitest run src/requests/application src/requests/requests.http.spec.ts`                                                                                                                                                                            | exit 1: 4 failed, 22 passed; GET live 404; строки З-10046 нет; live extra → `RequestFixtureMismatchError`; нет `demoLive: true`                                    |
+| 2026-09-12 | Фича 29 TDD green      | `pnpm --filter @client-portal/api exec vitest run src/requests/application src/requests/requests.http.spec.ts`                                                                                                                                                                            | exit 0: 26 passed; `/demo/links` 5 items без З-10046; live `demoLive: true`; каталог omit; extra 500 и re-seed → `accepted`                                        |
+| 2026-09-12 | Фича 29 generate       | `pnpm generate:api`                                                                                                                                                                                                                                                                       | exit 0: optional `demoLive` на `RequestPortalDataDto` (не в `required`); `schema.d.ts` сгенерирован                                                                |
+| 2026-09-12 | Фича 29 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 44, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-12 | Фича 29 format         | `pnpm exec prettier --write` затронутых ts/json/d.ts/md затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                    | exit 0                                                                                                                                                             |
+| 2026-09-12 | Фича 29 review fix     | `pnpm --filter @client-portal/api exec vitest run src/requests/requests.http.spec.ts`                                                                                                                                                                                                     | exit 0: 15 passed; `updatedAt` / `reachedAt` / `uploadedAt` live — окно `now()`, не только ISO                                                                     |

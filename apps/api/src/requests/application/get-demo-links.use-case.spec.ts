@@ -24,6 +24,17 @@ function queryWithSummaries(summaries: readonly RequestSummary[]): RequestQueryP
   };
 }
 
+function liveSummary(accessSecretHash: string): RequestSummary {
+  return {
+    publicNumber: 'З-10046',
+    counterpartyName: 'ООО «Северная дуга»',
+    title: 'Щит ЩО-70 показа',
+    status: 'accepted',
+    updatedAt: '2026-09-12T12:00:00.000Z',
+    accessSecretHash,
+  };
+}
+
 describe('GetDemoLinksUseCase', () => {
   it('builds portalPath from the fixture secret and omits the stored hash', async () => {
     const items = await new GetDemoLinksUseCase(
@@ -98,5 +109,66 @@ describe('GetDemoLinksUseCase', () => {
     await expect(new GetDemoLinksUseCase(port).execute()).rejects.toBeInstanceOf(
       RequestFixtureMismatchError,
     );
+  });
+
+  it('omits the live З-10046 extra from items instead of failing closed', async () => {
+    const items = await new GetDemoLinksUseCase(
+      queryWithSummaries([
+        ...REQUEST_CATALOG.map(summaryFromCatalog),
+        liveSummary(hashOpaqueToken('seed-z10046-live-severnaya-duga')),
+      ]),
+    ).execute();
+
+    expect(items.map((item) => item.publicNumber)).toEqual([
+      'З-10041',
+      'З-10042',
+      'З-10043',
+      'З-10044',
+      'З-10045',
+    ]);
+    expect(items).not.toEqual(
+      expect.arrayContaining([expect.objectContaining({ publicNumber: 'З-10046' })]),
+    );
+  });
+
+  it('rejects live З-10046 stored with a hash that is not the live fixture secret', async () => {
+    await expect(
+      new GetDemoLinksUseCase(
+        queryWithSummaries([
+          ...REQUEST_CATALOG.map(summaryFromCatalog),
+          liveSummary('hash-not-the-live-fixture'),
+        ]),
+      ).execute(),
+    ).rejects.toBeInstanceOf(RequestFixtureMismatchError);
+  });
+
+  it('rejects a non-live extra even when the live fixture is stored', async () => {
+    await expect(
+      new GetDemoLinksUseCase(
+        queryWithSummaries([
+          ...REQUEST_CATALOG.map(summaryFromCatalog),
+          liveSummary(hashOpaqueToken('seed-z10046-live-severnaya-duga')),
+          {
+            publicNumber: 'З-19999',
+            counterpartyName: 'ООО «Лишнее»',
+            title: 'Лишняя заявка',
+            status: 'accepted',
+            updatedAt: '2026-09-09T00:00:00.000Z',
+            accessSecretHash: 'hash-not-present-in-fixture-catalog',
+          },
+        ]),
+      ).execute(),
+    ).rejects.toBeInstanceOf(RequestFixtureMismatchError);
+  });
+
+  it('rejects an incomplete catalog even when the live fixture row is present', async () => {
+    await expect(
+      new GetDemoLinksUseCase(
+        queryWithSummaries([
+          summaryFromCatalog(REQUEST_CATALOG[0]),
+          liveSummary(hashOpaqueToken('seed-z10046-live-severnaya-duga')),
+        ]),
+      ).execute(),
+    ).rejects.toBeInstanceOf(RequestFixtureMismatchError);
   });
 });

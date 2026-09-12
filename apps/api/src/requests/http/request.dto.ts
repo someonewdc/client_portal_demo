@@ -123,6 +123,9 @@ export class RequestPortalDataDto {
 
   @ApiProperty({ type: () => RequestFileDto, isArray: true })
   files!: RequestFileDto[];
+
+  @ApiPropertyOptional({ example: true, type: Boolean })
+  demoLive?: true;
 }
 
 export class RequestPortalResponseDto {
