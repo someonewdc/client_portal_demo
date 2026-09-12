@@ -65,7 +65,7 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
   <main>
     <p v-if="status === 'pending'" class="text-ink-muted" role="status">Загрузка заявки…</p>
     <section v-else-if="isNotFound" role="alert">
-      <h1 class="text-xl font-semibold text-ink">Ссылка недействительна</h1>
+      <h1 class="document-display">Ссылка недействительна</h1>
       <p class="mt-3 text-ink-muted">
         Заявки по этой ссылке нет. Проверьте адрес или попросите новую ссылку у менеджера.
       </p>
@@ -77,16 +77,16 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
       </span>
     </p>
     <template v-else-if="request">
-      <p class="text-sm text-ink-muted">Статус заявки</p>
-      <h1 class="mt-2 text-xl font-semibold text-ink">{{ currentStatusLabel }}</h1>
-      <p class="mt-2 text-xl tabular-nums text-ink">{{ request.publicNumber }}</p>
-      <p class="mt-2 text-ink">Менеджер отправил вам эту ссылку. Вход не нужен.</p>
+      <p class="document-caption">Статус заявки</p>
+      <h1 class="document-display mt-1">{{ currentStatusLabel }}</h1>
+      <p class="document-identity mt-2 tabular-nums">{{ request.publicNumber }}</p>
+      <p class="mt-4 text-ink">Менеджер отправил вам эту ссылку. Вход не нужен.</p>
       <dl class="mt-4">
-        <dt class="text-sm text-ink-muted">Заказчик</dt>
+        <dt class="document-caption">Заказчик</dt>
         <dd class="mt-1 text-ink">{{ request.counterpartyName }}</dd>
-        <dt class="mt-2 text-sm text-ink-muted">Изделие</dt>
-        <dd class="mt-1 text-ink-muted">{{ request.title }}</dd>
-        <dt class="mt-4 text-sm text-ink-muted">Обновлено</dt>
+        <dt class="mt-2 document-caption">Изделие</dt>
+        <dd class="mt-1 text-ink">{{ request.title }}</dd>
+        <dt class="mt-4 document-caption">Обновлено</dt>
         <dd class="mt-1">
           <time class="text-sm tabular-nums text-ink-muted" :datetime="request.updatedAt">
             {{ formatRequestUpdatedAt(request.updatedAt) }}
@@ -121,8 +121,8 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
         </li>
       </ol>
 
-      <table class="mt-8 w-full min-w-0 max-w-full border-collapse text-left">
-        <caption class="mb-3 text-left font-semibold text-ink">
+      <table class="w-full min-w-0 max-w-full border-collapse text-left">
+        <caption class="document-section text-left">
           Спецификация
         </caption>
         <thead class="max-sm:hidden">
@@ -159,7 +159,7 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
         </tbody>
       </table>
 
-      <h2 class="mt-8 font-semibold text-ink">Файлы</h2>
+      <h2 class="document-section">Файлы</h2>
       <p class="mt-3 text-ink">Имя файла открывает выписку на экране.</p>
       <ul class="mt-3 divide-y divide-rule" aria-label="Файлы" role="list">
         <li

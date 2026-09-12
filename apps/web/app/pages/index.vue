@@ -55,7 +55,7 @@ function formatUpdatedAt(iso: string): string {
 
 <template>
   <main>
-    <h1 class="text-xl font-semibold text-ink">Ссылки для показа</h1>
+    <h1 class="document-display">Ссылки для показа</h1>
     <p class="mt-3 text-ink">Этот список не показывается заказчику.</p>
     <p class="mt-2 text-ink-muted">Так выглядит то, что вы отправили бы заказчику в мессенджер.</p>
     <p class="mt-2 text-ink">Нажмите строку — откроется экран заказчика по ссылке.</p>

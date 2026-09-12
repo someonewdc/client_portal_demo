@@ -53,4 +53,32 @@
     text-decoration-line: none;
     cursor: default;
   }
+
+  .document-display {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: var(--color-ink);
+  }
+
+  .document-identity {
+    font-size: 1.125rem;
+    font-weight: 400;
+    color: var(--color-ink);
+    font-variant-numeric: tabular-nums;
+  }
+
+  .document-section {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--color-ink);
+    margin-top: 2.5rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .document-caption {
+    font-size: 0.8125rem;
+    font-weight: 400;
+    color: var(--color-ink-muted);
+    letter-spacing: 0.02em;
+  }
 }

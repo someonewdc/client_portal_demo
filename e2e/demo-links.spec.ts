@@ -102,6 +102,28 @@ test('demo links index names itself and tells the conductor to click a row', asy
   await expect(page).toHaveURL(/\/r\/seed-z10043-quote-kuznetsov$/);
 });
 
+test('demo links index heading uses document display type role', async ({ page }) => {
+  const response = await page.goto('/');
+
+  expect(response, 'GET / must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  const heading = page.getByRole('heading', { exact: true, level: 1, name: 'Ссылки для показа' });
+  await expect(heading).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
+
+  const metrics = await heading.evaluate(async (element) => {
+    await document.fonts.ready;
+    const computed = getComputedStyle(element);
+    return {
+      fontSize: computed.fontSize,
+      fontWeight: computed.fontWeight,
+    };
+  });
+  expect(metrics.fontSize, 'index h1 must be display 24px').toBe('24px');
+  expect(metrics.fontWeight, 'index h1 must be semibold 600').toBe('600');
+});
+
 test('demo links index status stamp is a regular-weight tag, not a button', async ({ page }) => {
   const response = await page.goto('/');
 

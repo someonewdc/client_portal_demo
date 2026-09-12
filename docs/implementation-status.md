@@ -2,13 +2,19 @@
 
 ## Текущее состояние
 
-Нарезка UX иерархии документа (D-047, D-048): промпты
-`docs/ux/task-19.md` и `task-20.md`. Оператор `реализуй ux задачу N` — полный
-вход и цикл implement → review. Код 19–20 не писать в docs-PR нарезки. Задача
-18 уже на `main` (#55). Классы `.document-display` / `.document-identity` /
-`.document-section` / `.document-caption` / `.document-summary` — в промптах,
-в CSS этого PR нет. Контракт пары реквизитов — baseline + пересечение по
-вертикали, не равенство `top`. Дата и размер могут остаться muted.
+Шкала ролей документа (UX задача 19): в `main.css` классы `.document-display`
+(h1 24px / 600), `.document-identity` (номер 18px / 400, `tabular-nums`),
+`.document-section` (caption `Спецификация` и `h2` `Файлы` — 18px / 600,
+`margin-top` 40px без `mt-8` на `<table>`), `.document-caption` (кикер, тип
+листа, `dt` — 13px muted). `dd` заказчика и изделия — ink; дата и размер
+могут остаться muted. Индекс и оба 404 (`this-secret-does-not-exist`,
+`нет-такого.pdf`) — тот же display. Кластер кабинета 0.25 / 0.5 / 1rem; на
+листе между номером и дисклеймером остаётся `dl`. Бренд шапки классом не
+красили. `.document-summary` и двухколоночный `dl` — задача 20, не здесь.
+Лента, файлы, колонки спеки, `.document-link`, штамп не менялись.
+Нарезка UX иерархии (D-047, D-048) на `main` (#57). Задача 18 на `main` (#55).
+Контракт пары реквизитов — baseline + пересечение по вертикали, не равенство
+`top`.
 Русские формулировки кабинета (D-046): под «Файлы» —
 `Имя файла открывает выписку на экране.`; дисклеймер листа —
 `Это выписка на экране, а не файл для скачивания.`; тупик чужого файла —
@@ -187,6 +193,7 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | UX задача 17 file sheet spec grid     | проверен                          |
 | UX задача 18 spec qty column          | проверен                          |
 | UX docs иерархия (D-047…D-048)        | выполнен                          |
+| UX задача 19 document type roles      | проверен                          |
 
 ## Журнал проверки
 
@@ -647,3 +654,8 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | 2026-09-12 | D-046 TDD green full   | `pnpm exec playwright test --workers=1` против `make dev` + seed                                                                                                                                                                                                                          | exit 0: 37 passed (demo-links, focus-visible, layout-header, request-cabinet, security-headers)                                                                    |
 | 2026-09-12 | UX docs 19–20          | `pnpm exec prettier --write` затронутых md затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                 | exit 0; docs-only (D-047…D-048, `docs/ux/task-19`…`20`); lint/test продукта не запускались                                                                         |
 | 2026-09-12 | UX docs 19–20 review   | `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                                                  | exit 0; blocker: baseline ≠ top; should-fix: UA-margin, muted дата, caption mt, кластер листа, 404 seed, стрелка с 18                                              |
+| 2026-09-12 | UX-19 TDD red          | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 1: 36 passed, 7 failed; h1 кабинета/индекса/листа/404 `20px`; нет `.document-display` в `main.css`; flake rest-color `rgb(0, 0, 238)`                         |
+| 2026-09-12 | UX-19 TDD green        | `pnpm exec playwright test e2e/request-cabinet.spec.ts e2e/demo-links.spec.ts --grep "document type roles\|document display type role\|document type role class names" --workers=1` против `make dev` + seed                                                                              | exit 0: 6 passed; h1 24px/600, номер 18px, секции 18px/600 `marginTop` 40px, table `0px`, `dt` 13px muted, изделие ink                                             |
+| 2026-09-12 | UX-19 gates            | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-12 | UX-19 format           | `pnpm exec prettier --write` затронутых css/vue/e2e/md затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                     | exit 0                                                                                                                                                             |
+| 2026-09-12 | UX-19 TDD green full   | `pnpm exec playwright test --workers=1` против `make dev` + seed                                                                                                                                                                                                                          | exit 0: 43 passed (demo-links, focus-visible, layout-header, request-cabinet, security-headers)                                                                    |
