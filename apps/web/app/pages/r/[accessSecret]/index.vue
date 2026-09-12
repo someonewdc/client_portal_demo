@@ -128,8 +128,8 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
         <thead class="max-sm:hidden">
           <tr class="border-b border-rule text-sm text-ink-muted">
             <th class="py-2 pr-4 font-semibold">Наименование</th>
-            <th class="py-2 pr-4 font-semibold">Кол-во</th>
-            <th class="py-2 pr-4 font-semibold">Ед.</th>
+            <th class="py-2 pr-4 font-semibold sm:min-w-[4.75rem] sm:whitespace-nowrap">Кол-во</th>
+            <th class="py-2 pr-4 font-semibold sm:min-w-12 sm:whitespace-nowrap">Ед.</th>
             <th v-if="hasSpecComments" class="py-2 font-semibold">Комментарий</th>
           </tr>
         </thead>
@@ -143,11 +143,11 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
               <span class="block text-sm text-ink-muted sm:hidden">Наименование</span>
               <span class="break-words">{{ line.name }}</span>
             </td>
-            <td class="block py-1 text-ink sm:table-cell sm:py-3 sm:pr-4">
+            <td class="block py-1 text-ink sm:table-cell sm:min-w-[4.75rem] sm:py-3 sm:pr-4">
               <span class="block text-sm text-ink-muted sm:hidden">Кол-во</span>
               <span class="tabular-nums">{{ line.quantity }}</span>
             </td>
-            <td class="block py-1 text-ink sm:table-cell sm:py-3 sm:pr-4">
+            <td class="block py-1 text-ink sm:table-cell sm:min-w-12 sm:py-3 sm:pr-4">
               <span class="block text-sm text-ink-muted sm:hidden">Ед.</span>
               <span>{{ line.unit }}</span>
             </td>

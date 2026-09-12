@@ -356,6 +356,24 @@ async function expectSpecTableDesktopColumns(page: Page) {
   await expect(firstRow.getByText('Наименование', { exact: true })).toBeHidden();
 }
 
+async function countColumnHeaderTextLineBoxes(header: Locator): Promise<number> {
+  return header.evaluate(async (th) => {
+    await document.fonts.ready;
+    const walker = document.createTreeWalker(th, NodeFilter.SHOW_TEXT);
+    let lineBoxes = 0;
+    let current = walker.nextNode();
+    while (current != null) {
+      if (current.textContent?.trim()) {
+        const range = document.createRange();
+        range.selectNodeContents(current);
+        lineBoxes += range.getClientRects().length;
+      }
+      current = walker.nextNode();
+    }
+    return lineBoxes;
+  });
+}
+
 const filesSheetHint = 'Имя открывает выписку на экране.';
 
 async function expectFilesSheetHint(page: Page) {
@@ -907,6 +925,34 @@ test('quote cabinet specification keeps a desktop table with thead at 1280px', a
 
   await expectCabinetStatusHeader(page, quoteCabinet.publicNumber, quoteCabinet.statusLabel);
   await expectSpecTableDesktopColumns(page);
+});
+
+test('quote cabinet specification quantity header stays one text line at 1280px', async ({
+  page,
+}) => {
+  await page.setViewportSize({ width: 1280, height: 900 });
+  const response = await page.goto(`/r/${quoteCabinet.accessSecret}`);
+
+  expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expectCabinetStatusHeader(page, quoteCabinet.publicNumber, quoteCabinet.statusLabel);
+
+  const specTable = page.getByRole('table', { name: 'Спецификация' });
+  const quantityHeader = specTable.getByRole('columnheader', { name: 'Кол-во', exact: true });
+  await expect(quantityHeader).toBeVisible();
+  await expect(quantityHeader).toHaveText('Кол-во');
+
+  const quantityLineBoxes = await countColumnHeaderTextLineBoxes(quantityHeader);
+  expect(quantityLineBoxes, 'Кол-во header text must stay one line-box').toBe(1);
+
+  await expect(specTable.getByText('1', { exact: true }).first()).toBeVisible();
+  await expect(specTable.getByText('шт', { exact: true }).first()).toBeVisible();
+  await expect(specTable.getByText('IP54, навесной', { exact: true })).toBeVisible();
+
+  const firstRow = specTable.locator('tbody tr').filter({ hasText: quoteCabinet.specLine });
+  const layout = await firstRow.evaluate((tr) => getComputedStyle(tr).display);
+  expect(layout, 'desktop spec stays a table-row').toBe('table-row');
 });
 
 for (const cabinet of nextStepCabinets) {
