@@ -9,6 +9,8 @@ import { getOptionsToken, type ThrottlerModuleOptions } from '@nestjs/throttler'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { REQUEST_CATALOG } from './domain/request-catalog.js';
+import { buildRequestStages } from './domain/request-stages.js';
+import { PLANT_NAME, REQUEST_STATUS_LABELS } from './domain/request-status.js';
 import type * as portalThrottle from './http/portal-throttle.js';
 
 process.env.TZ = 'Europe/Moscow';
@@ -132,6 +134,21 @@ const EXPECTED_Z10043 = {
     },
   ],
 } as const;
+
+function expectedPortalFromCatalog(entry: (typeof REQUEST_CATALOG)[number]) {
+  return {
+    publicNumber: entry.publicNumber,
+    counterpartyName: entry.counterpartyName,
+    title: entry.title,
+    status: entry.status,
+    statusLabel: REQUEST_STATUS_LABELS[entry.status],
+    updatedAt: entry.updatedAt,
+    plantName: PLANT_NAME,
+    stages: buildRequestStages(entry.stageHistory),
+    specLines: entry.specLines,
+    files: entry.files,
+  };
+}
 
 function applyEnv(databaseUrl: string): void {
   process.env.TZ = 'Europe/Moscow';
@@ -739,11 +756,17 @@ describe('request HTTP', () => {
       method: 'POST',
       url: conductorUrl(CONDUCTOR_SECRET, 'advance'),
     });
+    const afterSecond = Date.now();
     const secondPortal = await app!.inject({
       method: 'GET',
       url: `/api/v1/requests/${Z10046_SECRET}`,
     });
-    const secondPortalData = secondPortal.json().data as { files: unknown[]; status: string };
+    const secondPortalData = secondPortal.json().data as {
+      files: Array<{ kind: string; uploadedAt: string }>;
+      stages: Array<{ reachedAt: string | null; status: string }>;
+      status: string;
+      updatedAt: string;
+    };
 
     expect(second.statusCode).toBe(200);
     expect(second.json().data).toEqual({
@@ -763,19 +786,30 @@ describe('request HTTP', () => {
         byteSize: 240000,
       }),
     ]);
+    expectLiveStandNow(secondPortalData.updatedAt, afterSecond);
+    expectLiveStandNow(
+      secondPortalData.stages.find((stage) => stage.status === 'quote_ready')?.reachedAt,
+      afterSecond,
+    );
+    expectLiveStandNow(
+      secondPortalData.files.find((file) => file.kind === 'quote')?.uploadedAt,
+      afterSecond,
+    );
 
     const third = await app!.inject({
       method: 'POST',
       url: conductorUrl(CONDUCTOR_SECRET, 'advance'),
     });
+    const afterThird = Date.now();
     const thirdPortal = await app!.inject({
       method: 'GET',
       url: `/api/v1/requests/${Z10046_SECRET}`,
     });
     const thirdPortalData = thirdPortal.json().data as {
-      files: unknown[];
+      files: Array<{ kind: string; uploadedAt: string }>;
       stages: Array<{ reachedAt: string | null; status: string }>;
       status: string;
+      updatedAt: string;
     };
 
     expect(third.statusCode).toBe(200);
@@ -798,6 +832,15 @@ describe('request HTTP', () => {
       }),
     ]);
     expect(thirdPortalData.stages.every((stage) => stage.reachedAt !== null)).toBe(true);
+    expectLiveStandNow(thirdPortalData.updatedAt, afterThird);
+    expectLiveStandNow(
+      thirdPortalData.stages.find((stage) => stage.status === 'invoice_issued')?.reachedAt,
+      afterThird,
+    );
+    expectLiveStandNow(
+      thirdPortalData.files.find((file) => file.kind === 'invoice')?.uploadedAt,
+      afterThird,
+    );
 
     const fourth = await app!.inject({
       method: 'POST',
@@ -893,17 +936,22 @@ describe('request HTTP', () => {
     expect(reset.statusCode).toBe(200);
     expect(advancedAgain.statusCode).toBe(200);
 
-    const catalog = await app!.inject({
-      method: 'GET',
-      url: `/api/v1/requests/${Z10043_SECRET}`,
-    });
     const links = await app!.inject({ method: 'GET', url: '/api/v1/demo/links' });
 
-    expect(catalog.statusCode).toBe(200);
-    expect(catalog.json()).toEqual({
-      data: EXPECTED_Z10043,
-      meta: { traceId: expect.any(String) },
-    });
+    const z10043 = REQUEST_CATALOG.find((entry) => entry.publicNumber === 'З-10043');
+    expect(z10043).toBeDefined();
+    expect(expectedPortalFromCatalog(z10043!)).toEqual(EXPECTED_Z10043);
+    for (const entry of REQUEST_CATALOG) {
+      const catalog = await app!.inject({
+        method: 'GET',
+        url: `/api/v1/requests/${entry.accessSecret}`,
+      });
+      expect(catalog.statusCode).toBe(200);
+      expect(catalog.json()).toEqual({
+        data: expectedPortalFromCatalog(entry),
+        meta: { traceId: expect.any(String) },
+      });
+    }
     expect(links.json().data.items).toEqual([...EXPECTED_DEMO_LINKS]);
   });
 

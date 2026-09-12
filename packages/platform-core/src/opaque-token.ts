@@ -15,8 +15,8 @@ export function hashOpaqueToken(token: string): string {
 }
 
 export function constantTimeTextEqual(left: string, right: string): boolean {
-  const leftBytes = Buffer.from(left, 'utf8');
-  const rightBytes = Buffer.from(right, 'utf8');
+  const leftDigest = createHash('sha256').update(left, 'utf8').digest();
+  const rightDigest = createHash('sha256').update(right, 'utf8').digest();
 
-  return leftBytes.byteLength === rightBytes.byteLength && timingSafeEqual(leftBytes, rightBytes);
+  return timingSafeEqual(leftDigest, rightDigest);
 }
