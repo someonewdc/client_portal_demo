@@ -1,3 +1,7 @@
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
 import { hashOpaqueToken } from '@client-portal/platform-core/opaque-token';
 import { isProblemDetails } from '@client-portal/platform-core/problem-details';
 import type { NestFastifyApplication } from '@nestjs/platform-fastify';
@@ -15,7 +19,9 @@ const intendedDatabaseUrl =
 
 const Z10043_SECRET = 'seed-z10043-quote-kuznetsov';
 const Z10046_SECRET = 'seed-z10046-live-severnaya-duga';
+const CONDUCTOR_SECRET = 'seed-demo-conductor-nordshield';
 const UNKNOWN_SECRET = 'unknown-secret-not-in-seed';
+const UNKNOWN_CONDUCTOR_SECRET = 'unknown-conductor-secret';
 const UNKNOWN_SECRET_A = 'unknown-secret-a';
 const UNKNOWN_SECRET_B = 'unknown-secret-b';
 const SAME_CLIENT_IP = '127.0.0.1';
@@ -131,9 +137,15 @@ function applyEnv(databaseUrl: string): void {
   process.env.TZ = 'Europe/Moscow';
   process.env.API_PORT = '3001';
   process.env.DATABASE_URL = databaseUrl;
+  process.env.DEMO_CONDUCTOR_SECRET = CONDUCTOR_SECRET;
   process.env.LOG_LEVEL = 'error';
   process.env.NODE_ENV = 'test';
   process.env.WEB_ORIGIN = 'http://localhost:3000';
+}
+
+function conductorUrl(secret: string, action?: 'advance' | 'reset'): string {
+  const base = `/api/v1/demo/conductor/${secret}`;
+  return action === undefined ? base : `${base}/${action}`;
 }
 
 function problemDetail(body: unknown): string {
@@ -575,6 +587,316 @@ describe('request HTTP', () => {
       getTracker: clientIpTracker,
       throttlers: [{ limit: PORTAL_THROTTLE_LIMIT, ttl: PORTAL_THROTTLE_TTL_MS }],
     });
+  });
+
+  it('returns the live conductor snapshot with nextStatus in_calculation after seed', async () => {
+    const response = await app!.inject({
+      method: 'GET',
+      url: conductorUrl(CONDUCTOR_SECRET),
+    });
+    const body: unknown = response.json();
+
+    expect(response.statusCode).toBe(200);
+    expect(response.statusCode).not.toBe(401);
+    expectPrivateNoStore(response.headers);
+    expect(body).toEqual({
+      data: {
+        publicNumber: 'З-10046',
+        status: 'accepted',
+        statusLabel: 'Принят',
+        portalPath: '/r/seed-z10046-live-severnaya-duga',
+        nextStatus: 'in_calculation',
+        nextStatusLabel: 'В расчёте',
+      },
+      meta: { traceId: expect.any(String) },
+    });
+  });
+
+  it('returns 404 Problem Details for an unknown or empty conductor secret, not 401', async () => {
+    const requests = [
+      { method: 'GET' as const, url: conductorUrl(UNKNOWN_CONDUCTOR_SECRET) },
+      { method: 'POST' as const, url: conductorUrl(UNKNOWN_CONDUCTOR_SECRET, 'advance') },
+      { method: 'POST' as const, url: conductorUrl(UNKNOWN_CONDUCTOR_SECRET, 'reset') },
+      { method: 'GET' as const, url: '/api/v1/demo/conductor/' },
+      { method: 'POST' as const, url: '/api/v1/demo/conductor//advance' },
+      { method: 'POST' as const, url: '/api/v1/demo/conductor//reset' },
+    ];
+
+    for (const request of requests) {
+      const response = await app!.inject(request);
+      const body: unknown = response.json();
+      const detail = problemDetail(body);
+      const payload = JSON.stringify(body);
+
+      expect(response.statusCode).toBe(404);
+      expect(response.statusCode).not.toBe(401);
+      expect(response.headers['content-type']).toContain('application/problem+json');
+      expect(isProblemDetails(body)).toBe(true);
+      expect(body).toMatchObject({
+        status: 404,
+        title: 'Resource not found',
+      });
+      expect(detail).not.toContain(UNKNOWN_CONDUCTOR_SECRET);
+      expect(detail).not.toContain(CONDUCTOR_SECRET);
+      expect(detail.toLowerCase()).not.toMatch(/select |from |stack|prisma/i);
+      expect(payload.toLowerCase()).not.toMatch(/select |from |stack|prisma/i);
+    }
+  });
+
+  it('resets the live request to accepted with one questionnaire and next in_calculation', async () => {
+    await app!.inject({ method: 'POST', url: conductorUrl(CONDUCTOR_SECRET, 'advance') });
+    await app!.inject({ method: 'POST', url: conductorUrl(CONDUCTOR_SECRET, 'advance') });
+
+    const response = await app!.inject({
+      method: 'POST',
+      url: conductorUrl(CONDUCTOR_SECRET, 'reset'),
+    });
+    const after = Date.now();
+    const body: unknown = response.json();
+    const portal = await app!.inject({
+      method: 'GET',
+      url: `/api/v1/requests/${Z10046_SECRET}`,
+    });
+    const portalData = portal.json().data as {
+      files: Array<{ fileName: string; kind: string }>;
+      stages: Array<{ reachedAt: string | null; status: string }>;
+      status: string;
+      updatedAt: string;
+    };
+
+    expect(response.statusCode).toBe(200);
+    expectPrivateNoStore(response.headers);
+    expect(body).toEqual({
+      data: {
+        publicNumber: 'З-10046',
+        status: 'accepted',
+        statusLabel: 'Принят',
+        portalPath: '/r/seed-z10046-live-severnaya-duga',
+        nextStatus: 'in_calculation',
+        nextStatusLabel: 'В расчёте',
+      },
+      meta: { traceId: expect.any(String) },
+    });
+    expect(portal.statusCode).toBe(200);
+    expect(portalData.status).toBe('accepted');
+    expect(portalData.files).toEqual([
+      expect.objectContaining({
+        fileName: 'Опросный-лист-З-10046.pdf',
+        kind: 'questionnaire',
+        byteSize: 100000,
+      }),
+    ]);
+    expect(portalData.stages.filter((stage) => stage.reachedAt !== null)).toEqual([
+      expect.objectContaining({ status: 'accepted', reachedAt: expect.any(String) }),
+    ]);
+    expectLiveStandNow(portalData.updatedAt, after);
+    expectLiveStandNow(portalData.stages[0]?.reachedAt, after);
+  });
+
+  it('advances the live request three times per D-052 and rejects a fourth advance with 409', async () => {
+    const first = await app!.inject({
+      method: 'POST',
+      url: conductorUrl(CONDUCTOR_SECRET, 'advance'),
+    });
+    const afterFirst = Date.now();
+    const firstPortal = await app!.inject({
+      method: 'GET',
+      url: `/api/v1/requests/${Z10046_SECRET}`,
+    });
+    const firstPortalData = firstPortal.json().data as {
+      files: unknown[];
+      stages: Array<{ reachedAt: string | null; status: string }>;
+      status: string;
+    };
+
+    expect(first.statusCode).toBe(200);
+    expect(first.json()).toEqual({
+      data: {
+        publicNumber: 'З-10046',
+        status: 'in_calculation',
+        statusLabel: 'В расчёте',
+        portalPath: '/r/seed-z10046-live-severnaya-duga',
+        nextStatus: 'quote_ready',
+        nextStatusLabel: 'КП готово',
+      },
+      meta: { traceId: expect.any(String) },
+    });
+    expect(firstPortalData.status).toBe('in_calculation');
+    expect(firstPortalData.files).toHaveLength(1);
+    expect(firstPortalData.files).toEqual([
+      expect.objectContaining({
+        fileName: 'Опросный-лист-З-10046.pdf',
+        kind: 'questionnaire',
+      }),
+    ]);
+    expect(
+      firstPortalData.stages.filter((stage) => stage.reachedAt !== null).map((s) => s.status),
+    ).toEqual(['accepted', 'in_calculation']);
+    expectLiveStandNow(firstPortalData.stages[1]?.reachedAt, afterFirst);
+
+    const second = await app!.inject({
+      method: 'POST',
+      url: conductorUrl(CONDUCTOR_SECRET, 'advance'),
+    });
+    const secondPortal = await app!.inject({
+      method: 'GET',
+      url: `/api/v1/requests/${Z10046_SECRET}`,
+    });
+    const secondPortalData = secondPortal.json().data as { files: unknown[]; status: string };
+
+    expect(second.statusCode).toBe(200);
+    expect(second.json().data).toEqual({
+      publicNumber: 'З-10046',
+      status: 'quote_ready',
+      statusLabel: 'КП готово',
+      portalPath: '/r/seed-z10046-live-severnaya-duga',
+      nextStatus: 'invoice_issued',
+      nextStatusLabel: 'Счёт выставлен',
+    });
+    expect(secondPortalData.status).toBe('quote_ready');
+    expect(secondPortalData.files).toEqual([
+      expect.objectContaining({ fileName: 'Опросный-лист-З-10046.pdf', kind: 'questionnaire' }),
+      expect.objectContaining({
+        fileName: 'КП-З-10046.pdf',
+        kind: 'quote',
+        byteSize: 240000,
+      }),
+    ]);
+
+    const third = await app!.inject({
+      method: 'POST',
+      url: conductorUrl(CONDUCTOR_SECRET, 'advance'),
+    });
+    const thirdPortal = await app!.inject({
+      method: 'GET',
+      url: `/api/v1/requests/${Z10046_SECRET}`,
+    });
+    const thirdPortalData = thirdPortal.json().data as {
+      files: unknown[];
+      stages: Array<{ reachedAt: string | null; status: string }>;
+      status: string;
+    };
+
+    expect(third.statusCode).toBe(200);
+    expect(third.json().data).toEqual({
+      publicNumber: 'З-10046',
+      status: 'invoice_issued',
+      statusLabel: 'Счёт выставлен',
+      portalPath: '/r/seed-z10046-live-severnaya-duga',
+      nextStatus: null,
+      nextStatusLabel: null,
+    });
+    expect(thirdPortalData.status).toBe('invoice_issued');
+    expect(thirdPortalData.files).toEqual([
+      expect.objectContaining({ fileName: 'Опросный-лист-З-10046.pdf', kind: 'questionnaire' }),
+      expect.objectContaining({ fileName: 'КП-З-10046.pdf', kind: 'quote' }),
+      expect.objectContaining({
+        fileName: 'Счёт-З-10046.pdf',
+        kind: 'invoice',
+        byteSize: 180000,
+      }),
+    ]);
+    expect(thirdPortalData.stages.every((stage) => stage.reachedAt !== null)).toBe(true);
+
+    const fourth = await app!.inject({
+      method: 'POST',
+      url: conductorUrl(CONDUCTOR_SECRET, 'advance'),
+    });
+    const fourthBody: unknown = fourth.json();
+    const fourthDetail = problemDetail(fourthBody);
+    const afterConflict = await app!.inject({
+      method: 'GET',
+      url: conductorUrl(CONDUCTOR_SECRET),
+    });
+    const afterConflictPortal = await app!.inject({
+      method: 'GET',
+      url: `/api/v1/requests/${Z10046_SECRET}`,
+    });
+
+    expect(fourth.statusCode).toBe(409);
+    expect(fourth.statusCode).not.toBe(401);
+    expect(fourth.headers['content-type']).toContain('application/problem+json');
+    expect(isProblemDetails(fourthBody)).toBe(true);
+    expect(fourthBody).toMatchObject({
+      status: 409,
+      title: 'Request conflict',
+    });
+    expect(fourthDetail).not.toContain(CONDUCTOR_SECRET);
+    expect(fourthDetail.toLowerCase()).not.toMatch(/select |from |stack|prisma/i);
+    expect(afterConflict.json().data).toEqual({
+      publicNumber: 'З-10046',
+      status: 'invoice_issued',
+      statusLabel: 'Счёт выставлен',
+      portalPath: '/r/seed-z10046-live-severnaya-duga',
+      nextStatus: null,
+      nextStatusLabel: null,
+    });
+    expect(afterConflictPortal.json().data.files).toHaveLength(3);
+    expect(afterConflictPortal.json().data.status).toBe('invoice_issued');
+  });
+
+  it('does not mutate catalog request З-10043 when the conductor advances or resets', async () => {
+    const advanced = await app!.inject({
+      method: 'POST',
+      url: conductorUrl(CONDUCTOR_SECRET, 'advance'),
+    });
+    const reset = await app!.inject({
+      method: 'POST',
+      url: conductorUrl(CONDUCTOR_SECRET, 'reset'),
+    });
+    const advancedAgain = await app!.inject({
+      method: 'POST',
+      url: conductorUrl(CONDUCTOR_SECRET, 'advance'),
+    });
+
+    expect(advanced.statusCode).toBe(200);
+    expect(reset.statusCode).toBe(200);
+    expect(advancedAgain.statusCode).toBe(200);
+
+    const catalog = await app!.inject({
+      method: 'GET',
+      url: `/api/v1/requests/${Z10043_SECRET}`,
+    });
+    const links = await app!.inject({ method: 'GET', url: '/api/v1/demo/links' });
+
+    expect(catalog.statusCode).toBe(200);
+    expect(catalog.json()).toEqual({
+      data: EXPECTED_Z10043,
+      meta: { traceId: expect.any(String) },
+    });
+    expect(links.json().data.items).toEqual([...EXPECTED_DEMO_LINKS]);
+  });
+
+  it('allows CORS POST from the web origin and keeps credentials off', async () => {
+    const preflight = await app!.inject({
+      headers: {
+        'access-control-request-method': 'POST',
+        origin: 'http://localhost:3000',
+      },
+      method: 'OPTIONS',
+      url: conductorUrl(CONDUCTOR_SECRET, 'advance'),
+    });
+    const get = await app!.inject({
+      headers: { origin: 'http://localhost:3000' },
+      method: 'GET',
+      url: conductorUrl(CONDUCTOR_SECRET),
+    });
+
+    expect(String(preflight.headers['access-control-allow-methods'] ?? '')).toMatch(/POST/i);
+    expect(preflight.headers['access-control-allow-origin']).toBe('http://localhost:3000');
+    expect(preflight.headers['access-control-allow-credentials']).not.toBe('true');
+    expect(get.headers['access-control-allow-origin']).toBe('http://localhost:3000');
+    expect(get.headers['access-control-allow-credentials']).not.toBe('true');
+  });
+
+  it('compares the conductor secret with constantTimeTextEqual', () => {
+    const source = readFileSync(
+      resolve(dirname(fileURLToPath(import.meta.url)), 'infrastructure/env-conductor-auth.ts'),
+      'utf8',
+    );
+
+    expect(source).toMatch(/constantTimeTextEqual/);
+    expect(source).toMatch(/DEMO_CONDUCTOR_SECRET/);
   });
 });
 

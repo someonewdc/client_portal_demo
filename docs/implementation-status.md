@@ -6,7 +6,9 @@
 `docs/llm/feature-28.md` … `feature-33.md`. Оператор `выполни фичу N`. Фича 29:
 seed пяти каталожных + живая З-10046; `GET /demo/links` — ровно пять items
 З-10041…З-10045 (живая extra, не в `items`); `GET /requests/{secret}` живой —
-`demoLive: true`, у пяти поле omit. Фичи 30–33 не начаты. Каталог пяти и
+`demoLive: true`, у пяти поле omit. Фича 30: GET/POST
+`/demo/conductor/{secret}` (снимок, advance, reset), CORS POST,
+`DEMO_CONDUCTOR_SECRET`. Фичи 31–33 не начаты. Каталог пяти и
 UX-задачи 1–20 на `main` не откатывались.
 Summary list реквизитов (UX задача 20): класс `.document-summary` на одном
 `dl` кабинета (Заказчик / Изделие / Обновлено) и одном листа (Заказчик /
@@ -201,7 +203,7 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | UX задача 20 document summary list    | проверен                          |
 | Фича 28 docs live-сценарий            | выполнен                          |
 | Фича 29 live fixture З-10046          | проверен                          |
-| Фича 30 conductor API                 | не начат                          |
+| Фича 30 conductor API                 | проверен                          |
 | Фича 31 экран /start                  | не начат                          |
 | Фича 32 экран пульта                  | не начат                          |
 | Фича 33 poll кабинета живой заявки    | не начат                          |
@@ -683,3 +685,8 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | 2026-09-12 | Фича 29 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 44, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
 | 2026-09-12 | Фича 29 format         | `pnpm exec prettier --write` затронутых ts/json/d.ts/md затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                    | exit 0                                                                                                                                                             |
 | 2026-09-12 | Фича 29 review fix     | `pnpm --filter @client-portal/api exec vitest run src/requests/requests.http.spec.ts`                                                                                                                                                                                                     | exit 0: 15 passed; `updatedAt` / `reachedAt` / `uploadedAt` live — окно `now()`, не только ISO                                                                     |
+| 2026-09-12 | Фича 30 TDD red        | `pnpm --filter @client-portal/api exec vitest run src/core/config src/bootstrap src/requests`                                                                                                                                                                                             | exit 1: 11 failed, 34 passed; GET conductor 404; CORS methods без POST; `validateApiEnv` не требует `DEMO_CONDUCTOR_SECRET`                                        |
+| 2026-09-12 | Фича 30 TDD green      | `pnpm --filter @client-portal/api exec vitest run src/core/config src/bootstrap src/requests`                                                                                                                                                                                             | exit 0: 45 passed; GET snapshot `nextStatus` `in_calculation`; reset/advance D-052; 4-й advance 409; CORS POST; env требует секрет                                 |
+| 2026-09-12 | Фича 30 generate       | `pnpm generate:api`                                                                                                                                                                                                                                                                       | exit 0: path keys `/demo/conductor/{conductorSecret}` (+ `/advance`, `/reset`); `ConductorSnapshotDataDto`                                                         |
+| 2026-09-12 | Фича 30 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 55, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-12 | Фича 30 format         | `pnpm exec prettier --write` затронутых ts/json/d.ts/yml/md затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                | exit 0                                                                                                                                                             |

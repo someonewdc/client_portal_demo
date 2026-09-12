@@ -135,3 +135,36 @@ export class RequestPortalResponseDto {
   @ApiProperty({ type: () => TraceMetaDto })
   meta!: TraceMetaDto;
 }
+
+export class ConductorSnapshotDataDto {
+  @ApiProperty({ example: 'З-10046', type: String })
+  publicNumber!: string;
+
+  @ApiProperty({ enum: REQUEST_STATUSES, example: 'accepted', type: String })
+  status!: string;
+
+  @ApiProperty({ example: 'Принят', type: String })
+  statusLabel!: string;
+
+  @ApiProperty({ example: '/r/seed-z10046-live-severnaya-duga', type: String })
+  portalPath!: string;
+
+  @ApiProperty({
+    enum: REQUEST_STATUSES,
+    example: 'in_calculation',
+    nullable: true,
+    type: String,
+  })
+  nextStatus!: string | null;
+
+  @ApiProperty({ example: 'В расчёте', nullable: true, type: String })
+  nextStatusLabel!: string | null;
+}
+
+export class ConductorSnapshotResponseDto {
+  @ApiProperty({ type: () => ConductorSnapshotDataDto })
+  data!: ConductorSnapshotDataDto;
+
+  @ApiProperty({ type: () => TraceMetaDto })
+  meta!: TraceMetaDto;
+}

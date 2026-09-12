@@ -42,11 +42,12 @@ function responseContentTypes(
   document: Record<string, unknown>,
   path: string,
   status: string,
+  method: string = 'get',
 ): string[] {
   const paths = asRecord(document.paths);
   const item = asRecord(paths[path]);
-  const get = asRecord(item.get);
-  const responses = asRecord(get.responses);
+  const operation = asRecord(item[method]);
+  const responses = asRecord(operation.responses);
   const response = asRecord(responses[status]);
   if (!('content' in response) || response.content === undefined) {
     return [];
@@ -87,6 +88,38 @@ describe('OpenAPI contract for generated client', () => {
       maxItems: 5,
       minItems: 2,
       type: 'array',
+    });
+  });
+
+  it('documents conductor GET/POST snapshots and problem+json failures', () => {
+    const paths = asRecord(document.paths);
+    expect(Object.keys(paths)).toEqual(
+      expect.arrayContaining([
+        '/demo/conductor/{conductorSecret}',
+        '/demo/conductor/{conductorSecret}/advance',
+        '/demo/conductor/{conductorSecret}/reset',
+      ]),
+    );
+    expect(responseContentTypes(document, '/demo/conductor/{conductorSecret}', '200')).toContain(
+      'application/json',
+    );
+    expect(responseContentTypes(document, '/demo/conductor/{conductorSecret}', '404')).toEqual([
+      'application/problem+json',
+    ]);
+    expect(
+      responseContentTypes(document, '/demo/conductor/{conductorSecret}/advance', '200', 'post'),
+    ).toContain('application/json');
+    expect(
+      responseContentTypes(document, '/demo/conductor/{conductorSecret}/advance', '409', 'post'),
+    ).toEqual(['application/problem+json']);
+    expect(
+      responseContentTypes(document, '/demo/conductor/{conductorSecret}/reset', '200', 'post'),
+    ).toContain('application/json');
+    expect(schemaProperty(document, 'ConductorSnapshotDataDto', 'nextStatus')).toMatchObject({
+      nullable: true,
+    });
+    expect(schemaProperty(document, 'ConductorSnapshotDataDto', 'nextStatusLabel')).toMatchObject({
+      nullable: true,
     });
   });
 });

@@ -27,6 +27,15 @@ function assertContract(document: {
   if (document.paths?.['/requests/{accessSecret}'] === undefined) {
     throw new Error('OpenAPI is missing path /requests/{accessSecret}');
   }
+  if (document.paths?.['/demo/conductor/{conductorSecret}'] === undefined) {
+    throw new Error('OpenAPI is missing path /demo/conductor/{conductorSecret}');
+  }
+  if (document.paths?.['/demo/conductor/{conductorSecret}/advance'] === undefined) {
+    throw new Error('OpenAPI is missing path /demo/conductor/{conductorSecret}/advance');
+  }
+  if (document.paths?.['/demo/conductor/{conductorSecret}/reset'] === undefined) {
+    throw new Error('OpenAPI is missing path /demo/conductor/{conductorSecret}/reset');
+  }
 }
 
 const app = await createApplication();

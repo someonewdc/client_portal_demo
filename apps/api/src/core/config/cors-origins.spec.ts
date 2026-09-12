@@ -50,15 +50,15 @@ describe('corsOriginsFromWebOrigin', () => {
 });
 
 describe('createApplication CORS', () => {
-  it('disables credentials and limits methods to GET, HEAD and OPTIONS', () => {
+  it('disables credentials and allows GET, HEAD, OPTIONS and POST', () => {
     expect(createApplicationSource).toMatch(/corsOriginsFromWebOrigin/);
+    expect(createApplicationSource).toMatch(/credentials:\s*false/);
     expect(createApplicationSource).not.toMatch(/credentials:\s*true/);
-    expect(createApplicationSource).not.toMatch(/['"]POST['"]/);
     expect(createApplicationSource).not.toMatch(/['"]PUT['"]/);
     expect(createApplicationSource).not.toMatch(/['"]PATCH['"]/);
     expect(createApplicationSource).not.toMatch(/['"]DELETE['"]/);
     expect(createApplicationSource).toMatch(
-      /methods:\s*\[\s*['"]GET['"]\s*,\s*['"]HEAD['"]\s*,\s*['"]OPTIONS['"]\s*\]/,
+      /methods:\s*\[\s*['"]GET['"]\s*,\s*['"]HEAD['"]\s*,\s*['"]OPTIONS['"]\s*,\s*['"]POST['"]\s*\]/,
     );
   });
 });

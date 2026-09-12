@@ -55,6 +55,139 @@
         ]
       }
     },
+    "/demo/conductor/{conductorSecret}": {
+      "get": {
+        "operationId": "DemoConductorController_show",
+        "parameters": [
+          {
+            "name": "conductorSecret",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConductorSnapshotResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Секрет пульта неизвестен",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Снимок живой заявки для пульта ведущего",
+        "tags": [
+          "demo"
+        ]
+      }
+    },
+    "/demo/conductor/{conductorSecret}/advance": {
+      "post": {
+        "operationId": "DemoConductorController_advance",
+        "parameters": [
+          {
+            "name": "conductorSecret",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConductorSnapshotResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Секрет пульта неизвестен",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Живая заявка уже на последнем шаге",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Один переход автомата живой заявки",
+        "tags": [
+          "demo"
+        ]
+      }
+    },
+    "/demo/conductor/{conductorSecret}/reset": {
+      "post": {
+        "operationId": "DemoConductorController_reset",
+        "parameters": [
+          {
+            "name": "conductorSecret",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConductorSnapshotResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Секрет пульта неизвестен",
+            "content": {
+              "application/problem+json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetailsDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Сброс живой заявки к принятой",
+        "tags": [
+          "demo"
+        ]
+      }
+    },
     "/demo/links": {
       "get": {
         "operationId": "DemoLinksController_list",
@@ -184,6 +317,72 @@
         "properties": {
           "data": {
             "$ref": "#/components/schemas/HealthDataDto"
+          },
+          "meta": {
+            "$ref": "#/components/schemas/TraceMetaDto"
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "ConductorSnapshotDataDto": {
+        "type": "object",
+        "properties": {
+          "publicNumber": {
+            "type": "string",
+            "example": "З-10046"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "in_calculation",
+              "quote_ready",
+              "invoice_issued"
+            ],
+            "example": "accepted"
+          },
+          "statusLabel": {
+            "type": "string",
+            "example": "Принят"
+          },
+          "portalPath": {
+            "type": "string",
+            "example": "/r/seed-z10046-live-severnaya-duga"
+          },
+          "nextStatus": {
+            "type": "string",
+            "enum": [
+              "accepted",
+              "in_calculation",
+              "quote_ready",
+              "invoice_issued"
+            ],
+            "example": "in_calculation",
+            "nullable": true
+          },
+          "nextStatusLabel": {
+            "type": "string",
+            "example": "В расчёте",
+            "nullable": true
+          }
+        },
+        "required": [
+          "publicNumber",
+          "status",
+          "statusLabel",
+          "portalPath",
+          "nextStatus",
+          "nextStatusLabel"
+        ]
+      },
+      "ConductorSnapshotResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ConductorSnapshotDataDto"
           },
           "meta": {
             "$ref": "#/components/schemas/TraceMetaDto"

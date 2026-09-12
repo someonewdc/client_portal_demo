@@ -63,3 +63,12 @@ export interface RequestPortalView {
   readonly files: readonly RequestFileMeta[];
   readonly demoLive?: true;
 }
+
+export interface ConductorSnapshot {
+  readonly publicNumber: string;
+  readonly status: RequestStatus;
+  readonly statusLabel: string;
+  readonly portalPath: string;
+  readonly nextStatus: RequestStatus | null;
+  readonly nextStatusLabel: string | null;
+}

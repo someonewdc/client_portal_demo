@@ -20,6 +20,7 @@ env:
   LOG_LEVEL: info
   NODE_ENV: test
   WEB_ORIGIN: http://localhost:3000
+  DEMO_CONDUCTOR_SECRET: seed-demo-conductor-nordshield
 
 jobs:
   verify:

@@ -15,6 +15,7 @@ function applyEnv(databaseUrl: string): void {
   process.env.LOG_LEVEL = 'error';
   process.env.NODE_ENV = 'test';
   process.env.WEB_ORIGIN = 'http://localhost:3000';
+  process.env.DEMO_CONDUCTOR_SECRET = 'seed-demo-conductor-nordshield';
 }
 
 async function startApp(databaseUrl: string): Promise<{

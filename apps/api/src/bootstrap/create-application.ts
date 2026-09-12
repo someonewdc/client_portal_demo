@@ -21,7 +21,7 @@ export async function createApplication(): Promise<NestFastifyApplication> {
   await configureBaseFastifyApplication(app, { globalPrefix: 'api/v1' });
   app.enableCors({
     credentials: false,
-    methods: ['GET', 'HEAD', 'OPTIONS'],
+    methods: ['GET', 'HEAD', 'OPTIONS', 'POST'],
     origin: corsOriginsFromWebOrigin(config.get('WEB_ORIGIN', { infer: true })),
   });
   const readiness = app.get(ReadinessService);
