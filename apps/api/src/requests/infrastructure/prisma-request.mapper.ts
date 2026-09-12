@@ -22,6 +22,12 @@ interface PrismaRequestRow extends PrismaRequestSummaryRow {
     readonly kind: string;
     readonly byteSize: number;
     readonly uploadedAt: Date;
+    readonly specLines: readonly {
+      readonly name: string;
+      readonly quantity: number;
+      readonly unit: string;
+      readonly comment: string | null;
+    }[];
   }[];
   readonly stageHistory: readonly {
     readonly status: string;
@@ -68,6 +74,12 @@ export function mapRequestRecord(row: PrismaRequestRow): RequestRecord {
       kind: requireFileKind(file.kind),
       byteSize: file.byteSize,
       uploadedAt: file.uploadedAt.toISOString(),
+      specLines: file.specLines.map((line) => ({
+        name: line.name,
+        quantity: line.quantity,
+        unit: line.unit,
+        ...(line.comment === null ? {} : { comment: line.comment }),
+      })),
     })),
     stageHistory: row.stageHistory.map((entry) => ({
       status: requireStatus(entry.status),

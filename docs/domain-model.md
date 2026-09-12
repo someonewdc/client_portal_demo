@@ -15,9 +15,10 @@
   необязательный `comment`. Это не корзина каталога и не типы цен. Каталог сидов ниже —
   источник правды: не выдумывать другие title/строки.
 - `files` — метаданные вложений: `fileName`, `kind` (`questionnaire` / `quote` / `invoice`),
-  `byteSize` (integer), `uploadedAt`. Бинарников и загрузки с диска нет. В UI имя открывает
-  HTML-лист `/r/{accessSecret}/d/{fileName}` (D-029), не download. В одной заявке
-  `fileName` уникален (D-035; код — фича 19).
+  `byteSize` (integer), `uploadedAt`, `specLines` (2–5 строк того документа: `name`, `quantity`,
+  `unit`, необязательный `comment`). Бинарников и загрузки с диска нет. В UI имя открывает
+  HTML-лист `/r/{accessSecret}/d/{fileName}` (D-029); таблица листа — `files[].specLines`
+  (D-054), не `request.specLines`. В одной заявке `fileName` уникален (D-035; код — фича 19).
 - `stageHistory` — когда заявка достигла каждого пройденного статуса (для ленты штампов).
 - `demoLive` — только в HTTP кабинета: явное `true` у З-10046; у каталожных пяти поля нет
   (D-050). Не колонка «логин».
@@ -90,7 +91,7 @@
   2. `name` `Комплект автоматики ввода`, `quantity` `1`, `unit` `шт`
 - `files`:
   - `fileName` `Опросный-лист-З-10041.pdf`, `kind` `questionnaire`, `byteSize` `98000`,
-    `uploadedAt` `2026-09-01T09:05:00.000Z`
+    `uploadedAt` `2026-09-01T09:05:00.000Z`; `specLines` = `specLines` заявки
 
 ### З-10042
 
@@ -103,7 +104,7 @@
   2. `name` `Шкаф учёта`, `quantity` `2`, `unit` `шт`
 - `files`:
   - `fileName` `Опросный-лист-З-10042.pdf`, `kind` `questionnaire`, `byteSize` `102000`,
-    `uploadedAt` `2026-09-01T09:10:00.000Z`
+    `uploadedAt` `2026-09-01T09:10:00.000Z`; `specLines` = `specLines` заявки
 
 ### З-10043
 
@@ -118,9 +119,11 @@
   2. `name` `Рубильник ввода`, `quantity` `1`, `unit` `шт`
 - `files`:
   - `fileName` `Опросный-лист-З-10043.pdf`, `kind` `questionnaire`, `byteSize` `120400`,
-    `uploadedAt` `2026-09-01T09:05:00.000Z`
+    `uploadedAt` `2026-09-01T09:05:00.000Z`; `specLines`:
+    1. `name` `ВРУ 400 А`, `quantity` `1`, `unit` `шт`, `comment` `опросный лист`
+    2. `name` `Учёт на вводе`, `quantity` `1`, `unit` `шт`
   - `fileName` `КП-З-10043.pdf`, `kind` `quote`, `byteSize` `240000`, `uploadedAt`
-    `2026-09-04T12:00:00.000Z`
+    `2026-09-04T12:00:00.000Z`; `specLines` = `specLines` заявки
 
 ### З-10044
 
@@ -134,11 +137,16 @@
   2. `name` `Шкаф частотников`, `quantity` `1`, `unit` `шт`
 - `files`:
   - `fileName` `Опросный-лист-З-10044.pdf`, `kind` `questionnaire`, `byteSize` `110000`,
-    `uploadedAt` `2026-09-01T09:05:00.000Z`
+    `uploadedAt` `2026-09-01T09:05:00.000Z`; `specLines`:
+    1. `name` `Щит управления теплицами`, `quantity` `1`, `unit` `шт`, `comment` `IP54`
+    2. `name` `Частотники полива`, `quantity` `3`, `unit` `шт`
   - `fileName` `КП-З-10044.pdf`, `kind` `quote`, `byteSize` `256000`, `uploadedAt`
-    `2026-09-04T12:00:00.000Z`
+    `2026-09-04T12:00:00.000Z`; `specLines`:
+    1. `name` `Щит управления теплицами`, `quantity` `1`, `unit` `комплект`
+    2. `name` `Шкаф частотников`, `quantity` `1`, `unit` `шт`
+    3. `name` `Пульт диспетчера`, `quantity` `1`, `unit` `шт`
   - `fileName` `Счёт-З-10044.pdf`, `kind` `invoice`, `byteSize` `180000`, `uploadedAt`
-    `2026-09-06T15:00:00.000Z`
+    `2026-09-06T15:00:00.000Z`; `specLines` = `specLines` заявки
 
 ### З-10045
 
@@ -151,7 +159,7 @@
   2. `name` `Блок учёта`, `quantity` `1`, `unit` `шт`
 - `files`:
   - `fileName` `Опросный-лист-З-10045.pdf`, `kind` `questionnaire`, `byteSize` `99000`,
-    `uploadedAt` `2026-09-01T09:20:00.000Z`
+    `uploadedAt` `2026-09-01T09:20:00.000Z`; `specLines` = `specLines` заявки
 
 ## Живая заявка З-10046 (не в `/demo/links`)
 
@@ -165,11 +173,18 @@
 - `specLines`:
   1. `name` `Щит ЩО-70 800 А IP54`, `quantity` `1`, `unit` `шт`, `comment` `навесной, показ`
   2. `name` `Комплект автоматики ввода`, `quantity` `1`, `unit` `шт`
-- файлы (метаданные, появляются по шагу, D-052):
+- файлы (метаданные, появляются по шагу, D-052; состав строк — D-054):
   - `accepted`: `fileName` `Опросный-лист-З-10046.pdf`, `kind` `questionnaire`,
-    `byteSize` `100000`
-  - `quote_ready`: + `КП-З-10046.pdf`, `kind` `quote`, `byteSize` `240000`
-  - `invoice_issued`: + `Счёт-З-10046.pdf`, `kind` `invoice`, `byteSize` `180000`
+    `byteSize` `100000`; `specLines`:
+    1. `name` `Щит ЩО-70 800 А IP54`, `quantity` `1`, `unit` `шт`, `comment` `навесной`
+    2. `name` `АВР на вводе`, `quantity` `1`, `unit` `комплект`
+  - `quote_ready`: + `КП-З-10046.pdf`, `kind` `quote`, `byteSize` `240000`; `specLines`:
+    1. `name` `Щит ЩО-70 800 А IP54`, `quantity` `1`, `unit` `шт`
+    2. `name` `Комплект автоматики ввода`, `quantity` `1`, `unit` `шт`
+    3. `name` `Рубильник ввода`, `quantity` `1`, `unit` `шт`
+  - `invoice_issued`: + `Счёт-З-10046.pdf`, `kind` `invoice`, `byteSize` `180000`; `specLines`:
+    1. `name` `Щит ЩО-70 800 А IP54`, `quantity` `1`, `unit` `шт`, `comment` `к оплате, показ`
+    2. `name` `Комплект автоматики ввода`, `quantity` `1`, `unit` `шт`
 - Даты — `now()` стенда, не замороженные ISO каталога пяти. В тестах F30: `reachedAt`
   не null у пройденных, порядок, не равенство конкретной дате.
 - `GET /requests/{accessSecret}`: `demoLive: true`. У пяти каталожных поля нет.

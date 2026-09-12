@@ -1,5 +1,5 @@
 import type { RequestFileKind, RequestStatus } from '../domain/request-status.js';
-import type { RequestRecord } from '../domain/request.js';
+import type { RequestRecord, RequestSpecLine } from '../domain/request.js';
 
 export const REQUEST_LIVE_COMMAND = Symbol('REQUEST_LIVE_COMMAND');
 
@@ -11,6 +11,7 @@ export interface LiveRequestStateWrite {
     readonly kind: RequestFileKind;
     readonly byteSize: number;
     readonly uploadedAt: Date;
+    readonly specLines: readonly RequestSpecLine[];
   }[];
   readonly stageHistory: readonly {
     readonly status: RequestStatus;

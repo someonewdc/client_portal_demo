@@ -36,6 +36,7 @@ export class AdvanceLiveRequestUseCase {
           kind: file.kind,
           byteSize: file.byteSize,
           uploadedAt: new Date(file.uploadedAt),
+          specLines: file.specLines,
         })),
         stageHistory: [
           ...record.stageHistory.map((entry) => ({

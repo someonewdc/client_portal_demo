@@ -90,13 +90,39 @@ Prefix живёт на server URL, path keys относительные. Пос�
         "fileName": "Опросный-лист-З-10043.pdf",
         "kind": "questionnaire",
         "byteSize": 120400,
-        "uploadedAt": "2026-09-01T09:05:00.000Z"
+        "uploadedAt": "2026-09-01T09:05:00.000Z",
+        "specLines": [
+          {
+            "name": "ВРУ 400 А",
+            "quantity": 1,
+            "unit": "шт",
+            "comment": "опросный лист"
+          },
+          {
+            "name": "Учёт на вводе",
+            "quantity": 1,
+            "unit": "шт"
+          }
+        ]
       },
       {
         "fileName": "КП-З-10043.pdf",
         "kind": "quote",
         "byteSize": 240000,
-        "uploadedAt": "2026-09-04T12:00:00.000Z"
+        "uploadedAt": "2026-09-04T12:00:00.000Z",
+        "specLines": [
+          {
+            "name": "Вводно-распределительное устройство 400 А",
+            "quantity": 1,
+            "unit": "шт",
+            "comment": "IP54, навесное"
+          },
+          {
+            "name": "Рубильник ввода",
+            "quantity": 1,
+            "unit": "шт"
+          }
+        ]
       }
     ]
   },
@@ -110,7 +136,7 @@ Prefix живёт на server URL, path keys относительные. Пос�
 `stages` всегда четыре элемента в каноническом порядке. `reachedAt: null` — шаг ещё не
 наступил.
 
-Поля `title`, `specLines`, `files`, `updatedAt` и fixture-секрет каталожных пяти — 1:1 из
+Поля `title`, `specLines`, `files` (включая `files[].specLines`, D-054), `updatedAt` и fixture-секрет каталожных пяти — 1:1 из
 каталога `docs/domain-model.md`. Пример выше — З-10043 из этого каталога, не образец для
 выдумки. Живая З-10046 — отдельный каталог в том же файле; даты live — `now()`, не
 замороженный ISO пяти.

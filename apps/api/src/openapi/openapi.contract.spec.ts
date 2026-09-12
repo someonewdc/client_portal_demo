@@ -89,6 +89,11 @@ describe('OpenAPI contract for generated client', () => {
       minItems: 2,
       type: 'array',
     });
+    expect(schemaProperty(document, 'RequestFileDto', 'specLines')).toMatchObject({
+      maxItems: 5,
+      minItems: 2,
+      type: 'array',
+    });
   });
 
   it('documents conductor GET/POST snapshots and problem+json failures', () => {

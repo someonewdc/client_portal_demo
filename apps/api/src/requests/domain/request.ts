@@ -12,6 +12,7 @@ export interface RequestFileMeta {
   readonly kind: RequestFileKind;
   readonly byteSize: number;
   readonly uploadedAt: string;
+  readonly specLines: readonly RequestSpecLine[];
 }
 
 export interface RequestStageHistoryEntry {

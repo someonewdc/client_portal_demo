@@ -17,7 +17,10 @@ import { mapRequestRecord, mapRequestSummary } from './prisma-request.mapper.js'
 
 const requestInclude = {
   specLines: { orderBy: { position: 'asc' as const } },
-  files: { orderBy: { position: 'asc' as const } },
+  files: {
+    orderBy: { position: 'asc' as const },
+    include: { specLines: { orderBy: { position: 'asc' as const } } },
+  },
   stageHistory: true,
 };
 
@@ -114,16 +117,27 @@ async function persistLiveState(
   });
   await tx.requestFile.deleteMany({ where: { requestId } });
   await tx.requestStageHistory.deleteMany({ where: { requestId } });
-  await tx.requestFile.createMany({
-    data: write.files.map((file, position) => ({
-      byteSize: file.byteSize,
-      fileName: file.fileName,
-      kind: file.kind,
-      position,
-      requestId,
-      uploadedAt: file.uploadedAt,
-    })),
-  });
+  for (const [position, file] of write.files.entries()) {
+    await tx.requestFile.create({
+      data: {
+        byteSize: file.byteSize,
+        fileName: file.fileName,
+        kind: file.kind,
+        position,
+        requestId,
+        uploadedAt: file.uploadedAt,
+        specLines: {
+          create: file.specLines.map((line, linePosition) => ({
+            comment: line.comment ?? null,
+            name: line.name,
+            position: linePosition,
+            quantity: line.quantity,
+            unit: line.unit,
+          })),
+        },
+      },
+    });
+  }
   await tx.requestStageHistory.createMany({
     data: write.stageHistory.map((entry) => ({
       reachedAt: entry.reachedAt,

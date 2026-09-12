@@ -73,16 +73,27 @@ export async function applyRequestSeed(): Promise<void> {
             unit: line.unit,
           })),
         });
-        await tx.requestFile.createMany({
-          data: fixture.files.map((file, position) => ({
-            byteSize: file.byteSize,
-            fileName: file.fileName,
-            kind: file.kind,
-            position,
-            requestId: request.id,
-            uploadedAt: new Date(file.uploadedAt),
-          })),
-        });
+        for (const [position, file] of fixture.files.entries()) {
+          await tx.requestFile.create({
+            data: {
+              byteSize: file.byteSize,
+              fileName: file.fileName,
+              kind: file.kind,
+              position,
+              requestId: request.id,
+              uploadedAt: new Date(file.uploadedAt),
+              specLines: {
+                create: file.specLines.map((line, linePosition) => ({
+                  comment: line.comment ?? null,
+                  name: line.name,
+                  position: linePosition,
+                  quantity: line.quantity,
+                  unit: line.unit,
+                })),
+              },
+            },
+          });
+        }
         await tx.requestStageHistory.createMany({
           data: fixture.stageHistory.map((entry) => ({
             reachedAt: new Date(entry.reachedAt),

@@ -27,8 +27,60 @@ const calculationCabinet = {
 const invoiceCabinet = {
   accessSecret: 'seed-z10044-invoice-teplitsy',
   publicNumber: 'З-10044',
+  counterpartyName: 'ООО «Теплицы Поволжья»',
+  title: 'Щит управления теплицами',
+  specLine: 'Щит управления теплицами',
+  specLineSecondary: 'Шкаф частотников',
   fileNames: ['Опросный-лист-З-10044.pdf', 'КП-З-10044.pdf', 'Счёт-З-10044.pdf'],
 } as const;
+
+const invoiceFileSheetKinds = [
+  {
+    kind: 'questionnaire',
+    fileName: invoiceCabinet.fileNames[0],
+    kindLabel: 'Опросный лист',
+    lead: 'Исходные требования.',
+    followOn:
+      'Ниже — состав, который заказчик передал заводу. Это не коммерческое предложение и не счёт.',
+    tableCaption: 'Состав заявки',
+    closing: 'По этим данным завод готовит расчёт. Коммерческого предложения в этом листе нет.',
+    titlePrefix: 'Опросный лист',
+    specLines: [
+      { name: 'Щит управления теплицами', quantity: '1', unit: 'шт' },
+      { name: 'Частотники полива', quantity: '3', unit: 'шт' },
+    ],
+  },
+  {
+    kind: 'quote',
+    fileName: invoiceCabinet.fileNames[1],
+    kindLabel: 'КП',
+    lead: 'Коммерческое предложение.',
+    followOn: 'Ниже — позиции коммерческого предложения. Это не счёт и не исходный опросный лист.',
+    tableCaption: 'Спецификация',
+    closing: 'Это предложение, не счёт. Счёт выставляется отдельно.',
+    titlePrefix: 'КП',
+    specLines: [
+      { name: 'Щит управления теплицами', quantity: '1', unit: 'комплект' },
+      { name: 'Шкаф частотников', quantity: '1', unit: 'шт' },
+      { name: 'Пульт диспетчера', quantity: '1', unit: 'шт' },
+    ],
+  },
+  {
+    kind: 'invoice',
+    fileName: invoiceCabinet.fileNames[2],
+    kindLabel: 'Счёт',
+    lead: 'Счёт.',
+    followOn:
+      'Ниже — позиции выставленного счёта. Это не коммерческое предложение и не опросный лист.',
+    tableCaption: 'Позиции счёта',
+    closing: 'Счёт выставлен. Оплата в этом окне не принимается.',
+    titlePrefix: 'Счёт',
+    specLines: [
+      { name: 'Щит управления теплицами', quantity: '1', unit: 'комплект' },
+      { name: 'Шкаф частотников', quantity: '1', unit: 'шт' },
+    ],
+  },
+] as const;
 
 const nextStepCabinets = [
   {
@@ -658,6 +710,87 @@ async function expectQuoteFileSheetExtract(page: Page) {
 
   await expect(
     page.getByRole('link', { name: `К заявке ${quoteCabinet.publicNumber}`, exact: true }),
+  ).toBeVisible();
+  await expect(page.getByRole('link', { name: /скачать/i })).toHaveCount(0);
+  await expect(page.getByText('скачать', { exact: true })).toHaveCount(0);
+  await expect(page.locator('[download]')).toHaveCount(0);
+  await expect(page.locator('a[href="#"]')).toHaveCount(0);
+}
+
+async function sheetSpecIdentity(page: Page, caption: string): Promise<string> {
+  const table = page.getByRole('table', { name: caption });
+  await expect(table).toBeVisible();
+  return table.locator('tbody tr').evaluateAll((rows) =>
+    rows
+      .map((row) => {
+        const values = [...row.querySelectorAll('td')].map((cell) => {
+          const spans = [...cell.querySelectorAll('span')];
+          const valueSpan = spans.at(-1);
+          return (valueSpan?.textContent ?? cell.textContent ?? '').trim();
+        });
+        return `${values[0] ?? ''}|${values[1] ?? ''}|${values[2] ?? ''}`;
+      })
+      .sort()
+      .join('||'),
+  );
+}
+
+async function expectFileSheetKindExtract(
+  page: Page,
+  sheet: (typeof invoiceFileSheetKinds)[number],
+) {
+  await expect(page.getByRole('heading', { level: 1, name: sheet.fileName })).toBeVisible();
+  await expect(page.getByRole('heading', { level: 1 })).toHaveClass(/document-display/);
+  await expect(page.getByText(fileSheetDisclaimer, { exact: true })).toBeVisible();
+  await expect(page.getByText(sheet.lead, { exact: true })).toBeVisible();
+  await expect(page.getByText(sheet.kindLabel, { exact: true }).first()).toBeVisible();
+  await expect(page.getByText(sheet.followOn, { exact: true })).toBeVisible();
+  await expect(page.getByText(sheet.closing, { exact: true })).toBeVisible();
+
+  const customerLabel = page.locator('dt', { hasText: /^Заказчик$/ });
+  await expect(customerLabel).toBeVisible();
+  await expect(
+    customerLabel
+      .locator('xpath=following-sibling::dd[1]')
+      .getByText(invoiceCabinet.counterpartyName, { exact: true }),
+  ).toBeVisible();
+
+  const productLabel = page.locator('dt', { hasText: /^Изделие$/ });
+  await expect(productLabel).toBeVisible();
+  await expect(
+    productLabel
+      .locator('xpath=following-sibling::dd[1]')
+      .getByText(invoiceCabinet.title, { exact: true }),
+  ).toBeVisible();
+
+  await expect(page.locator('dt', { hasText: /^Загружено$/ })).toBeVisible();
+  await expect(page.locator('dt', { hasText: /^Размер$/ })).toBeVisible();
+
+  const specTable = page.getByRole('table', { name: sheet.tableCaption });
+  await expect(specTable).toBeVisible();
+  await expect(specTable.locator('tbody tr')).toHaveCount(sheet.specLines.length);
+  for (const line of sheet.specLines) {
+    const row = specTable.locator('tbody tr').filter({ hasText: line.name });
+    await expect(row.getByText(line.name, { exact: true })).toBeVisible();
+    await expect(row.getByText(line.quantity, { exact: true })).toBeVisible();
+    await expect(row.getByText(line.unit, { exact: true })).toBeVisible();
+  }
+
+  for (const other of invoiceFileSheetKinds) {
+    if (other.kind === sheet.kind) {
+      continue;
+    }
+
+    await expect(page.getByText(other.followOn, { exact: true })).toHaveCount(0);
+    await expect(page.getByText(other.closing, { exact: true })).toHaveCount(0);
+    await expect(page.getByRole('table', { name: other.tableCaption })).toHaveCount(0);
+  }
+
+  await expect(page).toHaveTitle(
+    `${sheet.titlePrefix} — ${invoiceCabinet.publicNumber} — ПК «Нордщит»`,
+  );
+  await expect(
+    page.getByRole('link', { name: `К заявке ${invoiceCabinet.publicNumber}`, exact: true }),
   ).toBeVisible();
   await expect(page.getByRole('link', { name: /скачать/i })).toHaveCount(0);
   await expect(page.getByText('скачать', { exact: true })).toHaveCount(0);
@@ -1299,6 +1432,62 @@ test('quote file sheet is a labelled on-screen extract with a full specification
   expect(response?.ok()).toBe(true);
 
   await expectQuoteFileSheetExtract(page);
+});
+
+test('invoice request file sheets differ by kind beyond the lead', async ({ page }) => {
+  for (const sheet of invoiceFileSheetKinds) {
+    const sheetPath = `/r/${invoiceCabinet.accessSecret}/d/${encodeURIComponent(sheet.fileName)}`;
+    const response = await page.goto(sheetPath);
+
+    expect(
+      response,
+      `GET /r/{secret}/d/${sheet.fileName} must receive a response from :3000`,
+    ).toBeTruthy();
+    expect(response?.ok(), `${sheet.kind} sheet must be HTTP 200`).toBe(true);
+
+    await expectFileSheetKindExtract(page, sheet);
+  }
+});
+
+test('invoice request file sheets show distinct spec tables by kind', async ({ page }) => {
+  const identities: string[] = [];
+
+  for (const sheet of invoiceFileSheetKinds) {
+    const sheetPath = `/r/${invoiceCabinet.accessSecret}/d/${encodeURIComponent(sheet.fileName)}`;
+    const response = await page.goto(sheetPath);
+
+    expect(
+      response,
+      `GET /r/{secret}/d/${sheet.fileName} must receive a response from :3000`,
+    ).toBeTruthy();
+    expect(response?.ok(), `${sheet.kind} sheet must be HTTP 200`).toBe(true);
+
+    const identity = await sheetSpecIdentity(page, sheet.tableCaption);
+    expect(identity.length, `${sheet.kind} spec table identity`).toBeGreaterThan(0);
+    identities.push(identity);
+  }
+
+  expect(
+    new Set(identities).size,
+    `questionnaire/quote/invoice tables must not be copies, got ${identities.join(' ;; ')}`,
+  ).toBe(3);
+});
+
+test('invoice cabinet keeps the order spec, not a file-kind table', async ({ page }) => {
+  const response = await page.goto(`/r/${invoiceCabinet.accessSecret}`);
+
+  expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expect(
+    page.getByRole('heading', { level: 1, name: 'Счёт выставлен', exact: true }),
+  ).toBeVisible();
+
+  const specTable = page.getByRole('table', { name: 'Спецификация' });
+  await expect(specTable.getByText(invoiceCabinet.specLine, { exact: true })).toBeVisible();
+  await expect(
+    specTable.getByText(invoiceCabinet.specLineSecondary, { exact: true }),
+  ).toBeVisible();
 });
 
 test('quote file sheet specification keeps a shared qty column at 1280px', async ({ page }) => {
