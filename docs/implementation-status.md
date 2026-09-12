@@ -8,7 +8,10 @@ seed пяти каталожных + живая З-10046; `GET /demo/links` — 
 З-10041…З-10045 (живая extra, не в `items`); `GET /requests/{secret}` живой —
 `demoLive: true`, у пяти поле omit. Фича 30: GET/POST
 `/demo/conductor/{secret}` (снимок, advance, reset), CORS POST,
-`DEMO_CONDUCTOR_SECRET`. Фичи 31–33 не начаты. Каталог пяти и
+`DEMO_CONDUCTOR_SECRET`. Фича 31: экран `/start` (кнопка «Подать заявку» →
+сброс живой З-10046 через server-only `NUXT_DEMO_CONDUCTOR_SECRET` и кабинет
+«Принят»); индекс — блок «Живой показ» и ссылка «Как заказчик начинает».
+Фичи 32–33 не начаты. Каталог пяти и
 UX-задачи 1–20 на `main` не откатывались.
 Summary list реквизитов (UX задача 20): класс `.document-summary` на одном
 `dl` кабинета (Заказчик / Изделие / Обновлено) и одном листа (Заказчик /
@@ -204,7 +207,7 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | Фича 28 docs live-сценарий            | выполнен                          |
 | Фича 29 live fixture З-10046          | проверен                          |
 | Фича 30 conductor API                 | проверен                          |
-| Фича 31 экран /start                  | не начат                          |
+| Фича 31 экран /start                  | проверен                          |
 | Фича 32 экран пульта                  | не начат                          |
 | Фича 33 poll кабинета живой заявки    | не начат                          |
 
@@ -700,3 +703,6 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | 2026-09-12 | Фича 30 review4 red    | `pnpm --filter @client-portal/api exec vitest run src/requests/application/load-live-request-for-conductor.spec.ts src/requests/requests.http.spec.ts`                                                                                                                                    | exit 1: GET по хешу → З-19999; `loadLiveRequestForConductor` резолвит чужой `publicNumber`                                                                         |
 | 2026-09-12 | Фича 30 review4 green  | `pnpm --filter @client-portal/api exec vitest run src/core/config src/bootstrap src/requests`                                                                                                                                                                                             | exit 0: 48; пара `publicNumber`+`accessSecretHash`; GET/advance/reset 500, З-10046 без мутации                                                                     |
 | 2026-09-12 | Фича 30 review4 gates  | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 58, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-12 | Фича 31 TDD red        | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 1: 7 failed, 1 did not run, 46 passed; нет `NUXT_DEMO_CONDUCTOR_SECRET` в `.env.example`; GET `/start` не ok; на индексе нет «Живой показ»                    |
+| 2026-09-12 | Фича 31 TDD green      | `pnpm test:e2e` против `make dev` + seed                                                                                                                                                                                                                                                  | exit 0: 54 passed; `/start` D-052, клик → З-10046 «Принят», reset после счёта, индекс «Как заказчик начинает», секрет не в HTML, capability-заголовки              |
+| 2026-09-12 | Фича 31 gates          | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 58, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
