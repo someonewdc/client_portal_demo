@@ -183,6 +183,8 @@ export interface components {
             stages: components["schemas"]["RequestStageDto"][];
             specLines: components["schemas"]["RequestSpecLineDto"][];
             files: components["schemas"]["RequestFileDto"][];
+            /** @example true */
+            demoLive?: boolean;
         };
         RequestPortalResponseDto: {
             data: components["schemas"]["RequestPortalDataDto"];

@@ -61,4 +61,5 @@ export interface RequestPortalView {
   readonly stages: readonly RequestStage[];
   readonly specLines: readonly RequestSpecLine[];
   readonly files: readonly RequestFileMeta[];
+  readonly demoLive?: true;
 }

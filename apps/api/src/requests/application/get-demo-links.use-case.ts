@@ -1,5 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 
+import { isAllowedLiveRequestExtra } from '../domain/live-request-fixture.js';
 import type { DemoLink } from '../domain/request.js';
 import { REQUEST_CATALOG, fixtureSecretForHash } from '../domain/request-catalog.js';
 import { REQUEST_STATUS_LABELS } from '../domain/request-status.js';
@@ -31,20 +32,25 @@ export class GetDemoLinksUseCase {
   async execute(): Promise<readonly DemoLink[]> {
     const records = await this.requests.listRequestSummaries();
     const items = records
-      .map((record) => {
+      .flatMap((record) => {
+        if (isAllowedLiveRequestExtra(record)) {
+          return [];
+        }
         const accessSecret = fixtureSecretForHash(record.accessSecretHash);
         if (accessSecret === undefined) {
           throw new RequestFixtureMismatchError();
         }
-        return {
-          publicNumber: record.publicNumber,
-          counterpartyName: record.counterpartyName,
-          title: record.title,
-          status: record.status,
-          statusLabel: REQUEST_STATUS_LABELS[record.status],
-          portalPath: `/r/${accessSecret}`,
-          updatedAt: record.updatedAt,
-        };
+        return [
+          {
+            publicNumber: record.publicNumber,
+            counterpartyName: record.counterpartyName,
+            title: record.title,
+            status: record.status,
+            statusLabel: REQUEST_STATUS_LABELS[record.status],
+            portalPath: `/r/${accessSecret}`,
+            updatedAt: record.updatedAt,
+          },
+        ];
       })
       .sort((left, right) => left.publicNumber.localeCompare(right.publicNumber, 'ru'));
 

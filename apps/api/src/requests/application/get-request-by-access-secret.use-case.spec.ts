@@ -6,6 +6,7 @@ import type { RequestQueryPort, RequestRecord } from './request-query.port.js';
 import { GetRequestByAccessSecretUseCase } from './get-request-by-access-secret.use-case.js';
 
 const FIXTURE_SECRET = 'seed-z10043-quote-kuznetsov';
+const LIVE_SECRET = 'seed-z10046-live-severnaya-duga';
 
 function quoteRecord(accessSecretHash: string): RequestRecord {
   return {
@@ -61,6 +62,58 @@ describe('GetRequestByAccessSecretUseCase', () => {
     expect(result.stages).toHaveLength(4);
     expect(JSON.stringify(result)).not.toContain(hash);
     expect(result).not.toHaveProperty('accessSecretHash');
+    expect(result).not.toHaveProperty('demoLive');
+    expect(JSON.stringify(result)).not.toContain('"demoLive"');
+  });
+
+  it('marks only the live fixture with demoLive true', async () => {
+    const hash = hashOpaqueToken(LIVE_SECRET);
+    const port: RequestQueryPort = {
+      listRequestSummaries: async () => [],
+      findByAccessSecretHash: async (value) =>
+        value === hash
+          ? {
+              publicNumber: 'З-10046',
+              counterpartyName: 'ООО «Северная дуга»',
+              title: 'Щит ЩО-70 показа',
+              status: 'accepted',
+              updatedAt: '2026-09-12T12:00:00.000Z',
+              accessSecretHash: hash,
+              specLines: [
+                {
+                  name: 'Щит ЩО-70 800 А IP54',
+                  quantity: 1,
+                  unit: 'шт',
+                  comment: 'навесной, показ',
+                },
+                { name: 'Комплект автоматики ввода', quantity: 1, unit: 'шт' },
+              ],
+              files: [
+                {
+                  fileName: 'Опросный-лист-З-10046.pdf',
+                  kind: 'questionnaire',
+                  byteSize: 100000,
+                  uploadedAt: '2026-09-12T12:00:00.000Z',
+                },
+              ],
+              stageHistory: [{ status: 'accepted', reachedAt: '2026-09-12T12:00:00.000Z' }],
+            }
+          : null,
+    };
+
+    const result = await new GetRequestByAccessSecretUseCase(port).execute(LIVE_SECRET);
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        publicNumber: 'З-10046',
+        title: 'Щит ЩО-70 показа',
+        status: 'accepted',
+        demoLive: true,
+      }),
+    );
+    expect(result).toHaveProperty('demoLive', true);
+    expect(JSON.stringify(result)).toContain('"demoLive":true');
+    expect(JSON.stringify(result)).not.toContain('"demoLive":false');
   });
 
   it('throws a typed not-found error for an unknown secret', async () => {

@@ -419,6 +419,10 @@
             "items": {
               "$ref": "#/components/schemas/RequestFileDto"
             }
+          },
+          "demoLive": {
+            "type": "boolean",
+            "example": true
           }
         },
         "required": [
