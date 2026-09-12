@@ -7,7 +7,8 @@
 вход и цикл implement → review. Код 19–20 не писать в docs-PR нарезки. Задача
 18 уже на `main` (#55). Классы `.document-display` / `.document-identity` /
 `.document-section` / `.document-caption` / `.document-summary` — в промптах,
-в CSS этого PR нет.
+в CSS этого PR нет. Контракт пары реквизитов — baseline + пересечение по
+вертикали, не равенство `top`. Дата и размер могут остаться muted.
 Русские формулировки кабинета (D-046): под «Файлы» —
 `Имя файла открывает выписку на экране.`; дисклеймер листа —
 `Это выписка на экране, а не файл для скачивания.`; тупик чужого файла —
@@ -645,3 +646,4 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | 2026-09-12 | D-046 format           | `pnpm exec prettier --write` затронутых vue/ts/md/e2e затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                      | exit 0                                                                                                                                                             |
 | 2026-09-12 | D-046 TDD green full   | `pnpm exec playwright test --workers=1` против `make dev` + seed                                                                                                                                                                                                                          | exit 0: 37 passed (demo-links, focus-visible, layout-header, request-cabinet, security-headers)                                                                    |
 | 2026-09-12 | UX docs 19–20          | `pnpm exec prettier --write` затронутых md затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                                 | exit 0; docs-only (D-047…D-048, `docs/ux/task-19`…`20`); lint/test продукта не запускались                                                                         |
+| 2026-09-12 | UX docs 19–20 review   | `pnpm format:check` и `git diff --check`                                                                                                                                                                                                                                                  | exit 0; blocker: baseline ≠ top; should-fix: UA-margin, muted дата, caption mt, кластер листа, 404 seed, стрелка с 18                                              |

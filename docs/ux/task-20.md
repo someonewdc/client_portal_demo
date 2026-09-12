@@ -18,7 +18,7 @@ GOV.UK Summary list / метаданных Stripe invoice, не карточки
 
 ## Зависимости
 
-Задача 19 в `main` (классы `.document-caption` / значения ink уже есть). Фичи
+Задача 19 в `main` (классы `.document-caption` / изделие ink уже есть). Фичи
 15–27 не реализовывать.
 
 ## Read set
@@ -52,11 +52,16 @@ GOV.UK Summary list / метаданных Stripe invoice, не карточки
 - от `40rem` (`sm:`, тот же порог спеки): `display: grid`;
   `grid-template-columns: 9rem minmax(0, 1fr)`; `column-gap: 1rem`;
   `row-gap: 0.75rem`; `align-items: baseline`. Каждая пара `dt`+`dd` — одна
-  строка;
-- сбросить user-agent `margin` у `dd` (иначе колонка значения уезжает).
+  строка (бок о бок, пересекаются по вертикали). Не требовать равенства
+  `top`: после задачи 19 подпись 13px, значение 16px, при общей baseline
+  tops расходятся ~3px;
+- не сбрасывать user-agent `margin` у `dd` — Tailwind preflight уже
+  `margin: 0`. Живые сдвиги пары — Vue `mt-*` на `dt`/`dd`; на desktop их
+  убрать, чтобы grid-ряд не разъезжался.
 
 Повесить класс на оба `dl`. Типографику задачи 19 не откатывать: `dt` —
-`.document-caption`, `dd` — ink. Индекс `/` не трогать (там нет `dl`).
+`.document-caption`; `dd` заказчика и изделия — ink; дата и размер могут
+остаться muted. Индекс `/` не трогать (там нет `dl`).
 
 Ленту задачи 16, файлы задачи 15, спеку задач 17–18 не менять.
 
@@ -67,17 +72,20 @@ GOV.UK Summary list / метаданных Stripe invoice, не карточки
 ## TDD (red до CSS/Vue)
 
 1. Playwright **до** правки, `make dev` + seed, `document.fonts.ready`:
-   - кабинет З-10043, 1280×900: `dt` `Заказчик` и его `dd` `ИП Кузнецов П.А.` —
-     `getBoundingClientRect().y` совпадают ≤ 2px; то же для `Изделие` /
-     `ВРУ 400 А`;
+   - кабинет З-10043, 1280×900: у `dl` `alignItems === 'baseline'`;
+     `dt` `Заказчик` и `dd` `ИП Кузнецов П.А.` бок о бок (`dd.x >= dt.right - 2`)
+     и пересекаются по вертикали (`dt.top < dd.bottom && dd.top < dt.bottom`);
+     то же для `Изделие` / `ВРУ 400 А`. Не сравнивать `top`/`y` пары ≤ 2px;
    - лист КП, 1280×900: то же для `Заказчик` и для `Загружено` с его `time`;
    - кабинет и лист, 390×844: у каждой пары `dt.bottom <= dd.top` (столбец);
      `document.documentElement.scrollWidth <= 390`;
    - `main dl + p` на кабинете по-прежнему фраза «что дальше»;
    - computed `fontSize` `h1` кабинета остаётся `24px` (задача 19).
-2. `pnpm test:e2e` — **red** на 1280px: сейчас `dd` ниже `dt` на десятки
-   пикселей. Если assert зелёный до CSS — сравнивает не Y пары, перепиши.
+2. `pnpm test:e2e` — **red** на 1280px: сейчас `dd` ниже `dt`, вертикального
+   пересечения нет. Если assert зелёный до CSS — он ловит `top`/`y` вместо
+   пересечения, перепиши (после задачи 19 tops при baseline разойдутся ~3px).
 3. Не `waitForTimeout`. Не `display: table` как второй язык рядом с grid.
+   Не `align-items: start` «чтобы Y совпали».
 
 ## Что не делать
 
@@ -88,7 +96,8 @@ GOV.UK Summary list / метаданных Stripe invoice, не карточки
 ## Критерии приёмки
 
 - Given кабинет и лист З-10043 на 1280px, Then подпись и значение одной
-  пары на одной baseline-строке (Y ≤ 2px).
+  пары бок о бок с пересечением по вертикали (`align-items: baseline`).
+  Равенство `top` не требуется.
 - Given 390×844, Then пары столбцом, страница без горизонтального скролла.
 - Given `.document-summary` в `main.css`, Then имя класса именно такое.
 - Red evidence есть до green.

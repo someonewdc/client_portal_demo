@@ -94,8 +94,11 @@ LLM часто пишет код, затем тесты «под него». Т�
 - UX задача 18 пишет e2e одной текстовой строки «Кол-во» (`Range` по текстовому
   узлу, не `th.getClientRects()`) **до** ширин колонок.
 - UX задача 19 пишет e2e `fontSize`/`color` ролей (h1 24px, номер 18px, секции
-  18px, caption 13px muted, `dd` изделия ink) **до** CSS классов.
-- UX задача 20 пишет e2e общих Y подписи и значения `dl` на 1280px **до**
+  18px и `marginTop` 40px без `mt-8` на table, caption 13px muted, `dd` изделия
+  ink) и оба 404 (`this-secret-does-not-exist`, `нет-такого.pdf`) **до** CSS
+  классов.
+- UX задача 20 пишет e2e бок-о-бок и вертикального пересечения пары `dl` на
+  1280px (`align-items: baseline`, не равенство `top`) **до**
   `.document-summary`.
 - Селекторы: role / label / осмысленный `data-testid`, не CSS-хрупкость. Без
   `waitForTimeout` как синхронизации (`verification-honesty`).
