@@ -64,7 +64,7 @@ useSeoMeta({
     <section v-else-if="isMissingFile && request" role="alert">
       <h1 class="text-xl font-semibold text-ink">Ссылка недействительна</h1>
       <p class="mt-3 text-ink-muted">
-        Такого документа в заявке нет. Откройте заявку и выберите имя из списка.
+        Такого документа в заявке нет. Откройте заявку и выберите документ из списка.
       </p>
       <p class="mt-8">
         <NuxtLink class="document-link" :to="`/r/${accessSecret}`">
@@ -98,7 +98,7 @@ useSeoMeta({
           {{ formatByteSize(file.byteSize) }}
         </dd>
       </dl>
-      <p class="mt-4 text-ink">Это выписка на экране, не файл для скачивания.</p>
+      <p class="mt-4 text-ink">Это выписка на экране, а не файл для скачивания.</p>
       <p class="mt-8 text-ink">{{ fileSheetLead(file.kind) }}</p>
       <table class="mt-4 w-full min-w-0 max-w-full border-collapse text-left">
         <caption class="mb-3 text-left font-semibold text-ink">

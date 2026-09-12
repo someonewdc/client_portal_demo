@@ -107,7 +107,7 @@
   `null`
 - `specLines`:
   1. `name` `Вводно-распределительное устройство 400 А`, `quantity` `1`, `unit` `шт`,
-     `comment` `IP54, навесной`
+     `comment` `IP54, навесное`
   2. `name` `Рубильник ввода`, `quantity` `1`, `unit` `шт`
 - `files`:
   - `fileName` `Опросный-лист-З-10043.pdf`, `kind` `questionnaire`, `byteSize` `120400`,

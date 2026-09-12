@@ -279,7 +279,7 @@ async function expectSpecTableStacksOnNarrowPhone(page: Page) {
   const specTable = page.getByRole('table', { name: 'Спецификация' });
   await expect(specTable).toBeVisible();
   await expect(specTable.getByText(quoteCabinet.specLine, { exact: true })).toBeVisible();
-  await expect(specTable.getByText('IP54, навесной', { exact: true })).toBeVisible();
+  await expect(specTable.getByText('IP54, навесное', { exact: true })).toBeVisible();
   await expect(specTable.getByText(quoteCabinet.specLineSecondary, { exact: true })).toBeVisible();
 
   const rows = specTable.locator('tbody tr');
@@ -345,7 +345,7 @@ async function expectSpecTableDesktopColumns(page: Page) {
   await expect(
     specTable.getByRole('cell', { name: quoteCabinet.specLine, exact: true }),
   ).toBeVisible();
-  await expect(specTable.getByRole('cell', { name: 'IP54, навесной', exact: true })).toBeVisible();
+  await expect(specTable.getByRole('cell', { name: 'IP54, навесное', exact: true })).toBeVisible();
   await expect(
     specTable.getByRole('cell', { name: quoteCabinet.specLineSecondary, exact: true }),
   ).toBeVisible();
@@ -374,7 +374,7 @@ async function countColumnHeaderTextLineBoxes(header: Locator): Promise<number> 
   });
 }
 
-const filesSheetHint = 'Имя открывает выписку на экране.';
+const filesSheetHint = 'Имя файла открывает выписку на экране.';
 
 async function expectFilesSheetHint(page: Page) {
   await expect(page.getByRole('heading', { level: 2, name: 'Файлы', exact: true })).toBeVisible();
@@ -508,7 +508,7 @@ async function expectFileNameIsTheOnlyRecordLink(
   await expect(item.locator('time').getByRole('link')).toHaveCount(0);
 }
 
-const fileSheetDisclaimer = 'Это выписка на экране, не файл для скачивания.';
+const fileSheetDisclaimer = 'Это выписка на экране, а не файл для скачивания.';
 
 async function expectQuoteFileSheetExtract(page: Page) {
   await expect(
@@ -556,7 +556,7 @@ async function expectQuoteFileSheetExtract(page: Page) {
   await expect(firstLine.getByText(quoteCabinet.specLine, { exact: true })).toBeVisible();
   await expect(firstLine.getByText('1', { exact: true })).toBeVisible();
   await expect(firstLine.getByText('шт', { exact: true })).toBeVisible();
-  await expect(firstLine.getByText('IP54, навесной', { exact: true })).toBeVisible();
+  await expect(firstLine.getByText('IP54, навесное', { exact: true })).toBeVisible();
 
   const secondLine = specTable
     .locator('tbody tr')
@@ -564,7 +564,7 @@ async function expectQuoteFileSheetExtract(page: Page) {
   await expect(secondLine.getByText(quoteCabinet.specLineSecondary, { exact: true })).toBeVisible();
   await expect(secondLine.getByText('1', { exact: true })).toBeVisible();
   await expect(secondLine.getByText('шт', { exact: true })).toBeVisible();
-  await expect(secondLine.getByText('IP54, навесной')).toHaveCount(0);
+  await expect(secondLine.getByText('IP54, навесное')).toHaveCount(0);
 
   await expect(page).toHaveTitle('КП — З-10043 — ПК «Нордщит»');
 
@@ -773,7 +773,7 @@ test('quote cabinet shows Z-10043 seed payload from GET /requests/{accessSecret}
 
   await expect(page.getByText(quoteCabinet.specLine)).toBeVisible();
   await expect(page.getByText(quoteCabinet.specLineSecondary)).toBeVisible();
-  await expect(page.getByText('IP54, навесной')).toBeVisible();
+  await expect(page.getByText('IP54, навесное')).toBeVisible();
   await expect(page.getByText(quoteCabinet.questionnaireFileName, { exact: true })).toBeVisible();
   await expect(page.getByText(quoteCabinet.quoteFileName, { exact: true })).toBeVisible();
   await expect(page.locator(`dd > time[datetime="${quoteCabinet.updatedAt}"]`)).toBeVisible();
@@ -948,7 +948,7 @@ test('quote cabinet specification quantity header stays one text line at 1280px'
 
   await expect(specTable.getByText('1', { exact: true }).first()).toBeVisible();
   await expect(specTable.getByText('шт', { exact: true }).first()).toBeVisible();
-  await expect(specTable.getByText('IP54, навесной', { exact: true })).toBeVisible();
+  await expect(specTable.getByText('IP54, навесное', { exact: true })).toBeVisible();
 
   const firstRow = specTable.locator('tbody tr').filter({ hasText: quoteCabinet.specLine });
   const layout = await firstRow.evaluate((tr) => getComputedStyle(tr).display);
@@ -1006,7 +1006,7 @@ test('quote cabinet lists files as records and keeps the comment column', async 
   await expect(page.getByRole('button')).toHaveCount(0);
 
   await expect(page.getByRole('columnheader', { name: 'Комментарий' })).toBeVisible();
-  await expect(page.getByText('IP54, навесной')).toBeVisible();
+  await expect(page.getByText('IP54, навесное')).toBeVisible();
 });
 
 test('quote cabinet files hint that the name opens an on-screen sheet', async ({ page }) => {
@@ -1225,7 +1225,7 @@ test('quote file sheet specification keeps a shared qty column at 1280px', async
   await expect(page.getByText('Коммерческое предложение.', { exact: true })).toBeVisible();
   await expect(page).toHaveTitle('КП — З-10043 — ПК «Нордщит»');
   await expect(page.getByText('шт', { exact: true }).first()).toBeVisible();
-  await expect(page.getByText('IP54, навесной', { exact: true })).toBeVisible();
+  await expect(page.getByText('IP54, навесное', { exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: /скачать/i })).toHaveCount(0);
   await expect(page.locator('[download]')).toHaveCount(0);
   await expect(page.locator('a[href="#"]')).toHaveCount(0);
@@ -1307,9 +1307,12 @@ test('unknown file name on a live secret is a Russian dead-end', async ({ page }
   ).toBeVisible();
   expect(await page.title()).toContain('Ссылка недействительна — ПК «Нордщит»');
   await expect(
-    deadEnd.getByText('Такого документа в заявке нет. Откройте заявку и выберите имя из списка.', {
-      exact: true,
-    }),
+    deadEnd.getByText(
+      'Такого документа в заявке нет. Откройте заявку и выберите документ из списка.',
+      {
+        exact: true,
+      },
+    ),
   ).toBeVisible();
   await expect(deadEnd.getByText(/Заявки по этой ссылке нет/)).toHaveCount(0);
   await expect(page.getByText(/Код ошибки:/)).toHaveCount(0);

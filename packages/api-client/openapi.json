@@ -318,7 +318,7 @@
           },
           "comment": {
             "type": "string",
-            "example": "IP54, навесной"
+            "example": "IP54, навесное"
           }
         },
         "required": [

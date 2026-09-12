@@ -2,6 +2,11 @@
 
 ## Текущее состояние
 
+Русские формулировки кабинета (D-046): под «Файлы» —
+`Имя файла открывает выписку на экране.`; дисклеймер листа —
+`Это выписка на экране, а не файл для скачивания.`; тупик чужого файла —
+`…выберите документ из списка.`; комментарий З-10043 — `IP54, навесное`.
+Штампы D-007 и дисклеймер индекса не менялись.
 Колонка «Кол-во» кабинета (UX задача 18): на З-10043 при 1280px заголовок
 «Кол-во» — одна текстовая строка (`Range` по текстовому узлу, 1 line-box).
 От `40rem` у «Кол-во» `whitespace-nowrap` и `min-w-[4.75rem]`, у «Ед.»
@@ -102,7 +107,7 @@ UX/UI понятности (D-036…D-043): docs-only нарезка на `main`
 `main` (#45); задача 11 на `main` (#46); задача 12 на `main` (#47);
 задача 13 на `main` (#49); задача 14 на `main` (#50); задача 15 на
 `main` (#52); задача 16 на `main` (#53); задача 17 на `main` (#54);
-задача 18 на ветке `fix/ux-spec-qty-column`.
+задача 18 на `main` (#55).
 Оператор
 `выполни ux задачу N` → `docs/ux/README.md` (задачи 1–12, один чат).
 `реализуй ux задачу N` → тот же каталог + цикл (задачи 13–18, D-042).
@@ -627,3 +632,8 @@ UX/UI понятности (D-036…D-043): docs-only нарезка на `main`
 | 2026-09-12 | UX-18 gates            | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                                              | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
 | 2026-09-12 | UX-18 format           | `pnpm exec prettier --write e2e/request-cabinet.spec.ts apps/web/app/pages/r/[accessSecret]/index.vue` затем `prettier --check` и `git diff --check`                                                                                                                                      | exit 0                                                                                                                                                             |
 | 2026-09-12 | UX-18 TDD green full   | `pnpm exec playwright test --workers=1` против `make dev` + seed                                                                                                                                                                                                                          | exit 0: 37 passed (demo-links, focus-visible, layout-header, request-cabinet, security-headers)                                                                    |
+| 2026-09-12 | D-046 TDD red          | `pnpm exec playwright test e2e/request-cabinet.spec.ts --grep "files hint that the name opens\|file sheet is a labelled\|unknown file name on a live secret\|lists files as records and keeps the comment" --workers=1`                                                                   | exit 1: 4 failed; нет `Имя файла открывает…`, нет `а не файл`, нет `выберите документ`, нет `IP54, навесное`                                                       |
+| 2026-09-12 | D-046 TDD green        | та же команда против `make dev` + seed                                                                                                                                                                                                                                                    | exit 0: 4 passed; новые формулировки и `IP54, навесное` видны                                                                                                      |
+| 2026-09-12 | D-046 gates            | `pnpm generate:api` / `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `pnpm test` / `pnpm test:packages` / `pnpm build`                                                                                                                                                        | exit 0: api 36, web 16, scripts 80, 5 tarballs; Nuxt 4.5.2 production build                                                                                        |
+| 2026-09-12 | D-046 format           | `pnpm exec prettier --write` затронутых vue/ts/md/e2e затем `pnpm format:check` и `git diff --check`                                                                                                                                                                                      | exit 0                                                                                                                                                             |
+| 2026-09-12 | D-046 TDD green full   | `pnpm exec playwright test --workers=1` против `make dev` + seed                                                                                                                                                                                                                          | exit 0: 37 passed (demo-links, focus-visible, layout-header, request-cabinet, security-headers)                                                                    |

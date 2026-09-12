@@ -65,7 +65,7 @@ export class RequestSpecLineDto {
   @ApiProperty({ example: 'шт', type: String })
   unit!: string;
 
-  @ApiPropertyOptional({ example: 'IP54, навесной', type: String })
+  @ApiPropertyOptional({ example: 'IP54, навесное', type: String })
   comment?: string;
 }
 
