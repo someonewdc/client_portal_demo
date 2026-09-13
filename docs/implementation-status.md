@@ -2,13 +2,12 @@
 
 ## Текущее состояние
 
-Вынос ядра (D-056, docs-нарезка шага 0): контракт генератора второго workspace —
-allowlist/denylist/rewrite и этапы S1–S6 в `docs/implementation-plan.md`; CLI
-scope/порты ужесточены (не `@` одно, порты целые 1024–65535, попарно различны,
-не D-006). Промпт кода
-`docs/llm/scaffold-new-workspace.md` (`реализуй вынос ядра`). Скрипта
-`scripts/scaffold-new-workspace.mjs` ещё нет. Театр Нордщита, apps и packages
-не менялись.
+Вынос ядра (D-056): генератор `scripts/scaffold-new-workspace.mjs` копирует
+allowlist во второй git (`--preset core|portal`, `--scope` / `--name` / `--brand` /
+порты). Targeted S1–S6: `node --test scripts/scaffold-new-workspace.spec.mjs`.
+Источник остаётся `@client-portal`, порты D-006 и театр Нордщита. Промпт
+`docs/llm/scaffold-new-workspace.md` (`реализуй вынос ядра`). Театр Нордщита, apps и packages
+этого git генератор не переименовывает.
 Русские формулировки UI (D-055): зрительские фразы без оборванного подлежащего
 и канцелярита. Под «Файлы» — `Нажмите имя файла — откроется выписка на экране.`;
 `/start` — «с полки не купить» / «через менеджера»; poll —
@@ -251,6 +250,7 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | Состав листа по kind (D-054)          | проверен                          |
 | Русский UI (D-055)                    | проверен                          |
 | Вынос ядра docs (D-056)               | выполнен                          |
+| Вынос ядра код (D-056)                | проверен                          |
 
 ## Журнал проверки
 
@@ -799,3 +799,19 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | 2026-09-13 | D-055 e2e AC red       | `pnpm exec playwright test e2e/live-start.spec.ts e2e/live-conductor.spec.ts e2e/live-control.spec.ts e2e/request-cabinet.spec.ts --grep "start page names the entry\|index live block links to /start\|conductor page names itself\|index live block links to the conductor fixture\|conductor actions are pointer\|files hint that the name opens\|file sheet hint and name-only" --workers=1` (Vue `/start`+индекс+пульт+подсказка «Файлы» = `origin/main`) | exit 1: 7 failed; нет «с полки не купить», «Как заказчик подаёт заявку», «Пульт показа», «Продвинуть заявку», «Нажмите имя файла» |
 | 2026-09-13 | D-055 e2e AC green     | та же команда, Vue D-055 восстановлен                                                                                                                                                                                                                                                    | exit 0: 7 passed                                                                                                                                                   |
 | 2026-09-13 | D-056 docs             | `pnpm format` (без e2e) затем `prettier --check` на изменённых docs и `git diff --check`                                                                                                                                  | exit 0; docs-only (D-056, промпт scaffold); `pnpm format:check` всего репо падает на pre-existing wrap `e2e/live-cabinet-poll.spec.ts`; lint/test продукта не запускались |
+| 2026-09-13 | D-056 S1 TDD red       | `node --test --test-name-pattern 'S1 ' scripts/scaffold-new-workspace.spec.mjs`                                                                                                                                          | exit 1: нет `scripts/scaffold-new-workspace.mjs`; stderr MODULE_NOT_FOUND, не имя флага |
+| 2026-09-13 | D-056 S1 TDD green     | `node --test --test-name-pattern 'S1 ' scripts/scaffold-new-workspace.spec.mjs`                                                                                                                                          | exit 0: 9 passed; parse CLI, `--out` внутри git и непустой dest |
+| 2026-09-13 | D-056 S2 TDD red       | `node --test --test-name-pattern 'S2 ' scripts/scaffold-new-workspace.spec.mjs`                                                                                                                                          | exit 1: `rewriteTokens is not a function` |
+| 2026-09-13 | D-056 S2 TDD green     | `node --test --test-name-pattern 'S2 ' scripts/scaffold-new-workspace.spec.mjs`                                                                                                                                          | exit 0: 1 passed; `@protostar`, порты 3100/3101/5434 |
+| 2026-09-13 | D-056 S3 TDD red       | `node --test --test-name-pattern 'S3 ' scripts/scaffold-new-workspace.spec.mjs`                                                                                                                                          | exit 1: `isTheaterPath` / `collectTheaterLeaks` не функции |
+| 2026-09-13 | D-056 S3 TDD green     | `node --test --test-name-pattern 'S3 ' scripts/scaffold-new-workspace.spec.mjs`                                                                                                                                          | exit 0: 2 passed; denylist path true; leaks на З-1004/demoLive/REQUEST_CATALOG/DEMO_CONDUCTOR_SECRET |
+| 2026-09-13 | D-056 S4 TDD red       | `node --test --test-name-pattern 'S4 ' scripts/scaffold-new-workspace.spec.mjs`                                                                                                                                          | exit 1: `scaffoldWorkspace is not a function` |
+| 2026-09-13 | D-056 S4 TDD green     | `node --test --test-name-pattern 'S4 ' scripts/scaffold-new-workspace.spec.mjs`                                                                                                                                          | exit 0: 1 passed; пять пакетов A, нет kit C/театра, источник `@client-portal` |
+| 2026-09-13 | D-056 S5 TDD red       | `node --test --test-name-pattern 'S5 ' scripts/scaffold-new-workspace.spec.mjs`                                                                                                                                          | exit 1: theater leaks в dest (use-case spec, dto, seed, web tests) |
+| 2026-09-13 | D-056 S5 TDD green     | `node --test --test-name-pattern 'S5 ' scripts/scaffold-new-workspace.spec.mjs`                                                                                                                                          | exit 0: 1 passed; portal kit C, нет Demo/Conductor/demoLive/REQUEST_CATALOG |
+| 2026-09-13 | D-056 S6 TDD red       | `node --test --test-name-pattern 'S6 ' scripts/scaffold-new-workspace.spec.mjs`                                                                                                                                          | exit 1: `finalizeWorkspace is not a function` |
+| 2026-09-13 | D-056 S6 TDD green     | `node --test --test-name-pattern 'S6 ' scripts/scaffold-new-workspace.spec.mjs`                                                                                                                                          | exit 0: 1 passed; dest `pnpm install` + `build:core` + `generate:api`; OpenAPI health-only, без `/demo/links` |
+| 2026-09-13 | D-056 targeted         | `node --test scripts/scaffold-new-workspace.spec.mjs`                                                                                                                                                                    | exit 0: 15 passed (S1–S6) |
+| 2026-09-13 | D-056 gates            | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `git diff --check`                                                                                                                                             | exit 0 |
+| 2026-09-13 | D-056 prettier         | `prettier --check` на `scripts/scaffold-new-workspace.mjs` `scripts/scaffold-new-workspace.spec.mjs` `AGENTS.md` `docs/implementation-status.md` `package.json`                                                          | exit 0; `pnpm format:check` всего репо падает на pre-existing wrap `e2e/live-cabinet-poll.spec.ts` |
+| 2026-09-13 | D-056 pnpm test        | `pnpm test`                                                                                                                                                                                                              | exit 1: API HTTP 27 failed, `Can't reach database server at 127.0.0.1:5433` (стенд после `make down`); packages 42 passed; scaffold spec не дошёл |
