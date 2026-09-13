@@ -2,6 +2,13 @@
 
 ## Текущее состояние
 
+Вынос ядра (D-056, docs-нарезка шага 0): контракт генератора второго workspace —
+allowlist/denylist/rewrite и этапы S1–S6 в `docs/implementation-plan.md`; CLI
+scope/порты ужесточены (не `@` одно, порты целые 1024–65535, попарно различны,
+не D-006). Промпт кода
+`docs/llm/scaffold-new-workspace.md` (`реализуй вынос ядра`). Скрипта
+`scripts/scaffold-new-workspace.mjs` ещё нет. Театр Нордщита, apps и packages
+не менялись.
 Русские формулировки UI (D-055): зрительские фразы без оборванного подлежащего
 и канцелярита. Под «Файлы» — `Нажмите имя файла — откроется выписка на экране.`;
 `/start` — «с полки не купить» / «через менеджера»; poll —
@@ -164,6 +171,7 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 Без `ux` фразы `выполни задачу N` и `реализуй задачу N` не ведут в
 `docs/ux/`. Не класть UX-промпты в `docs/llm/feature-NN.md`. Live-сценарий:
 `выполни фичу N` → `docs/llm/feature-NN.md` (28–33, D-049). Это не `выполни задачу N`.
+Вынос ядра: `реализуй вынос ядра` → `docs/llm/scaffold-new-workspace.md` (D-056).
 
 ## Правила обновления
 
@@ -242,9 +250,11 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | Листы по kind (D-053)                 | проверен                          |
 | Состав листа по kind (D-054)          | проверен                          |
 | Русский UI (D-055)                    | проверен                          |
+| Вынос ядра docs (D-056)               | выполнен                          |
 
 ## Журнал проверки
 
+<!-- prettier-ignore -->
 | Дата       | Что                    | Команда                                                                                                                                                                                                                                                                                   | Результат                                                                                                                                                          |
 | ---------- | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | 2026-09-09 | Создание заготовки     | `pnpm install`                                                                                                                                                                                                                                                                            | exit 0, pnpm 11.21.0, 7 workspace projects                                                                                                                         |
@@ -788,3 +798,4 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | 2026-09-13 | D-055 gates            | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `git diff --check`                                                                                                                                                                                                             | exit 0                                                                                                                                                             |
 | 2026-09-13 | D-055 e2e AC red       | `pnpm exec playwright test e2e/live-start.spec.ts e2e/live-conductor.spec.ts e2e/live-control.spec.ts e2e/request-cabinet.spec.ts --grep "start page names the entry\|index live block links to /start\|conductor page names itself\|index live block links to the conductor fixture\|conductor actions are pointer\|files hint that the name opens\|file sheet hint and name-only" --workers=1` (Vue `/start`+индекс+пульт+подсказка «Файлы» = `origin/main`) | exit 1: 7 failed; нет «с полки не купить», «Как заказчик подаёт заявку», «Пульт показа», «Продвинуть заявку», «Нажмите имя файла» |
 | 2026-09-13 | D-055 e2e AC green     | та же команда, Vue D-055 восстановлен                                                                                                                                                                                                                                                    | exit 0: 7 passed                                                                                                                                                   |
+| 2026-09-13 | D-056 docs             | `pnpm format` (без e2e) затем `prettier --check` на изменённых docs и `git diff --check`                                                                                                                                  | exit 0; docs-only (D-056, промпт scaffold); `pnpm format:check` всего репо падает на pre-existing wrap `e2e/live-cabinet-poll.spec.ts`; lint/test продукта не запускались |

@@ -125,3 +125,10 @@ smoke фичи 5 (`make e2e`).
 
 Для docs-only поставки: Prettier / `git diff --check`. Не утверждать, что lint/test
 продукта прошли, если не запускались.
+
+**Вынос ядра (D-056):** docs-нарезка шага 0 — без red продукта. Код генератора —
+`scripts/scaffold-new-workspace.spec.mjs` (`node:test`) **до**
+`scripts/scaffold-new-workspace.mjs`. Этапы S1–S6 (CLI, rewrite, guards, core,
+portal+rewrite, install/build) — каждый со своим red/green; таблицы allowlist и
+rewrite — `docs/implementation-plan.md`. Не `make up` клона и не порты D-006.
+Промпт: `docs/llm/scaffold-new-workspace.md`.

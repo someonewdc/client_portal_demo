@@ -42,9 +42,10 @@
 Предметный HTTP/MVP закрыт фичей 8. IA статусного документа — фичи 9–12 (D-027).
 HTML-лист файла — фича 13 (D-029). Нарезка дефектов — фича 14 (D-030); имена задач
 1–13 = фичи 15–27. UX/UI понятности — `docs/ux/task-NN.md`, не номера live-фич.
-Live-сценарий — фичи 28–33 (D-049…D-052): F28 docs-only; код F29–33 ещё нет.
-Если нужен новый script — заведи его в той фиче или UX-задаче, чей AC это требует,
-и запиши в `package.json`.
+Live-сценарий — фичи 28–33 (D-049…D-052): F28 docs-only; код F29–33 на `main`.
+Вынос ядра (D-056) — не номер feature-NN: docs-нарезка шага 0; код генератора —
+`docs/llm/scaffold-new-workspace.md`. Если нужен новый script — заведи его в той
+фиче, UX-задаче или промпте выноса, чей AC это требует, и запиши в `package.json`.
 
 ## Порядок
 
@@ -109,9 +110,178 @@ docs → 1 Postgres/Prisma/ready
 `feature-33.md`. Оператор: `выполни фичу N`. Контракт — D-049…D-052. Код F29–33
 не писать в docs-PR нарезки (F28). Зависимость: фича N в `main` до старта N+1.
 
+## Вынос ядра (не фичи 1–33 и не UX)
+
+Отдельный трек, один PR в `main` после этой docs-нарезки. Оператор:
+`реализуй вынос ядра` → [`docs/llm/scaffold-new-workspace.md`](llm/scaffold-new-workspace.md).
+Контракт — D-056. Цикл implement→review не используется. Этот git остаётся
+consumer №1 (`@client-portal`, порты D-006). Продукт Protostar — не этот
+репозиторий. Не `выполни фичу N`.
+
+Код генератора режут на этапы S1–S6: у каждого свой red, потом минимальный
+green. Не склеивать S1–S6 в один assert «скрипт целиком».
+
+```text
+S1 каркас CLI          → parse argv, отказ на плохие флаги / --out внутри git
+S2 rewrite токенов     → scope / name / brand / ports на фикстуре строк
+S3 guards              → denylist путей + fail-closed token scan
+S4 core preset         → дерево dest без kit C и без театра D
+S5 portal + rewrite    → kit C есть; смешанные файлы как таблица ниже
+S6 install / build     → pnpm install + build:core (+ generate:api) в tmpdir
+```
+
+Зависимость: S(n) green до кода S(n+1). Targeted: `node --test scripts/scaffold-new-workspace.spec.mjs`.
+
+### Allowlist (префиксы `git ls-files`; минус denylist; потом rewrite)
+
+**A — оба пресета, as-is + rewrite `@client-portal` → `--scope`:**
+`packages/platform-core/`, `packages/nestjs-core/`, `packages/openapi-client-core/`,
+`packages/tsconfig/`, `packages/eslint-config/` (весь tracked, включая tests и README).
+
+**B — оба пресета (рецепт; часть строк — rewrite-таблица):**
+`.nvmrc`, `.node-version`, `pnpm-workspace.yaml`, корневой `package.json`,
+`prettier.config.mjs`, `.prettierignore`, `eslint.config.mjs`, `.gitignore`,
+`.dockerignore`, `Makefile`, `compose.yaml`, `Dockerfile`, `.env.example`,
+`.github/workflows/ci.yml`, `.github/actions/setup-workspace/action.yml`,
+`scripts/check-boundaries.mjs`, `scripts/check-boundaries.spec.mjs`,
+`scripts/test-packages.mjs`, `scripts/test-packages.spec.mjs`,
+`scripts/free-stand-ports.mjs`, `scripts/free-stand-ports.spec.mjs`,
+`scripts/compose-smoke.mjs`,
+`apps/api/package.json`, `apps/api/tsconfig.json`, `apps/api/tsconfig.build.json`,
+`apps/api/prisma.config.ts`,
+`apps/api/src/main.ts`, `apps/api/src/app.module.ts`,
+`apps/api/src/bootstrap/create-application.ts`,
+`apps/api/src/core/config/api-env.ts`, `apps/api/src/core/config/api-env.spec.ts`,
+`apps/api/src/core/config/cors-origins.ts`, `apps/api/src/core/config/cors-origins.spec.ts`,
+`apps/api/src/health/` (все tracked),
+`apps/api/src/persistence/` (все tracked),
+`apps/api/src/openapi/document.ts`, `apps/api/src/openapi/export-openapi.ts`,
+`apps/api/src/openapi/openapi.contract.spec.ts`,
+`apps/api/prisma/schema.prisma`, `apps/api/prisma/seed.ts`,
+`apps/web/package.json`, `apps/web/tsconfig.json`, `apps/web/nuxt.config.ts`,
+`apps/web/app/app.vue`, `apps/web/app/plugins/api.ts`,
+`apps/web/app/layouts/default.vue`, `apps/web/app/assets/css/main.css`,
+`apps/web/app/pages/index.vue`,
+`packages/api-client/package.json`, `packages/api-client/tsconfig.json`,
+`packages/api-client/src/index.ts`,
+`.agents/skills/foundation-package-conventions/SKILL.md`,
+`.agents/skills/nestjs-hexagonal-boundaries/SKILL.md`,
+`.agents/skills/change-impact-gates/SKILL.md`,
+`.agents/skills/prisma-persistence-boundary/SKILL.md`,
+`.agents/skills/nuxt-ssr-data-and-ui/SKILL.md`,
+`.agents/skills/verification-honesty/SKILL.md`,
+`.agents/skills/git-delivery/SKILL.md`,
+`.agents/skills/docker-reclaim-space/SKILL.md`.
+
+**C — только `portal`:**
+`apps/api/src/requests/requests.module.ts`,
+`apps/api/src/requests/public.ts`,
+`apps/api/src/requests/http/request-portal.controller.ts`,
+`apps/api/src/requests/http/request.dto.ts`,
+`apps/api/src/requests/http/capability-cache-control.interceptor.ts`,
+`apps/api/src/requests/http/portal-throttle.ts`,
+`apps/api/src/requests/http/map-application-error.ts`,
+`apps/api/src/requests/application/get-request-by-access-secret.use-case.ts`,
+`apps/api/src/requests/application/get-request-by-access-secret.use-case.spec.ts`,
+`apps/api/src/requests/application/request-not-found.error.ts`,
+`apps/api/src/requests/application/request-query.port.ts`,
+`apps/api/src/requests/domain/request.ts`,
+`apps/api/src/requests/domain/request-status.ts`,
+`apps/api/src/requests/domain/request-stages.ts`,
+`apps/api/src/requests/domain/request-stages.spec.ts`,
+`apps/api/src/requests/domain/request-file-spec-lines.spec.ts`,
+`apps/api/src/requests/infrastructure/prisma-request.repository.ts`,
+`apps/api/src/requests/infrastructure/prisma-request.mapper.ts`,
+`apps/api/src/requests/infrastructure/apply-request-seed.ts`,
+`apps/web/app/pages/r/[accessSecret]/index.vue`,
+`apps/web/app/pages/r/[accessSecret]/d/[fileName].vue`,
+`apps/web/app/composables/useRequestPortal.ts`,
+`apps/web/app/utils/async-data-problem.ts`,
+`apps/web/app/utils/request-file-display.ts`,
+`apps/web/app/utils/request-next-step.ts`,
+`apps/web/app/utils/request-portal-cache-key.ts`,
+`apps/web/app/utils/route-param-value.ts`,
+`apps/web/tests/async-data-problem.spec.ts`,
+`apps/web/tests/request-file-display.spec.ts`,
+`apps/web/tests/request-next-step.spec.ts`,
+`apps/web/tests/request-portal-cache-key.spec.ts`,
+`apps/web/tests/route-param-value.spec.ts`.
+
+**Prisma в dest (не копировать историю миграций Нордщита):**
+`apps/api/prisma/schema.prisma` — rewrite; `apps/api/prisma/seed.ts` — rewrite;
+в dest одна initial migration. `core`: техническая модель (аналог F1 probe), без
+`Request`. `portal`: модели `Request*` как сейчас, без комментариев «demo catalog».
+
+### Denylist (никогда в dest)
+
+`apps/api/src/requests/domain/request-catalog.ts`,
+`apps/api/src/requests/domain/live-request-fixture.ts`,
+`apps/api/src/requests/http/demo-links.controller.ts`,
+`apps/api/src/requests/http/demo-conductor.controller.ts`,
+`apps/api/src/requests/application/get-demo-links.use-case.ts`,
+`apps/api/src/requests/application/get-demo-links.use-case.spec.ts`,
+`apps/api/src/requests/application/get-conductor-snapshot.use-case.ts`,
+`apps/api/src/requests/application/advance-live-request.use-case.ts`,
+`apps/api/src/requests/application/reset-live-request.use-case.ts`,
+`apps/api/src/requests/application/load-live-request-for-conductor.ts`,
+`apps/api/src/requests/application/load-live-request-for-conductor.spec.ts`,
+`apps/api/src/requests/application/conductor-auth.port.ts`,
+`apps/api/src/requests/application/request-live-command.port.ts`,
+`apps/api/src/requests/application/live-request-advance-conflict.error.ts`,
+`apps/api/src/requests/application/request-fixture-mismatch.error.ts`,
+`apps/api/src/requests/infrastructure/env-conductor-auth.ts`,
+`apps/api/prisma/migrations/`,
+`apps/web/app/pages/start.vue`,
+`apps/web/app/pages/c/`,
+`apps/web/app/utils/live-cabinet-poll.ts`,
+`apps/web/app/utils/bind-live-cabinet-poll.ts`,
+`apps/web/tests/live-cabinet-poll.spec.ts`,
+`apps/web/tests/bind-live-cabinet-poll.spec.ts`,
+`apps/web/server/api/start-request.post.ts`,
+`apps/web/server/api/conductor/`,
+`packages/api-client/openapi.json`,
+`packages/api-client/src/schema.d.ts`,
+`packages/api-client/src/index.spec.ts`,
+`scripts/lifecycle-targets.spec.mjs`,
+`e2e/`, `playwright.config.ts`,
+`docs/llm/feature-NN.md`, `docs/ux/`, `docs/source-brief.md`,
+`docs/demo-scenarios.md`, `docs/domain-model.md`, `docs/implementation-status.md`,
+`.agents/skills/implement-review-cycle/`, `.agents/skills/pr-review/`,
+`.agents/skills/github-remote/`,
+`pnpm-lock.yaml`, `.env`, `node_modules/`, `dist/`,
+`apps/api/src/generated/`.
+
+### Rewrite смешанных файлов (dest outcome; не invent)
+
+| Путь                                                                                  | Пресет         | Результат в dest                                                                                                                                                                                                                                              |
+| ------------------------------------------------------------------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `apps/api/src/app.module.ts`                                                          | оба            | `core`: `ConfigModule` + logging + `HealthModule` + problem filter; **нет** `RequestsModule`, **нет** `ThrottlerModule`. `portal`: то же + `RequestsModule` (только portal) + `ThrottlerModule` GET secret. Нет импортов demo/conductor.                      |
+| `apps/api/src/requests/requests.module.ts`                                            | `portal`       | `controllers: [RequestPortalController]`. Providers: lookup use-case, Prisma repo, `REQUEST_QUERY`. **Нет** DemoLinks/DemoConductor/live/conductor. Файл отсутствует в `core`.                                                                                |
+| `apps/api/prisma/seed.ts` и `apply-request-seed.ts`                                   | оба / `portal` | `core`: `prisma/seed.ts` — no-op **без** импорта `requests/`. `portal`: `apply-request-seed.ts` + `seed.ts` — идемпотентный no-op. **Нет** `REQUEST_CATALOG`, live fixture, `deleteMany` `notIn` каталога. Файл `apply-request-seed.ts` отсутствует в `core`. |
+| `apps/api/src/requests/http/map-application-error.ts`                                 | `portal`       | Только `RequestNotFoundError` → 404. **Нет** `LiveRequestAdvanceConflictError` / 409 live. Файл отсутствует в `core`.                                                                                                                                         |
+| `apps/api/src/health/health.http.spec.ts`                                             | оба            | Fixture env **без** `DEMO_CONDUCTOR_SECRET`.                                                                                                                                                                                                                  |
+| `apps/api/src/requests/domain/request.ts`                                             | `portal`       | `RequestPortalView` **без** `demoLive`.                                                                                                                                                                                                                       |
+| `apps/api/src/requests/application/get-request-by-access-secret.use-case.ts` (+ spec) | `portal`       | Lookup по хешу секрета. **Нет** `live-request-fixture`, **нет** spread `demoLive`. Spec без З-10046.                                                                                                                                                          |
+| `apps/api/src/openapi/document.ts`                                                    | оба            | `setTitle(--brand)`. Paths = оставшиеся controllers: `core` только health; `portal` health + `GET /requests/{accessSecret}`. Нет `/demo/links` и conductor.                                                                                                   |
+| `apps/api/src/openapi/openapi.contract.spec.ts`                                       | оба            | Assert только путей dest. Нет `/demo/links`, нет `demoLive`.                                                                                                                                                                                                  |
+| `apps/web/nuxt.config.ts`                                                             | оба            | Scope/порты из флагов. `routeRules`: `/`; `portal` ещё `/r/**`. **Нет** `/start`, `/c/**`. **Нет** `runtimeConfig.demoConductorSecret`.                                                                                                                       |
+| `apps/web/app/pages/index.vue`                                                        | оба            | Заглушка бренда (бренд шапки не heading). **Нет** «Ссылки для показа», **нет** `$api.GET('/demo/links')`, **нет** ссылок `/start` и `/c/`.                                                                                                                    |
+| `apps/web/app/pages/r/[accessSecret]/index.vue`                                       | `portal`       | Кабинет. **Нет** импорта `live-cabinet-poll` / poll-фразы. Бренд в title = `--brand`.                                                                                                                                                                         |
+| `apps/api/src/bootstrap/create-application.ts`                                        | оба            | **Нет** hook Cache-Control на `/demo/conductor`. CORS: `GET`, `HEAD`, `OPTIONS` (без `POST`).                                                                                                                                                                 |
+| `apps/api/src/core/config/api-env.ts` (+ spec)                                        | оба            | **Нет** `DEMO_CONDUCTOR_SECRET`. Default `API_PORT` = `--api-port`.                                                                                                                                                                                           |
+| `compose.yaml`, `.env.example`, `.github/workflows/ci.yml`                            | оба            | Имена от `--name`, порты от флагов. **Нет** `DEMO_CONDUCTOR_*`, `nordshield`.                                                                                                                                                                                 |
+| `Makefile`                                                                            | оба            | Порты/project от флагов. `compose-smoke` — health, не дисклеймер индекса. **Нет** `pnpm test:e2e` / Playwright в dest.                                                                                                                                        |
+| `scripts/compose-smoke.mjs`                                                           | оба            | Проверка `GET /api/v1/health/ready` и контейнеров с префиксом `--name`. **Нет** фразы «не показывается заказчику».                                                                                                                                            |
+| `scripts/check-boundaries.mjs`, `scripts/test-packages.mjs` (+ spec)                  | оба            | Зашитый `@client-portal` в **копии** → `--scope`. Этот git не трогать.                                                                                                                                                                                        |
+| `apps/web/app/layouts/default.vue`                                                    | оба            | Тексты `ПК «Нордщит»` → `--brand`.                                                                                                                                                                                                                            |
+| `packages/api-client/src/index.ts`                                                    | оба            | Импорт `--scope/openapi-client-core`; фасад без generated schema Нордщита (schema появляется после `generate:api` в dest).                                                                                                                                    |
+
+Не копировать as-is и не оставлять висячие импорты театра: после rewrite dest должен typecheck по смыслу пресета (фактически проверяет S6 для core packages; web/api generate:api — тоже S6).
+
 ## Что не входит ни в одну фичу
 
 Коннекторы amo/1С, чат, OTP, upload файлов, каталог SKU, mock-api,
 админка менеджера (кроме индекса и пульта показа, D-049), Kubernetes, Redis,
 логин / парольная форма / HTTP 401, общее PATCH `/requests/{secret}`,
-таймаут авто-продвижения как основной режим, мутация каталога З-10041…З-10045.
+таймаут авто-продвижения как основной режим, мутация каталога З-10041…З-10045,
+портал Protostar / деплой / переименование `@client-portal` в этом git.

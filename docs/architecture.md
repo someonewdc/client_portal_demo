@@ -16,6 +16,8 @@
 - `apps/web` не импортирует Prisma, Nest DTO, `apps/api/src`.
 - `apps/api` не импортирует Nuxt. Composition root: CORS, readiness, Swagger title, DSN.
 - Core packages не знают заявку, Нордщит и Prisma.
+- Этот git — consumer №1 линейки (`@client-portal`). Второй workspace копирует
+  allowlist генератором (D-056), не clone всего дерева и не новые exports ядра.
 
 mock-api и `mock-core` **нет**. «Система заявок завода» в демо — строки в Postgres после
 seed. Не эмулировать внешнюю шину.
