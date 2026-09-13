@@ -20,6 +20,7 @@ const PORT_PATTERN = /^[0-9]+$/;
 const FORBIDDEN_SCOPE = '@client-portal';
 const FORBIDDEN_NAME = 'client-portal-demo';
 const FORBIDDEN_BRANDS = new Set(['ПК «Нордщит»', 'Нордщит']);
+const BRAND_PATTERN = /^[\p{L}\p{N}][\p{L}\p{N} .+«»-]{0,78}$/u;
 const RESERVED_PORTS = new Set([3000, 3001, 5433]);
 const MIN_PORT = 1024;
 const MAX_PORT = 65535;
@@ -356,8 +357,11 @@ export function parseArgs(argv, context = {}) {
   if (!NAME_PATTERN.test(name) || name === FORBIDDEN_NAME) {
     flagError('--name', 'must be a kebab-case name other than client-portal-demo');
   }
-  if (brand.length === 0 || FORBIDDEN_BRANDS.has(brand)) {
-    flagError('--brand', 'must be a non-empty brand other than Нордщит');
+  if (brand.length === 0 || FORBIDDEN_BRANDS.has(brand) || !BRAND_PATTERN.test(brand)) {
+    flagError(
+      '--brand',
+      'must be a quote-safe brand of letters, numbers, spaces, or hyphens other than Нордщит',
+    );
   }
 
   const webPort = parsePort(flags, 'web-port', DEFAULT_WEB_PORT);
@@ -927,7 +931,14 @@ function rewriteRootPackageJson(source) {
     delete pkg.devDependencies['@playwright/test'];
   }
   if (typeof pkg.scripts.test === 'string') {
-    pkg.scripts.test = pkg.scripts.test.replace(' scripts/lifecycle-targets.spec.mjs', '');
+    pkg.scripts.test = pkg.scripts.test.replace(/node --test\s+.+$/, (segment) => {
+      const files = segment
+        .replace(/^node --test\s+/, '')
+        .trim()
+        .split(/\s+/)
+        .filter((file) => ALLOWLIST_B.includes(file));
+      return `node --test ${files.join(' ')}`;
+    });
   }
   return `${JSON.stringify(pkg, null, 2)}\n`;
 }

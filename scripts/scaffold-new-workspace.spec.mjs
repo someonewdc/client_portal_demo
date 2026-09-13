@@ -133,6 +133,34 @@ describe('S1 scaffold CLI parse', () => {
     assert.match(result.stderr, /--brand/);
   });
 
+  it('rejects a brand that would break dest TypeScript or JSON string literals', async () => {
+    const { parseArgs } = await loadScaffold();
+    for (const brand of ["Builder's Lab", 'Foo"Bar', 'Cash$Brand', 'A`Tick']) {
+      const dest = join(tmpdir(), `scaffold-unsafe-brand-${process.pid}-${brand.length}`);
+      assert.throws(
+        () =>
+          parseArgs(flagArgv({ ...validFlags, out: dest, brand }), {
+            cwd: rootDirectory,
+            sourceRoot: rootDirectory,
+          }),
+        /--brand/,
+        brand,
+      );
+      assert.equal(existsSync(dest), false, brand);
+    }
+  });
+
+  it('parses a Cyrillic brand without writing dest', async () => {
+    const dest = join(tmpdir(), `scaffold-cyrillic-brand-${process.pid}`);
+    const { parseArgs } = await loadScaffold();
+    const parsed = parseArgs(flagArgv({ ...validFlags, out: dest, brand: 'Протостар' }), {
+      cwd: rootDirectory,
+      sourceRoot: rootDirectory,
+    });
+    assert.equal(parsed.brand, 'Протостар');
+    assert.equal(existsSync(dest), false);
+  });
+
   it('rejects a non-integer port, port 80, reserved 3000, and duplicate web/api ports', () => {
     const cases = [
       { flag: 'web-port', value: '3000.5', named: /--web-port/ },
@@ -359,6 +387,18 @@ describe('S4 core preset tree', () => {
       /@client-portal/,
     );
     assert.match(read(join(rootDirectory, 'apps/web/app/pages/index.vue')), /Ссылки для показа/);
+
+    const destPackage = JSON.parse(read(join(dest, 'package.json')));
+    assert.doesNotMatch(destPackage.scripts.test, /scaffold-new-workspace/);
+    assert.doesNotMatch(destPackage.scripts.test, /lifecycle-targets/);
+    const destTestFiles = destPackage.scripts.test
+      .split(/node --test\s+/)[1]
+      .trim()
+      .split(/\s+/);
+    assert.ok(destTestFiles.length > 0);
+    for (const file of destTestFiles) {
+      assert.equal(existsSync(join(dest, file)), true, file);
+    }
   });
 });
 

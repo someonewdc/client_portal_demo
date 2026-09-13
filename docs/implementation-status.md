@@ -5,7 +5,9 @@
 Вынос ядра (D-056): генератор `scripts/scaffold-new-workspace.mjs` копирует
 allowlist во второй git (`--preset core|portal`, `--scope` / `--name` / `--brand` /
 порты). Targeted S1–S6: `node --test scripts/scaffold-new-workspace.spec.mjs`.
-Источник остаётся `@client-portal`, порты D-006 и театр Нордщита. Промпт
+После ревью #70 dest `scripts.test` оставляет только spec из allowlist B (нет
+`scaffold-new-workspace.spec.mjs`); `--brand` — quote-safe (буквы/цифры/пробел/дефис,
+без `'"`/`$`/backtick). Источник остаётся `@client-portal`, порты D-006 и театр Нордщита. Промпт
 `docs/llm/scaffold-new-workspace.md` (`реализуй вынос ядра`). Театр Нордщита, apps и packages
 этого git генератор не переименовывает.
 Русские формулировки UI (D-055): зрительские фразы без оборванного подлежащего
@@ -815,3 +817,6 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | 2026-09-13 | D-056 gates            | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `git diff --check`                                                                                                                                             | exit 0 |
 | 2026-09-13 | D-056 prettier         | `prettier --check` на `scripts/scaffold-new-workspace.mjs` `scripts/scaffold-new-workspace.spec.mjs` `AGENTS.md` `docs/implementation-status.md` `package.json`                                                          | exit 0; `pnpm format:check` всего репо падает на pre-existing wrap `e2e/live-cabinet-poll.spec.ts` |
 | 2026-09-13 | D-056 pnpm test        | `pnpm test`                                                                                                                                                                                                              | exit 1: API HTTP 27 failed, `Can't reach database server at 127.0.0.1:5433` (стенд после `make down`); packages 42 passed; scaffold spec не дошёл |
+| 2026-09-13 | D-056 review #70 red   | `node --test --test-name-pattern 'rejects a brand that would break dest\|S4 core preset' scripts/scaffold-new-workspace.spec.mjs`                                                                                        | exit 1: `Builder's Lab` не отвергал `--brand`; dest `scripts.test` ссылался на `scripts/scaffold-new-workspace.spec.mjs` (файла нет в dest) |
+| 2026-09-13 | D-056 review #70 green | `node --test scripts/scaffold-new-workspace.spec.mjs`                                                                                                                                                                    | exit 0: 17 passed; dest test-script только allowlist B; `--brand` отвергает `'"`/`$`/backtick, принимает `Протостар` |
+| 2026-09-13 | D-056 review #70 gates | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `prettier --check` на scaffold `.mjs` / `git diff --check`                                                                                                    | exit 0 |
