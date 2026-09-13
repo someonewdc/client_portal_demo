@@ -27,6 +27,7 @@
 | Дефекты кода: задача N        | [`remediation-plan.md`](remediation-plan.md) (`выполни задачу N`)                                        |
 | UX/UI понятности: задача N    | [`ux/README.md`](ux/README.md) (`выполни ux задачу N` / `реализуй ux задачу N` → `ux/task-NN.md`)        |
 | Цикл implement→review         | skill `implement-review-cycle` (`через implement → review` или `реализуй ux задачу N`; не писать самому) |
+| Вынос ядра в другой git       | [`llm/scaffold-new-workspace.md`](llm/scaffold-new-workspace.md) (D-056, `реализуй вынос ядра`)          |
 
 Предметный код пишут отдельные чаты по `docs/llm/feature-NN.md`. Live-сценарий
 показа (фичи 28–33, D-049): `выполни фичу N`. Дефекты кода (фичи 15–27, D-030):
@@ -34,7 +35,8 @@
 (`выполни ux задачу N` / `реализуй ux задачу N`), не в общем скоупе фич. Без
 слова `ux` фразы `выполни задачу N` и `реализуй задачу N` не открывают
 `docs/ux/`. `выполни фичу N` не открывает remediation и не открывает `docs/ux/`.
-В этом наборе документов
+Вынос ядра (D-056): `реализуй вынос ядра` → [`llm/scaffold-new-workspace.md`](llm/scaffold-new-workspace.md);
+это не фича 1–33 и не UX. В этом наборе документов
 кода продукта нет. Стенд — цели корневого Makefile (`bootstrap`, `up`, `down`, `dev`,
 `restart`, `verify`), не сырой `docker compose` (D-013, D-028). `verify` поднимает полный стенд, мигрирует,
 генерирует api-client и сверяет diff до gates, затем compose-smoke, ставит Chromium и гоняет

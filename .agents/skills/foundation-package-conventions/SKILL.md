@@ -14,7 +14,9 @@ description: >-
 Ядро — runtime libraries. Этот skill — как агент их **трогает**. Не копируй `src/` пакета
 в приложение и не пересказывай README вместо импорта.
 
-Scope пакетов в новом workspace: `@client-portal`.
+Scope пакетов **в этом** workspace: `@client-portal` (consumer №1, D-002, D-056).
+Второй git — генератор `scripts/scaffold-new-workspace.mjs` (`--scope`), не
+переименование этого репо. Новых exports ради второго consumer, пока его кода нет.
 
 ## Non-negotiables
 
