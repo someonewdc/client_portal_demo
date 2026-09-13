@@ -83,8 +83,8 @@ workspace нет и в production API не добавляй. Новый skill «
   13–20: `реализуй ux задачу N` + цикл, D-036…D-048), не feature-NN;
   нарезка live-показа — `docs/llm/feature-28.md` … `feature-33.md` (D-049…D-052);
   оператор `выполни фичу N`;
-  вынос ядра (D-056): контракт генератора `scripts/scaffold-new-workspace.mjs`,
-  кода скрипта ещё нет (`реализуй вынос ядра`);
+  вынос ядра (D-056): `scripts/scaffold-new-workspace.mjs` копирует allowlist во
+  второй git (`реализуй вынос ядра`); этот репозиторий остаётся `@client-portal`;
 - Playwright: `pnpm test:e2e` / `make e2e` (smoke шапки, индекс, кабинет З-10043, битая
   ссылка, D-021); CI job `e2e` против `make up`;
 - PostgreSQL в Docker (хост 5433), Prisma 7 в `apps/api`.
