@@ -130,8 +130,17 @@ Prefix живёт на server URL, path keys относительные. Пос�
 }
 ```
 
-У З-10046 в этом payload есть `"demoLive": true`. У каталожных пяти поля `demoLive` нет
-(omit, не `false`) — D-050, код фичи 29.
+У З-10046 в этом payload есть `"demoLive": true` и `"letterReading": "По письму это заявка на навесной щит ЩО-70 800 А. В запросе указан АВР на вводе."`
+(D-057). У каталожных пяти полей `demoLive` и `letterReading` нет (omit, не `false` и не
+`""`) — D-050 / D-057, код фичи 29 и последующий код `letterReading`. Имя `letterReading`
+зафиксировано в D-057 (`letterParse` / `aiSummary` / `authoredLetter` отвергнуты).
+
+`GET /requests/{accessSecret}` не вызывает внешний HTTP и не генерирует разбор на poll.
+Poll кабинета 4 с (F33) — повтор того же payload; разбор не дергается. Пояснение КП не
+новое поле API: web считает факты из уже пришедших `files[].specLines`
+(`kind=questionnaire` vs `kind=quote`) одной функцией `quoteSpecLineFacts` в
+`apps/web/app/utils/quote-spec-line-facts.ts`. Не API-domain, не `request-file-spec-lines`:
+web не импортирует `apps/api`. Outbound HTTP к модели нет.
 
 `stages` всегда четыре элемента в каноническом порядке. `reachedAt: null` — шаг ещё не
 наступил.
@@ -222,3 +231,4 @@ Origin — `corsOriginsFromWebOrigin` (`WEB_ORIGIN` + близнец localhost/1
 
 Нет общего PATCH `/requests/{secret}`, upload файлов, auth headers, OTP, списка «всех
 заявок» кроме `/demo/links`. Write статусов — только demo/conductor пути (D-051).
+Нет поля пояснения КП. Нет вызова модели из GET.
