@@ -36,7 +36,8 @@
 слова `ux` фразы `выполни задачу N` и `реализуй задачу N` не открывают
 `docs/ux/`. `выполни фичу N` не открывает remediation и не открывает `docs/ux/`.
 Вынос ядра (D-056): `реализуй вынос ядра` → [`llm/scaffold-new-workspace.md`](llm/scaffold-new-workspace.md);
-это не фича 1–33 и не UX. В этом наборе документов
+это не фича 1–33 и не UX. Письмо на `/start` и пояснение КП — [`decisions.md`](decisions.md)
+D-057 (не живой провайдер). В этом наборе документов
 кода продукта нет. Стенд — цели корневого Makefile (`bootstrap`, `up`, `down`, `dev`,
 `restart`, `verify`), не сырой `docker compose` (D-013, D-028). `verify` поднимает полный стенд, мигрирует,
 генерирует api-client и сверяет diff до gates, затем compose-smoke, ставит Chromium и гоняет
