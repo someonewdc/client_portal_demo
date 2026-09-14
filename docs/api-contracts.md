@@ -133,7 +133,8 @@ Prefix живёт на server URL, path keys относительные. Пос�
 У З-10046 в этом payload есть `"demoLive": true` и `"letterReading": "По письму это заявка на навесной щит ЩО-70 800 А. В запросе указан АВР на вводе."`
 (D-057). У каталожных пяти полей `demoLive` и `letterReading` нет (omit, не `false` и не
 `""`) — D-050 / D-057, код фичи 29 и последующий код `letterReading`. Имя `letterReading`
-зафиксировано в D-057 (`letterParse` / `aiSummary` / `authoredLetter` отвергнуты).
+зафиксировано в D-057 (`letterParse` / `letterParseNote` / `aiSummary` / `intakeAi` /
+`authoredLetter` отвергнуты).
 
 `GET /requests/{accessSecret}` не вызывает внешний HTTP и не генерирует разбор на poll.
 Poll кабинета 4 с (F33) — повтор того же payload; разбор не дергается. Пояснение КП не

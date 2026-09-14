@@ -6,8 +6,9 @@
 разбора/пояснения по фикстуре или диффу specLines. `/start` показывает пример письма;
 GET живой З-10046 отдаёт `letterReading`; у каталожных пяти поле omit; выписка КП —
 факты + пометка; canned «потому что»
-только у З-10046. Живой провайдер, чат, Ollama, очередь, Redis — out. Vue / Nest /
-OpenAPI / Prisma / e2e не менялись и не проверялись; код продукта не «проверен».
+только у З-10046. Живой провайдер, чат, AI dashboard, нейрослоп, Ollama, очередь,
+Redis, брокер, mock-api — out. Vue / Nest / OpenAPI / Prisma / e2e не менялись и
+не проверялись; код продукта не «проверен».
 Вынос ядра (D-056): генератор `scripts/scaffold-new-workspace.mjs` копирует
 allowlist во второй git (`--preset core|portal`, `--scope` / `--name` / `--brand` /
 порты). Targeted S1–S6: `node --test scripts/scaffold-new-workspace.spec.mjs`.
@@ -829,3 +830,4 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | 2026-09-13 | D-056 review #70 gates | `pnpm check:boundaries` / `pnpm lint` / `pnpm typecheck` / `prettier --check` на scaffold `.mjs` / `git diff --check`                                                                                                    | exit 0 |
 | 2026-09-15 | D-057 docs             | `pnpm exec prettier --check AGENTS.md docs/README.md docs/api-contracts.md docs/decisions.md docs/demo-scenarios.md docs/domain-model.md docs/frontend.md docs/implementation-status.md docs/product-scope.md` затем `git diff --check` | exit 0; docs-only (D-057); Vue/Nest/OpenAPI/Prisma/e2e не запускались; код продукта не «проверен» |
 | 2026-09-15 | D-057 review must-fix  | `pnpm exec prettier --check AGENTS.md docs/api-contracts.md docs/decisions.md docs/domain-model.md docs/frontend.md docs/implementation-status.md docs/product-scope.md` затем `git diff --check` | exit 0; docs-only: владелец `quoteSpecLineFacts` в web; запрет AI восстановлен; omit `letterReading` только у каталога |
+| 2026-09-15 | D-057 canon fill       | `pnpm exec prettier --check AGENTS.md docs/README.md docs/api-contracts.md docs/decisions.md docs/demo-scenarios.md docs/domain-model.md docs/frontend.md docs/implementation-status.md docs/product-scope.md` затем `git diff --check` | exit 0; docs-only: отвергнутые `letterParseNote`/`intakeAi`; шаблоны `quoteSpecLineFacts` и факты З-10046 дословно; третий абзац `/start` и пометка КП дословно; Vue/Nest/OpenAPI/Prisma/e2e не запускались |

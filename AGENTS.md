@@ -32,7 +32,8 @@ workspace (`docs/llm/scaffold-new-workspace.md`, D-056), не фича 1–33 и
 (`выполни фичу N` для live 28–33; `выполни задачу N` для remediation 15–27).
 Копируемый промпт UX — `docs/ux/task-NN.md` (`выполни ux задачу N` или `реализуй ux
 задачу N`). Вынос ядра — `docs/llm/scaffold-new-workspace.md` (`реализуй вынос ядра`,
-D-056); не `выполни фичу N`.
+D-056); не `выполни фичу N`. Письмо и пояснение КП — `docs/decisions.md` D-057
+(не живой провайдер; Vue / Nest / OpenAPI / Prisma / e2e в docs-срезе не писать).
 
 Skills в `.agents/skills/` — повседневные процедуры репозитория. Открой нужный
 skill в том же изменении:
@@ -85,6 +86,8 @@ workspace нет и в production API не добавляй. Новый skill «
   оператор `выполни фичу N`;
   вынос ядра (D-056): `scripts/scaffold-new-workspace.mjs` копирует allowlist во
   второй git (`реализуй вынос ядра`); этот репозиторий остаётся `@client-portal`;
+  письмо и пояснение КП — `docs/decisions.md` D-057 (docs-only в этом срезе; не живой
+  провайдер);
 - Playwright: `pnpm test:e2e` / `make e2e` (smoke шапки, индекс, кабинет З-10043, битая
   ссылка, D-021); CI job `e2e` против `make up`;
 - PostgreSQL в Docker (хост 5433), Prisma 7 в `apps/api`.
@@ -103,8 +106,8 @@ mock-api **нет и не появится**. «Система заявок» = 
 Запрещено: каталог SKU, оптовый логин и роли, Integration Lab, чат, OTP, универсальная
 шина заявок, оплата, CMS, брокер, Redis, Elasticsearch, Kubernetes, AI, mock-api.
 Исключение D-057: только фиксированные демо-тексты разбора письма и пояснения КП
-(фикстура / дифф specLines). Живой провайдер, чат с моделью, Ollama, очередь, нейрослоп,
-«AI dashboard» остаются в запрете.
+(фикстура / дифф specLines). Живой провайдер, чат, AI dashboard, нейрослоп, Ollama,
+очередь, Redis, брокер, mock-api — out.
 
 Подробности: `docs/product-scope.md`, исходник — `docs/source-brief.md`.
 
