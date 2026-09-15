@@ -75,9 +75,7 @@ async function advanceLiveToInvoiceIssued(request: APIRequestContext) {
 
 async function clickStartRequest(page: Page) {
   const posted = page.waitForResponse((response) => {
-    return (
-      response.request().method() === 'POST' && response.url().includes('/api/start-request')
-    );
+    return response.request().method() === 'POST' && response.url().includes('/api/start-request');
   });
   await page.getByRole('button', { exact: true, name: startCopy.button }).click();
   const startPost = await posted;
