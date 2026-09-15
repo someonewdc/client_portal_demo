@@ -134,6 +134,12 @@ export class RequestPortalDataDto {
 
   @ApiPropertyOptional({ example: true, type: Boolean })
   demoLive?: true;
+
+  @ApiPropertyOptional({
+    example: 'По письму это заявка на навесной щит ЩО-70 800 А. В запросе указан АВР на вводе.',
+    type: String,
+  })
+  letterReading?: string;
 }
 
 export class RequestPortalResponseDto {

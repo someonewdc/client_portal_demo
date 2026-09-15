@@ -72,7 +72,11 @@ describe('GetRequestByAccessSecretUseCase', () => {
     expect(JSON.stringify(result)).not.toContain(hash);
     expect(result).not.toHaveProperty('accessSecretHash');
     expect(result).not.toHaveProperty('demoLive');
+    expect(result).not.toHaveProperty('letterReading');
     expect(JSON.stringify(result)).not.toContain('"demoLive"');
+    expect(JSON.stringify(result)).not.toContain('"letterReading"');
+    expect(JSON.stringify(result)).not.toContain('"letterParse"');
+    expect(JSON.stringify(result)).not.toContain('"aiSummary"');
   });
 
   it('marks only the live fixture with demoLive true', async () => {
@@ -127,11 +131,23 @@ describe('GetRequestByAccessSecretUseCase', () => {
         title: 'Щит ЩО-70 показа',
         status: 'accepted',
         demoLive: true,
+        letterReading:
+          'По письму это заявка на навесной щит ЩО-70 800 А. В запросе указан АВР на вводе.',
       }),
     );
     expect(result).toHaveProperty('demoLive', true);
+    expect(result).toHaveProperty(
+      'letterReading',
+      'По письму это заявка на навесной щит ЩО-70 800 А. В запросе указан АВР на вводе.',
+    );
+    expect(result.letterReading).not.toBe('');
     expect(JSON.stringify(result)).toContain('"demoLive":true');
     expect(JSON.stringify(result)).not.toContain('"demoLive":false');
+    expect(JSON.stringify(result)).not.toContain('"letterParse"');
+    expect(JSON.stringify(result)).not.toContain('"letterParseNote"');
+    expect(JSON.stringify(result)).not.toContain('"aiSummary"');
+    expect(JSON.stringify(result)).not.toContain('"intakeAi"');
+    expect(JSON.stringify(result)).not.toContain('"authoredLetter"');
   });
 
   it('throws a typed not-found error for an unknown secret', async () => {

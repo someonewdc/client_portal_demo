@@ -440,7 +440,9 @@ describe('request HTTP', () => {
     expect(payload).not.toContain(hash);
     expect(body).not.toMatchObject({ data: { accessSecretHash: hash } });
     expect(body).not.toMatchObject({ data: { demoLive: false } });
+    expect(body).not.toMatchObject({ data: { letterReading: '' } });
     expect(payload).not.toContain('"demoLive"');
+    expect(payload).not.toContain('"letterReading"');
   });
 
   it('returns distinct questionnaire, quote and invoice spec lines for Z-10044 and keeps cabinet specLines', async () => {
@@ -516,7 +518,9 @@ describe('request HTTP', () => {
 
       expect(response.statusCode).toBe(200);
       expect(data).not.toHaveProperty('demoLive');
+      expect(data).not.toHaveProperty('letterReading');
       expect(JSON.stringify(body)).not.toContain('"demoLive"');
+      expect(JSON.stringify(body)).not.toContain('"letterReading"');
     }
   });
 
@@ -543,6 +547,8 @@ describe('request HTTP', () => {
         statusLabel: 'Принят',
         plantName: 'ПК «Нордщит»',
         demoLive: true,
+        letterReading:
+          'По письму это заявка на навесной щит ЩО-70 800 А. В запросе указан АВР на вводе.',
         specLines: [
           {
             name: 'Щит ЩО-70 800 А IP54',
@@ -556,6 +562,17 @@ describe('request HTTP', () => {
     );
     expect(data).toHaveProperty('demoLive', true);
     expect(data?.demoLive).not.toBe(false);
+    expect(data).toHaveProperty(
+      'letterReading',
+      'По письму это заявка на навесной щит ЩО-70 800 А. В запросе указан АВР на вводе.',
+    );
+    expect(data?.letterReading).not.toBe('');
+    expect(data?.letterReading).not.toBe(false);
+    expect(JSON.stringify(body)).not.toContain('"letterParse"');
+    expect(JSON.stringify(body)).not.toContain('"letterParseNote"');
+    expect(JSON.stringify(body)).not.toContain('"aiSummary"');
+    expect(JSON.stringify(body)).not.toContain('"intakeAi"');
+    expect(JSON.stringify(body)).not.toContain('"authoredLetter"');
     const files = data?.files as Array<{ uploadedAt: string }> | undefined;
     const stages = data?.stages as Array<{ reachedAt: string | null }> | undefined;
     expect(files).toEqual([
@@ -575,6 +592,13 @@ describe('request HTTP', () => {
     expectLiveStandNow(stages?.[0]?.reachedAt, after);
     expectLiveStandNow(files?.[0]?.uploadedAt, after);
     expect(JSON.stringify(body)).not.toContain(hashOpaqueToken(Z10046_SECRET));
+
+    const second = await app!.inject({
+      method: 'GET',
+      url: `/api/v1/requests/${Z10046_SECRET}`,
+    });
+    expect(second.statusCode).toBe(200);
+    expect(second.json().data.letterReading).toBe(data?.letterReading);
   });
 
   it('fails closed on an extra besides catalog and live, then seed resets З-10046 to accepted', async () => {
@@ -625,12 +649,16 @@ describe('request HTTP', () => {
     const restoredData = restored.json().data as {
       demoLive?: unknown;
       files: unknown[];
+      letterReading?: unknown;
       stages: Array<{ reachedAt: string | null; status: string }>;
       status: string;
     };
     expect(restored.statusCode).toBe(200);
     expect(restoredData.status).toBe('accepted');
     expect(restoredData.demoLive).toBe(true);
+    expect(restoredData.letterReading).toBe(
+      'По письму это заявка на навесной щит ЩО-70 800 А. В запросе указан АВР на вводе.',
+    );
     expect(restoredData.files).toHaveLength(1);
     expect(restoredData.stages.filter((stage) => stage.reachedAt !== null)).toEqual([
       expect.objectContaining({ status: 'accepted' }),

@@ -33,7 +33,7 @@ workspace (`docs/llm/scaffold-new-workspace.md`, D-056), не фича 1–33 и
 Копируемый промпт UX — `docs/ux/task-NN.md` (`выполни ux задачу N` или `реализуй ux
 задачу N`). Вынос ядра — `docs/llm/scaffold-new-workspace.md` (`реализуй вынос ядра`,
 D-056); не `выполни фичу N`. Письмо и пояснение КП — `docs/decisions.md` D-057
-(не живой провайдер; Vue / Nest / OpenAPI / Prisma / e2e в docs-срезе не писать).
+(не живой провайдер; поставка кода в этом PR).
 
 Skills в `.agents/skills/` — повседневные процедуры репозитория. Открой нужный
 skill в том же изменении:

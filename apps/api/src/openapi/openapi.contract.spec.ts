@@ -96,6 +96,19 @@ describe('OpenAPI contract for generated client', () => {
     });
   });
 
+  it('documents optional letterReading on the portal payload', () => {
+    expect(schemaProperty(document, 'RequestPortalDataDto', 'letterReading')).toMatchObject({
+      example: 'По письму это заявка на навесной щит ЩО-70 800 А. В запросе указан АВР на вводе.',
+      type: 'string',
+    });
+    const components = asRecord(document.components);
+    const schemas = asRecord(components.schemas);
+    const portal = asRecord(schemas.RequestPortalDataDto);
+    const required = portal.required;
+    expect(Array.isArray(required) ? required : []).not.toContain('letterReading');
+    expect(Array.isArray(required) ? required : []).not.toContain('demoLive');
+  });
+
   it('documents conductor GET/POST snapshots and problem+json failures', () => {
     const paths = asRecord(document.paths);
     expect(Object.keys(paths)).toEqual(

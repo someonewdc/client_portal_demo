@@ -261,6 +261,8 @@ export interface components {
             files: components["schemas"]["RequestFileDto"][];
             /** @example true */
             demoLive?: boolean;
+            /** @example По письму это заявка на навесной щит ЩО-70 800 А. В запросе указан АВР на вводе. */
+            letterReading?: string;
         };
         RequestPortalResponseDto: {
             data: components["schemas"]["RequestPortalDataDto"];

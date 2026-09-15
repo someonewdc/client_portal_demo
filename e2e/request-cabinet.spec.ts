@@ -1945,3 +1945,80 @@ test('document summary list class name is declared in main.css', () => {
   const css = readFileSync(join(process.cwd(), 'apps/web/app/assets/css/main.css'), 'utf8');
   expect(css, 'D-048 summary class').toContain('.document-summary');
 });
+
+const letterReading =
+  'По письму это заявка на навесной щит ЩО-70 800 А. В запросе указан АВР на вводе.';
+const letterReadingCaption =
+  'Разбор письма сделан автоматически для показа. Это не решение завода.';
+const quoteNoteCaption =
+  'Пояснение составлено автоматически по расхождению опросного листа и КП. Это не решение завода и не часть коммерческого предложения.';
+const liveQuoteCanned =
+  'Автоматическая формулировка: комплект автоматики в расчёте заменяет АВР из опроса; рубильник ввода добавлен в КП и не был в опросе.';
+const catalogQuoteFacts = [
+  'В опросе есть «ВРУ 400 А», в КП этой строки нет.',
+  'В опросе есть «Учёт на вводе», в КП этой строки нет.',
+  'В КП есть «Вводно-распределительное устройство 400 А», в опросе его нет.',
+  'В КП есть «Рубильник ввода», в опросе его нет.',
+] as const;
+
+test('quote cabinet Z-10043 has no letter-reading block', async ({ page }) => {
+  const response = await page.goto(`/r/${quoteCabinet.accessSecret}`);
+
+  expect(response, 'GET /r/{secret} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expectCabinetStatusHeader(page, quoteCabinet.publicNumber, quoteCabinet.statusLabel);
+  await expect(page.getByText(letterReading, { exact: true })).toHaveCount(0);
+  await expect(page.getByText(letterReadingCaption, { exact: true })).toHaveCount(0);
+});
+
+test('quote file sheet Z-10043 shows automatic facts without canned because', async ({ page }) => {
+  const sheetPath = `/r/${quoteCabinet.accessSecret}/d/${encodeURIComponent(quoteCabinet.quoteFileName)}`;
+  const response = await page.goto(sheetPath);
+
+  expect(response, 'GET /r/{secret}/d/{fileName} must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expect(
+    page.getByRole('heading', { level: 1, name: quoteCabinet.quoteFileName }),
+  ).toBeVisible();
+  await expect(page.getByRole('table', { name: 'Спецификация' })).toBeVisible();
+  for (const fact of catalogQuoteFacts) {
+    await expect(page.getByText(fact, { exact: true })).toBeVisible();
+  }
+  await expect(page.getByText(quoteNoteCaption, { exact: true })).toBeVisible();
+  await expect(page.getByText(liveQuoteCanned, { exact: true })).toHaveCount(0);
+  await expect(
+    page.getByText('Это предложение, а не счёт. Счёт выставляется отдельно.', { exact: true }),
+  ).toBeVisible();
+});
+
+test('questionnaire and invoice sheets have no quote-note block', async ({ page }) => {
+  const questionnairePath = `/r/${quoteCabinet.accessSecret}/d/${encodeURIComponent(quoteCabinet.questionnaireFileName)}`;
+  const questionnaire = await page.goto(questionnairePath);
+
+  expect(
+    questionnaire,
+    'GET /r/{secret}/d/{questionnaire} must receive a response from :3000',
+  ).toBeTruthy();
+  expect(questionnaire?.ok()).toBe(true);
+  await expect(
+    page.getByRole('heading', { level: 1, name: quoteCabinet.questionnaireFileName }),
+  ).toBeVisible();
+  await expect(page.getByText(quoteNoteCaption, { exact: true })).toHaveCount(0);
+  await expect(page.getByText(liveQuoteCanned, { exact: true })).toHaveCount(0);
+  for (const fact of catalogQuoteFacts) {
+    await expect(page.getByText(fact, { exact: true })).toHaveCount(0);
+  }
+
+  const invoicePath = `/r/${invoiceCabinet.accessSecret}/d/${encodeURIComponent(invoiceCabinet.fileNames[2])}`;
+  const invoice = await page.goto(invoicePath);
+
+  expect(invoice, 'GET /r/{secret}/d/{invoice} must receive a response from :3000').toBeTruthy();
+  expect(invoice?.ok()).toBe(true);
+  await expect(
+    page.getByRole('heading', { level: 1, name: invoiceCabinet.fileNames[2] }),
+  ).toBeVisible();
+  await expect(page.getByText(quoteNoteCaption, { exact: true })).toHaveCount(0);
+  await expect(page.getByText(liveQuoteCanned, { exact: true })).toHaveCount(0);
+});

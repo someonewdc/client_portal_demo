@@ -4,6 +4,7 @@ import { computed } from 'vue';
 
 import { useRequestPortal } from '~/composables/useRequestPortal';
 import { documentStatusFromAsyncData } from '~/utils/async-data-problem';
+import { quoteSpecLineFacts } from '~/utils/quote-spec-line-facts';
 import {
   fileKindLabel,
   fileSheetExtractCopy,
@@ -40,6 +41,41 @@ const fileSheetLines = computed(() =>
 const hasSpecComments = computed(
   () => fileSheetLines.value.some((line) => Boolean(line.comment)) === true,
 );
+
+const quoteExplanationFacts = computed(() => {
+  if (file.value?.kind !== 'quote' || request.value == null) {
+    return [];
+  }
+
+  const questionnaire = request.value.files.find((item) => item.kind === 'questionnaire');
+  const quote = request.value.files.find((item) => item.kind === 'quote');
+  if (questionnaire == null || quote == null) {
+    return [];
+  }
+
+  return [...quoteSpecLineFacts(questionnaire.specLines, quote.specLines)];
+});
+
+const showQuoteExplanation = computed(
+  () => file.value?.kind === 'quote' && quoteExplanationFacts.value.length > 0,
+);
+
+const quoteCannedBecause = computed(() => {
+  if (request.value?.demoLive !== true) {
+    return null;
+  }
+
+  const facts = quoteExplanationFacts.value;
+  const hasLiveDivergences =
+    facts.includes('В опросе есть «АВР на вводе», в КП этой строки нет.') &&
+    facts.includes('В КП есть «Комплект автоматики ввода», в опросе его нет.') &&
+    facts.includes('В КП есть «Рубильник ввода», в опросе его нет.');
+  if (!hasLiveDivergences) {
+    return null;
+  }
+
+  return 'Автоматическая формулировка: комплект автоматики в расчёте заменяет АВР из опроса; рубильник ввода добавлен в КП и не был в опросе.';
+});
 
 useSeoMeta({
   title: computed(() => {
@@ -146,6 +182,14 @@ useSeoMeta({
           </tr>
         </tbody>
       </table>
+      <div v-if="showQuoteExplanation" class="mt-8 space-y-4">
+        <p v-for="fact in quoteExplanationFacts" :key="fact" class="text-ink">{{ fact }}</p>
+        <p v-if="quoteCannedBecause" class="text-ink">{{ quoteCannedBecause }}</p>
+        <p class="text-ink-muted">
+          Пояснение составлено автоматически по расхождению опросного листа и КП. Это не решение
+          завода и не часть коммерческого предложения.
+        </p>
+      </div>
       <p class="mt-8 text-ink">{{ fileSheetExtractCopy(file.kind).closing }}</p>
       <p class="mt-8">
         <NuxtLink class="document-link" :to="`/r/${accessSecret}`">

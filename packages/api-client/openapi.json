@@ -631,6 +631,10 @@
           "demoLive": {
             "type": "boolean",
             "example": true
+          },
+          "letterReading": {
+            "type": "string",
+            "example": "По письму это заявка на навесной щит ЩО-70 800 А. В запросе указан АВР на вводе."
           }
         },
         "required": [

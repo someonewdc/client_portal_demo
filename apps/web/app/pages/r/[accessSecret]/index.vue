@@ -85,6 +85,10 @@ function stampClass(stage: { reachedAt: string | null; status: string }, current
       <p class="document-identity mt-2 tabular-nums">{{ request.publicNumber }}</p>
       <p class="mt-4 text-ink">Менеджер отправил вам эту ссылку. Вход не нужен.</p>
       <p v-if="showLivePollHint" class="mt-4 text-ink">{{ LIVE_CABINET_POLL_HINT }}</p>
+      <p v-if="request.letterReading" class="mt-4 text-ink">{{ request.letterReading }}</p>
+      <p v-if="request.letterReading" class="mt-2 text-ink-muted">
+        Разбор письма сделан автоматически для показа. Это не решение завода.
+      </p>
       <dl class="document-summary mt-4">
         <dt class="document-caption">Заказчик</dt>
         <dd class="mt-1 text-ink sm:mt-0">{{ request.counterpartyName }}</dd>

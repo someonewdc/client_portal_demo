@@ -2,13 +2,11 @@
 
 ## Текущее состояние
 
-Письмо и пояснение КП (D-057, docs-only): исключение из out «AI» только для демо-текстов
-разбора/пояснения по фикстуре или диффу specLines. `/start` показывает пример письма;
-GET живой З-10046 отдаёт `letterReading`; у каталожных пяти поле omit; выписка КП —
-факты + пометка; canned «потому что»
-только у З-10046. Живой провайдер, чат, AI dashboard, нейрослоп, Ollama, очередь,
-Redis, брокер, mock-api — out. Vue / Nest / OpenAPI / Prisma / e2e не менялись и
-не проверялись; код продукта не «проверен».
+Письмо и пояснение КП (D-057): canned `letterReading` на GET живой З-10046 (omit у
+каталожных пяти); `/start` — третий абзац и textarea-пример письма; выписка КП —
+`quoteSpecLineFacts` + пометка; canned «потому что» только у З-10046. Код: Vue /
+Nest / OpenAPI / e2e; Prisma-колонка не нужна. Живой провайдер, чат, AI dashboard,
+нейрослоп, Ollama, очередь, Redis, брокер, mock-api — out.
 Вынос ядра (D-056): генератор `scripts/scaffold-new-workspace.mjs` копирует
 allowlist во второй git (`--preset core|portal`, `--scope` / `--name` / `--brand` /
 порты). Targeted S1–S6: `node --test scripts/scaffold-new-workspace.spec.mjs`.
@@ -260,7 +258,7 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | Русский UI (D-055)                    | проверен                          |
 | Вынос ядра docs (D-056)               | выполнен                          |
 | Вынос ядра код (D-056)                | проверен                          |
-| Письмо и пояснение КП (D-057)         | выполнен                          |
+| Письмо и пояснение КП (D-057)         | проверен                          |
 
 ## Журнал проверки
 
@@ -831,3 +829,6 @@ UX/UI понятности (D-036…D-048): docs-only нарезка на `main`
 | 2026-09-15 | D-057 docs             | `pnpm exec prettier --check AGENTS.md docs/README.md docs/api-contracts.md docs/decisions.md docs/demo-scenarios.md docs/domain-model.md docs/frontend.md docs/implementation-status.md docs/product-scope.md` затем `git diff --check` | exit 0; docs-only (D-057); Vue/Nest/OpenAPI/Prisma/e2e не запускались; код продукта не «проверен» |
 | 2026-09-15 | D-057 review must-fix  | `pnpm exec prettier --check AGENTS.md docs/api-contracts.md docs/decisions.md docs/domain-model.md docs/frontend.md docs/implementation-status.md docs/product-scope.md` затем `git diff --check` | exit 0; docs-only: владелец `quoteSpecLineFacts` в web; запрет AI восстановлен; omit `letterReading` только у каталога |
 | 2026-09-15 | D-057 canon fill       | `pnpm exec prettier --check AGENTS.md docs/README.md docs/api-contracts.md docs/decisions.md docs/demo-scenarios.md docs/domain-model.md docs/frontend.md docs/implementation-status.md docs/product-scope.md` затем `git diff --check` | exit 0; docs-only: отвергнутые `letterParseNote`/`intakeAi`; шаблоны `quoteSpecLineFacts` и факты З-10046 дословно; третий абзац `/start` и пометка КП дословно; Vue/Nest/OpenAPI/Prisma/e2e не запускались |
+| 2026-09-15 | D-057 code TDD red     | `node --experimental-strip-types --test apps/web/tests/quote-spec-line-facts.spec.ts`; `apps/api/node_modules/.bin/vitest run src/requests/application/get-request-by-access-secret.use-case.spec.ts src/openapi/openapi.contract.spec.ts` | exit 1: нет `quote-spec-line-facts.ts`; live GET без `letterReading`; OpenAPI без optional `letterReading` |
+| 2026-09-15 | D-057 code TDD green   | те же unit; `vitest run src/requests/requests.http.spec.ts -t 'returns the quote fixture by access secret\|omits demoLive on every catalog\|returns the live fixture with demoLive\|fails closed on an extra besides catalog'`; Playwright `--grep` D-057 letter/quote notes | exit 0: web 4 passed; use-case+OpenAPI 8 passed; HTTP 4 passed / 23 skipped; e2e 7 passed против `pnpm dev` + postgres |
+| 2026-09-15 | D-057 code gates       | `node scripts/check-boundaries.mjs`; `eslint . --max-warnings=0`; `apps/api` `tsc --noEmit`; `nuxt typecheck`; `packages/api-client` `tsc --noEmit`; `git diff --check` | exit 0; Prisma-колонка не добавлялась; `make up` завис на `postgres:17 Pulling` (образ уже локально), стенд — compose `--pull never` postgres + `pnpm dev` |
