@@ -86,7 +86,7 @@ workspace нет и в production API не добавляй. Новый skill «
   оператор `выполни фичу N`;
   вынос ядра (D-056): `scripts/scaffold-new-workspace.mjs` копирует allowlist во
   второй git (`реализуй вынос ядра`); этот репозиторий остаётся `@client-portal`;
-  письмо и пояснение КП — `docs/decisions.md` D-057 (docs-only в этом срезе; не живой
+  письмо и пояснение КП — `docs/decisions.md` D-057 (поставка кода в этом PR; не живой
   провайдер);
 - Playwright: `pnpm test:e2e` / `make e2e` (smoke шапки, индекс, кабинет З-10043, битая
   ссылка, D-021); CI job `e2e` против `make up`;

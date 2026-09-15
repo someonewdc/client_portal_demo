@@ -73,6 +73,17 @@ async function advanceLiveToInvoiceIssued(request: APIRequestContext) {
   await conductorPost(request, 'advance');
 }
 
+async function clickStartRequest(page: Page) {
+  const posted = page.waitForResponse((response) => {
+    return (
+      response.request().method() === 'POST' && response.url().includes('/api/start-request')
+    );
+  });
+  await page.getByRole('button', { exact: true, name: startCopy.button }).click();
+  const startPost = await posted;
+  expect(startPost.status(), 'POST /api/start-request must be 303 See Other').toBe(303);
+}
+
 function collectBrowserConductorLeak(page: Page): string[] {
   const leaked: string[] = [];
   page.on('request', (request) => {
@@ -192,7 +203,7 @@ test.describe('live request start action', () => {
     expect(response, 'GET /start must receive a response from :3000').toBeTruthy();
     expect(response?.ok()).toBe(true);
 
-    await page.getByRole('button', { exact: true, name: startCopy.button }).click();
+    await clickStartRequest(page);
 
     await expect(page).toHaveURL(new RegExp(`${LIVE_PORTAL_PATH}$`));
     await expect(
@@ -217,7 +228,7 @@ test.describe('live request start action', () => {
 
     const leaked = collectBrowserConductorLeak(page);
     await page.goto('/start');
-    await page.getByRole('button', { exact: true, name: startCopy.button }).click();
+    await clickStartRequest(page);
 
     await expect(page).toHaveURL(new RegExp(`${LIVE_PORTAL_PATH}$`));
     await expect(
