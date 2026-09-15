@@ -12,6 +12,8 @@ import { nextRequestStatus, REQUEST_STATUS_LABELS } from './request-status.js';
 
 export const LIVE_REQUEST_PUBLIC_NUMBER = 'З-10046';
 export const LIVE_REQUEST_ACCESS_SECRET = 'seed-z10046-live-severnaya-duga';
+export const LIVE_LETTER_READING =
+  'По письму это заявка на навесной щит ЩО-70 800 А. В запросе указан АВР на вводе.';
 
 export const LIVE_ACCESS_SECRET_HASH = hashOpaqueToken(LIVE_REQUEST_ACCESS_SECRET);
 

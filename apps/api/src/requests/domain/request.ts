@@ -63,6 +63,7 @@ export interface RequestPortalView {
   readonly specLines: readonly RequestSpecLine[];
   readonly files: readonly RequestFileMeta[];
   readonly demoLive?: true;
+  readonly letterReading?: string;
 }
 
 export interface ConductorSnapshot {

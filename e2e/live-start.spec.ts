@@ -73,6 +73,15 @@ async function advanceLiveToInvoiceIssued(request: APIRequestContext) {
   await conductorPost(request, 'advance');
 }
 
+async function clickStartRequest(page: Page) {
+  const posted = page.waitForResponse((response) => {
+    return response.request().method() === 'POST' && response.url().includes('/api/start-request');
+  });
+  await page.getByRole('button', { exact: true, name: startCopy.button }).click();
+  const startPost = await posted;
+  expect(startPost.status(), 'POST /api/start-request must be 303 See Other').toBe(303);
+}
+
 function collectBrowserConductorLeak(page: Page): string[] {
   const leaked: string[] = [];
   page.on('request', (request) => {
@@ -113,6 +122,26 @@ test('start page names the entry and shows both D-052 paragraphs', async ({ page
   await expect(page.getByRole('button', { exact: true, name: startCopy.button })).toBeVisible();
   await expect(page.getByRole('button')).toHaveCount(1);
   await expect(page.locator('a[href="#"]')).toHaveCount(0);
+});
+
+test('start page shows the D-057 letter example above a prefilled textarea', async ({ page }) => {
+  const response = await page.goto('/start');
+
+  expect(response, 'GET /start must receive a response from :3000').toBeTruthy();
+  expect(response?.ok()).toBe(true);
+
+  await expect(page.getByText(startCopy.firstParagraph, { exact: true })).toBeVisible();
+  await expect(page.getByText(startCopy.secondParagraph, { exact: true })).toBeVisible();
+  await expect(
+    page.getByText(
+      'Это пример того, как заявку написали бы письмом. Разбор на показе идёт по сценарию, не настоящей моделью.',
+      { exact: true },
+    ),
+  ).toBeVisible();
+  const letterField = page.getByRole('textbox');
+  await expect(letterField).toHaveCount(1);
+  await expect(letterField).toHaveValue('Нужен навесной щит ЩО-70 800 А, с АВР на вводе.');
+  await expect(page.getByRole('button', { exact: true, name: startCopy.button })).toBeVisible();
 });
 
 test('start HTML does not leak the conductor secret', async ({ page }) => {
@@ -172,7 +201,7 @@ test.describe('live request start action', () => {
     expect(response, 'GET /start must receive a response from :3000').toBeTruthy();
     expect(response?.ok()).toBe(true);
 
-    await page.getByRole('button', { exact: true, name: startCopy.button }).click();
+    await clickStartRequest(page);
 
     await expect(page).toHaveURL(new RegExp(`${LIVE_PORTAL_PATH}$`));
     await expect(
@@ -197,7 +226,7 @@ test.describe('live request start action', () => {
 
     const leaked = collectBrowserConductorLeak(page);
     await page.goto('/start');
-    await page.getByRole('button', { exact: true, name: startCopy.button }).click();
+    await clickStartRequest(page);
 
     await expect(page).toHaveURL(new RegExp(`${LIVE_PORTAL_PATH}$`));
     await expect(
@@ -251,5 +280,100 @@ test.describe('live request start action', () => {
     await expect(
       page.getByRole('heading', { exact: true, level: 1, name: 'В расчёте' }),
     ).toHaveCount(0);
+  });
+});
+
+const letterReading =
+  'По письму это заявка на навесной щит ЩО-70 800 А. В запросе указан АВР на вводе.';
+const letterReadingCaption =
+  'Разбор письма сделан автоматически для показа. Это не решение завода.';
+const quoteNoteCaption =
+  'Пояснение составлено автоматически по расхождению опросного листа и КП. Это не решение завода и не часть коммерческого предложения.';
+const liveQuoteCanned =
+  'Автоматическая формулировка: комплект автоматики в расчёте заменяет АВР из опроса; рубильник ввода добавлен в КП и не был в опросе.';
+const liveQuoteFacts = [
+  'В опросе есть «АВР на вводе», в КП этой строки нет.',
+  'В КП есть «Комплект автоматики ввода», в опросе его нет.',
+  'В КП есть «Рубильник ввода», в опросе его нет.',
+  '«Щит ЩО-70 800 А IP54» есть в опросе и в КП.',
+] as const;
+const quoteClosing = 'Это предложение, а не счёт. Счёт выставляется отдельно.';
+
+test.describe('live letter reading and quote notes', () => {
+  test.describe.configure({ mode: 'serial' });
+
+  test('live cabinet shows canned letterReading and the demo caption', async ({
+    page,
+    request,
+  }) => {
+    await conductorPost(request, 'reset');
+
+    const response = await page.goto(LIVE_PORTAL_PATH);
+    expect(response, 'GET live cabinet must receive a response from :3000').toBeTruthy();
+    expect(response?.ok()).toBe(true);
+
+    await expect(
+      page.getByRole('heading', { exact: true, level: 1, name: 'Принят' }),
+    ).toBeVisible();
+    await expect(page.getByText(LIVE_PUBLIC_NUMBER, { exact: true })).toBeVisible();
+    await expect(page.getByText(letterReading, { exact: true })).toBeVisible();
+    await expect(page.getByText(letterReadingCaption, { exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Продвинуть заявку' })).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Сбросить' })).toHaveCount(0);
+  });
+
+  test('live quote sheet shows facts, canned because, note, and keeps the closing', async ({
+    page,
+    request,
+  }) => {
+    await conductorPost(request, 'reset');
+    await conductorPost(request, 'advance');
+    await conductorPost(request, 'advance');
+
+    const quotePath = `${LIVE_PORTAL_PATH}/d/${encodeURIComponent('КП-З-10046.pdf')}`;
+    const response = await page.goto(quotePath);
+    expect(response, 'GET live quote sheet must receive a response from :3000').toBeTruthy();
+    expect(response?.ok()).toBe(true);
+
+    await expect(page.getByRole('heading', { level: 1, name: 'КП-З-10046.pdf' })).toBeVisible();
+    await expect(page.getByRole('table', { name: 'Спецификация' })).toBeVisible();
+    for (const fact of liveQuoteFacts) {
+      await expect(page.getByText(fact, { exact: true })).toBeVisible();
+    }
+    await expect(page.getByText(liveQuoteCanned, { exact: true })).toBeVisible();
+    await expect(page.getByText(quoteNoteCaption, { exact: true })).toBeVisible();
+    await expect(page.getByText(quoteClosing, { exact: true })).toBeVisible();
+  });
+
+  test('live questionnaire and invoice sheets have no quote-note block', async ({
+    page,
+    request,
+  }) => {
+    await conductorPost(request, 'reset');
+    await conductorPost(request, 'advance');
+    await conductorPost(request, 'advance');
+    await conductorPost(request, 'advance');
+
+    const questionnaire = await page.goto(
+      `${LIVE_PORTAL_PATH}/d/${encodeURIComponent('Опросный-лист-З-10046.pdf')}`,
+    );
+    expect(questionnaire, 'GET live questionnaire sheet must receive a response').toBeTruthy();
+    expect(questionnaire?.ok()).toBe(true);
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Опросный-лист-З-10046.pdf' }),
+    ).toBeVisible();
+    await expect(page.getByText(quoteNoteCaption, { exact: true })).toHaveCount(0);
+    await expect(page.getByText(liveQuoteCanned, { exact: true })).toHaveCount(0);
+    await expect(page.getByText(liveQuoteFacts[0], { exact: true })).toHaveCount(0);
+
+    const invoice = await page.goto(
+      `${LIVE_PORTAL_PATH}/d/${encodeURIComponent('Счёт-З-10046.pdf')}`,
+    );
+    expect(invoice, 'GET live invoice sheet must receive a response').toBeTruthy();
+    expect(invoice?.ok()).toBe(true);
+    await expect(page.getByRole('heading', { level: 1, name: 'Счёт-З-10046.pdf' })).toBeVisible();
+    await expect(page.getByText(quoteNoteCaption, { exact: true })).toHaveCount(0);
+    await expect(page.getByText(liveQuoteCanned, { exact: true })).toHaveCount(0);
+    await expect(page.getByText(liveQuoteFacts[0], { exact: true })).toHaveCount(0);
   });
 });
